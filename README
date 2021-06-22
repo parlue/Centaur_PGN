@@ -1,2 +1,2 @@
-Code for controlling a DGT Centaur chess board. Implements the reverse engineered protocols for piece detection, lights, sound, and display. Internet over pi zero without any changes. 
-PGN export tu USB and Email
+This is a merge of two projects about the DGT Centaur
+EsNekebo spend a lot of time to describe the internal interfaces. With my Unix experience I will megre the best of both sides to a really potential project.

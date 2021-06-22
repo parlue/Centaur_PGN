@@ -14,8 +14,14 @@ boardfunctions.ledsOff()
 
 while True:
     menu = {
+		'Centaur': 'DGT Centaur',
+		'PGN2USB': 'Export PGN to USB'
+		'PGN2Mail': 'Export PGN via Mail'
         'Lichess': 'Lichess',
-        'Centaur': 'DGT Centaur',
+		'LichessAPI': 'Import Key',
+        'DGTBoard': 'DGT Boardclone',
+		'Update': 'Update dso stack',
+		'Connecttest': 'Tethering test', 
         'Shutdown': 'Shutdown',
         'Reboot': 'Reboot'}
     boardfunctions.initialised = 0
@@ -25,6 +31,32 @@ while True:
         os.chdir("/home/pi/centaur")
         os.system("/home/pi/centaur/centaur")
         sys.exit()
+	if result == "PGN2USB":
+        boardfunctions.clearScreen()
+        os.chdir("/mnt/")
+        os.system("./chessgame.py")
+        sys.exit()
+	if result == "PGN2mail":
+        boardfunctions.clearScreen()
+        os.chdir("/mnt/")
+        os.system("./chessgamemail.py")
+        sys.exit()
+	if result == "DGT":
+        boardfunctions.clearScreen()
+        os.chdir("/home/pi/dgt/")
+        os.system("./dgtbord.py")
+        sys.exit()
+	if result == "LichessAPI":
+        boardfunctions.clearScreen()
+        os.chdir("/mnt/")
+        os.system("./config.py")
+        sys.exit()
+	if result == "Update":
+        boardfunctions.clearScreen()
+        os.chdir("/mnt/")
+        os.system("./update.py")
+        sys.exit()
+		
     if result == "Shutdown":
         boardfunctions.clearScreen()
         boardfunctions.sleepScreen()

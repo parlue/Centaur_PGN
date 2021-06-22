@@ -17,9 +17,10 @@ while True:
 		'Centaur': 'DGT Centaur',
 		'PGN2USB': 'Export PGN to USB'
 		'PGN2Mail': 'Export PGN via Mail'
-        'Lichess': 'Lichess',
+	    	'ANLG2Mail': 'Export analysed PGN via Mail'
+        	'Lichess': 'Lichess',
 		'LichessAPI': 'Import Key',
-        'DGTBoard': 'DGT Boardclone',
+        	'DGTBoard': 'DGT Boardclone',
 		'Update': 'Update dso stack',
 		'Connecttest': 'Tethering test', 
         'Shutdown': 'Shutdown',
@@ -37,6 +38,11 @@ while True:
         os.system("./chessgame.py")
         sys.exit()
 	if result == "PGN2mail":
+        boardfunctions.clearScreen()
+        os.chdir("/mnt/")
+        os.system("./chessgamemail.py")
+        sys.exit()
+	if result == "ANLG2Mail":
         boardfunctions.clearScreen()
         os.chdir("/mnt/")
         os.system("./chessgamemail.py")

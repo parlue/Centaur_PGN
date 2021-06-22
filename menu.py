@@ -14,76 +14,74 @@ boardfunctions.ledsOff()
 
 while True:
     menu = {
-		'Centaur': 'DGT Centaur',
-		'PGN2USB': 'Export PGN to USB'
-		'PGN2Mail': 'Export PGN via Mail'
-	    	 #'ANLG2Mail': 'Export analysed PGN via Mail'
-        	'Lichess': 'Lichess',
-		'LichessAPI': 'Import Key',
-        	'DGTBoard': 'DGT Boardclone',
-		'Update': 'Update dso stack',
-		'Connecttest': 'Tethering test', 
+	'Centaur': 'DGT Centaur',
+	'PGN2USB': 'Export PGN to USB'
+	'PGN2Mail': 'Export PGN via Mail'
+	 #'ANLG2Mail': 'Export analysed PGN via Mail'
+        'Lichess': 'Lichess',
+	'LichessAPI': 'Import Key',
+        'DGTBoard': 'DGT Boardclone',
+	'Update': 'Update dso stack',
+	'Connecttest': 'Tethering test', 
         'Shutdown': 'Shutdown',
         'Reboot': 'Reboot'}
-    boardfunctions.initialised = 0
-    result = boardfunctions.doMenu(menu)
-    if result == "Centaur":
-        boardfunctions.clearScreen()
-        os.chdir("/home/pi/centaur")
-        os.system("/home/pi/centaur/centaur")
+boardfunctions.initialised = 0
+result = boardfunctions.doMenu(menu)
+if result == "Centaur":
+	boardfunctions.clearScreen()
+	os.chdir("/home/pi/centaur")
+	os.system("/home/pi/centaur/centaur")
         sys.exit()
-	if result == "PGN2USB":
-        boardfunctions.clearScreen()
-        os.chdir("/mnt/")
-        os.system("./chessgame.py")
-        sys.exit()
-	if result == "PGN2mail":
-        boardfunctions.clearScreen()
-        os.chdir("/mnt/")
-        os.system("./chessgamemail.py")
-        sys.exit()
-	#if result == "ANLG2Mail":
-        #boardfunctions.clearScreen()
-        #os.chdir("/mnt/")
-        #os.system("./chessgamemail.py")
-        #sys.exit()
-	if result == "DGT":
-        boardfunctions.clearScreen()
-        os.chdir("/home/pi/dgt/")
-        os.system("./dgtbord.py")
-        sys.exit()
-	if result == "LichessAPI":
-        boardfunctions.clearScreen()
-        os.chdir("/mnt/")
-        os.system("./config.py")
-        sys.exit()
-	if result == "Update":
-        boardfunctions.clearScreen()
-        os.chdir("/mnt/")
-        os.system("./update.py")
-        sys.exit()
-		
-    if result == "Shutdown":
-        boardfunctions.clearScreen()
-        boardfunctions.sleepScreen()
-        boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-        os.system("/sbin/shutdown now")
-        sys.exit()
-    if result == "Reboot":
-        boardfunctions.clearScreen()
-        boardfunctions.sleepScreen()
-        boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-        os.system("/sbin/shutdown -r now")
-        sys.exit()
-    if result == "BACK":
-        boardfunctions.clearScreen()
-        boardfunctions.sleepScreen()
-        boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-        os.system("/sbin/shutdown now")
-        sys.exit()
-
-    if result == "Lichess":
-        lichessmenu = {'Current': 'Current', 'New': 'New Game'}
+if result == "PGN2USB":
+	boardfunctions.clearScreen()
+	os.chdir("/mnt/")
+	os.system("./chessgame.py")
+	sys.exit()
+if result == "PGN2mail":
+	boardfunctions.clearScreen()
+	os.chdir("/mnt/")
+	os.system("./chessgamemail.py")
+	sys.exit()
+#if result == "ANLG2Mail":
+	#boardfunctions.clearScreen()
+	#os.chdir("/mnt/")
+	#os.system("./chessgamemail.py")
+	#sys.exit()
+if result == "DGT":
+	boardfunctions.clearScreen()
+	os.chdir("/home/pi/dgt/")
+	os.system("./dgtbord.py")
+	sys.exit()
+if result == "LichessAPI":
+	boardfunctions.clearScreen()
+	os.chdir("/mnt/")
+	os.system("./config.py")
+	sys.exit()
+if result == "Update":
+	boardfunctions.clearScreen()
+	os.chdir("/mnt/")
+	os.system("./update.py")
+	sys.exit()
+if result == "Shutdown":
+	boardfunctions.clearScreen()
+	boardfunctions.sleepScreen()
+	boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+	os.system("/sbin/shutdown now")
+	sys.exit()
+if result == "Reboot":
+	boardfunctions.clearScreen()
+	boardfunctions.sleepScreen()
+	boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+	os.system("/sbin/shutdown -r now")
+	sys.exit()
+if result == "BACK":
+	boardfunctions.clearScreen()
+	boardfunctions.sleepScreen()
+	boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+	os.system("/sbin/shutdown now")
+	sys.exit()
+if result == "Lichess":
+	lichessmenu = {'Current': 'Current', 'New': 'New Game'}
         result = boardfunctions.doMenu(lichessmenu)
         print(result)
         # Current game will launch the screen for the current

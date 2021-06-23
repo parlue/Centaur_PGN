@@ -5,4 +5,8 @@ smtpuser = "name@name.com"
 smtp_encryption = "True"
 smtppassword = "hidden"
 subject = "New PGN file from Centaur"
+#fics_server = "fics.freechess.org"
+#fics_port = "5000"
+#fics_user = "your_fics_username"
+#fics_password "your_fics_password"
 

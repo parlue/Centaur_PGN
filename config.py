@@ -9,4 +9,8 @@ subject = "New PGN file from Centaur"
 #fics_port = "5000"
 #fics_user = "your_fics_username"
 #fics_password "your_fics_password"
+#icc_server = "chessclub.com"
+#fics_port = "5000"
+#fics_user = "your_icc_username"
+#fics_password "your_icc_password"
 

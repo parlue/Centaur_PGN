@@ -20,6 +20,10 @@ while True:
 	 #'ANLG2Mail': 'Export analysed PGN via Mail'
         'Lichess': 'Lichess',
 	'LichessAPI': 'Import Key',
+	#'FICS': 'FICS',
+	#'FICS_User': 'Import FICS-User',
+	#'ICC': 'ICC',
+	#'ICC_User': 'Import ICC-User',
         'DGTBoard': 'DGT Boardclone',
 	'Update': 'Update dso stack',
 	'Connecttest': 'Tethering test', 
@@ -57,6 +61,16 @@ if result == "LichessAPI":
 	os.chdir("/mnt/")
 	os.system("./config.py")
 	sys.exit()
+#if result == "FICS_User":
+	#boardfunctions.clearScreen()
+	#os.chdir("/mnt/")
+	#os.system("./config.py")
+	#sys.exit()
+#if result == "ICC_User":
+	#boardfunctions.clearScreen()
+	#os.chdir("/mnt/")
+	#os.system("./config.py")
+	#sys.exit()
 if result == "Update":
 	boardfunctions.clearScreen()
 	os.chdir("/mnt/")

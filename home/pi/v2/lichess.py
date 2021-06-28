@@ -7,7 +7,7 @@ import pyrasite
 import psutil
 import boardfunctions
 import chess
-import config
+import v2conf.py
 
 # Run a game on lichess
 # This is version two so we do it directly and with screen control!
@@ -25,12 +25,12 @@ pid = -1
 boardfunctions.clearSerial()
 
 if (len(sys.argv) == 1):
-    print("python3 lichess.py [current|live]")
+    print("/usr/bin/python3.6 lichess.py [current|live]")
     sys.exit()
 
 if (len(sys.argv) > 1):
     if (str(sys.argv[1]) != "current" and str(sys.argv[1]) != "live"):
-        print("python3 lichess.py [current|live]")
+        print("/usr/bin/python3.6 lichess.py [current|live]")
         sys.exit()
 
 session = berserk.TokenSession(token)

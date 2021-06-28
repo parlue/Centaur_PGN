@@ -3,7 +3,6 @@ EdNekebo spend a lot of time to describe the internal interfaces. With my Unix e
 It was a long way to go before it was possible to expand the DGT Centaur software with new functions. Big thanks to Ed Nekebno, who
 made the work on the DGT Centaur a lot easier with his decompilation. 
 In the first step, we have released the option of saving games on a USB stick.
-Thanks to Ed Nekebno, we can now also incorporate better and faster solutions at DGT Centaur.
 If other inventors want to take part in this project, feel free to be a part of this.
 Big Thank's also for Topschachbenny starting the first Mods, codes, idea's and Hardwaresupport.
 /boot FAT partion for boot and config files, so any User can edit it with windows

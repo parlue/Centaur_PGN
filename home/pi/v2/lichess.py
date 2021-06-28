@@ -1,3 +1,4 @@
+sys.path.append("/boot/")
 import sys
 import berserk
 import ssl
@@ -7,7 +8,7 @@ import pyrasite
 import psutil
 import boardfunctions
 import chess
-import /boot/v2conf.py
+import v2conf
 
 # Run a game on lichess
 # This is version two so we do it directly and with screen control!
@@ -15,11 +16,11 @@ import /boot/v2conf.py
 # Castling - move king, wait for beep, move rook
 # pawn promotion not yet implemented. Pick up pawn, put down queen
 
-# python3 lichess.py [current|live]
+# python3.6 lichess.py [current|live]
 
 # This is our lichess access token, the game id we're playing, fill it
 # in in config.py
-token = config.lichesstoken
+token = v2conf.lichesstoken
 pid = -1
 
 boardfunctions.clearSerial()

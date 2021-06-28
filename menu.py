@@ -39,7 +39,7 @@ if result == "Centaur":
 if result == "PGN2USB":
 	boardfunctions.clearScreen()
 	os.chdir("/mnt/")
-	os.system("./chessgame.py")
+	os.system("/usr/bin/python3.6 ./chessgame.py")
 	sys.exit()
 #if result == "PGN2mail":
 #	boardfunctions.clearScreen()
@@ -59,7 +59,7 @@ if result == "PGN2USB":
 if result == "LichessAPI":
 	boardfunctions.clearScreen()
 	os.chdir("/home/pi/v2/")
-	os.system("/usr/local/bin/python3.6 importlicheskey.py")
+	os.system("/usr/bin/python3.6 ./importlicheskey.py")
 	sys.exit()
 #if result == "FICS_User":
 	#boardfunctions.clearScreen()
@@ -74,7 +74,7 @@ if result == "LichessAPI":
 #if result == "Update":
 #	boardfunctions.clearScreen()
 #	os.chdir("/home/pi/v2")
-	os.system("/usr/local/bin/python3.6 ./update.py")
+	os.system("/usr/bin/python3.6 ./update.py")
 	sys.exit()
 if result == "Shutdown":
 	boardfunctions.clearScreen()

@@ -1,5 +1,5 @@
 echo "start menu V2"
-/usr/bin/python3 /home/pi/v2/menu.py
+/usr/bin/python3.6 /home/pi/v2/menu.py
 #echo "write pgn"
 #/usr/bin/python3.6 /mnt/chessgame.py
 #echo "ready pgn please remove USB-stick"

@@ -6,4 +6,11 @@ In the first step, we have released the option of saving games on a USB stick.
 Thanks to Ed Nekebno, we can now also incorporate better and faster solutions at DGT Centaur.
 If other inventors want to take part in this project, feel free to be a part of this.
 Big Thank's also for Topschachbenny starting the first Mods, codes, idea's and Hardwaresupport.
+/boot FAT partion for boot and config files, so any User can edit it with windows
+/mnt only partition with write access - dynamic chessfiles and PGN export are there
+/hom/pi/v2 location for 80% of the V2 files
+/etc/init.d location for startup parameters
+/etc/networks location for network changes
+/media mounting point of the USB stick
+
 

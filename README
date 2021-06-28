@@ -3,7 +3,6 @@ EdNekebo spend a lot of time to describe the internal interfaces. With my Unix e
 It was a long way to go before it was possible to expand the DGT Centaur software with new functions. Big thanks to Ed Nekebno, who
 made the work on the DGT Centaur a lot easier with his decompilation. 
 In the first step, we have released the option of saving games on a USB stick.
-Thanks to Ed Nekebno, we can now also incorporate better and faster solutions at DGT Centaur.
 If other inventors want to take part in this project, feel free to be a part of this.
 Big Thank's also for Topschachbenny starting the first Mods, codes, idea's and Hardwaresupport.
 /boot FAT partion for boot and config files, so any User can edit it with windows
@@ -13,4 +12,21 @@ Big Thank's also for Topschachbenny starting the first Mods, codes, idea's and H
 /etc/networks location for network changes
 /media mounting point of the USB stick
 
+Simple roadmap
+
+1. Networksupport for PI Zero
+2. Bootmenu
+3. PGN export via Menu
+4. Import of a configuration file with lichess API key
+5. Lichessplaying
+6. Version update
+
+inofficial not confirmed nest steps (I don't know if I have the time and motivation to do it)
+1. PGN export via email
+2. FICS playing
+3. ICC playing
+4. Export analizes PGNs
+5. DGT Board emulator
+6. White Pawn integration
+7. Engine for normal chessplaying - no chessfriend
 

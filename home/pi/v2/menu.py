@@ -26,7 +26,7 @@ while True:
 	#'ICC_User': 'Import ICC-User',
 	#'DGTBoard': 'DGT Boardclone',
 	'Update': 'Update dso stack',
-	#'Connecttest': 'Tethering test', 
+	'Connectiontest': 'Tethering test', 
 	'Shutdown': 'Shutdown',
 	'Reboot': 'Reboot'}
 boardfunctions.initialised = 0
@@ -73,7 +73,7 @@ if result == "LichessAPI":
 	#os.chdir("/mnt/")
 	#os.system("./config.py")
 	#sys.exit()
-#if result == "Update":
+if result == "Update":
 #	boardfunctions.clearScreen()
 	boardfunctions.writeText(10, "Looking for an Update")
 #	os.chdir("/home/pi/v2")
@@ -85,6 +85,10 @@ if result == "LichessAPI":
 	boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
 	os.system("/sbin/shutdown -r now")
 	sys.exit()
+if result == "Connectiontest";
+	boardfunctions.clearScreen()
+	os.chdir("/home/pi/v2")
+	os.system("/usr/bin/python3.6 ./connectiontest.py")
 if result == "Shutdown":
 	boardfunctions.clearScreen()
 	boardfunctions.sleepScreen()

@@ -15,17 +15,17 @@ boardfunctions.ledsOff()
 while True:
     menu = {
 	'Centaur': 'DGT Centaur',
-	'PGN2USB': 'Export PGN to USB'
-	#'PGN2Mail': 'Export PGN via Mail'
-	#'ANLG2Mail': 'Export analysed PGN via Mail'
+	'PGN2USB': 'Export PGN to USB',
+	#'PGN2Mail': 'Export PGN via Mail',
+	#'ANLG2Mail': 'Export analysed PGN via Mail',	
 	'Lichess': 'Lichess',
-	'LichessAPI': 'Import Key',
+	#'LichessAPI': 'Import Key',
 	#'FICS': 'FICS',
 	#'FICS_User': 'Import FICS-User',
 	#'ICC': 'ICC',
 	#'ICC_User': 'Import ICC-User',
 	#'DGTBoard': 'DGT Boardclone',
-	#'Update': 'Update dso stack',
+	'Update': 'Update dso stack',
 	#'Connecttest': 'Tethering test', 
 	'Shutdown': 'Shutdown',
 	'Reboot': 'Reboot'}
@@ -38,9 +38,11 @@ if result == "Centaur":
 	sys.exit()
 if result == "PGN2USB":
 	boardfunctions.clearScreen()
+	boardfunctions.writeText(10, "Save game to USB")
 	os.chdir("/mnt/")
 	os.system("/usr/bin/python3.6 ./chessgame.py")
-	sys.exit()
+	boardfunctions.writeText(10,"done")
+#	sys.exit()
 #if result == "PGN2mail":
 #	boardfunctions.clearScreen()
 #	os.chdir("/mnt/")
@@ -73,8 +75,15 @@ if result == "LichessAPI":
 	#sys.exit()
 #if result == "Update":
 #	boardfunctions.clearScreen()
+	boardfunctions.writeText(10, "Looking for an Update")
 #	os.chdir("/home/pi/v2")
-	os.system("/usr/bin/python3.6 ./update.py")
+#	os.system("/usr/bin/python3.6 ./update.py")
+	time.sleep(2)
+	boardfunctions.writeText(10, "time to reboot")
+	boardfunctions.clearScreen()
+	boardfunctions.sleepScreen()
+	boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+	os.system("/sbin/shutdown -r now")
 	sys.exit()
 if result == "Shutdown":
 	boardfunctions.clearScreen()

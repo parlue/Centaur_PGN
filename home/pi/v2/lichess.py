@@ -7,7 +7,7 @@ import pyrasite
 import psutil
 import boardfunctions
 import chess
-import v2conf.py
+import /boot/v2conf.py
 
 # Run a game on lichess
 # This is version two so we do it directly and with screen control!

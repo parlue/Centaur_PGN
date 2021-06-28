@@ -35,7 +35,7 @@ if result == "Centaur":
 	boardfunctions.clearScreen()
 	os.chdir("/home/pi/centaur")
 	os.system("/home/pi/centaur/centaur")
-        sys.exit()
+	sys.exit()
 if result == "PGN2USB":
 	boardfunctions.clearScreen()
 	os.chdir("/mnt/")

@@ -16,19 +16,19 @@ while True:
     menu = {
 	'Centaur': 'DGT Centaur',
 	'PGN2USB': 'Export PGN to USB'
-	'PGN2Mail': 'Export PGN via Mail'
-	 #'ANLG2Mail': 'Export analysed PGN via Mail'
-        'Lichess': 'Lichess',
+	#'PGN2Mail': 'Export PGN via Mail'
+	#'ANLG2Mail': 'Export analysed PGN via Mail'
+	'Lichess': 'Lichess',
 	'LichessAPI': 'Import Key',
 	#'FICS': 'FICS',
 	#'FICS_User': 'Import FICS-User',
 	#'ICC': 'ICC',
 	#'ICC_User': 'Import ICC-User',
-        'DGTBoard': 'DGT Boardclone',
-	'Update': 'Update dso stack',
-	'Connecttest': 'Tethering test', 
-        'Shutdown': 'Shutdown',
-        'Reboot': 'Reboot'}
+	#'DGTBoard': 'DGT Boardclone',
+	#'Update': 'Update dso stack',
+	#'Connecttest': 'Tethering test', 
+	'Shutdown': 'Shutdown',
+	'Reboot': 'Reboot'}
 boardfunctions.initialised = 0
 result = boardfunctions.doMenu(menu)
 if result == "Centaur":
@@ -41,25 +41,25 @@ if result == "PGN2USB":
 	os.chdir("/mnt/")
 	os.system("./chessgame.py")
 	sys.exit()
-if result == "PGN2mail":
-	boardfunctions.clearScreen()
-	os.chdir("/mnt/")
-	os.system("./chessgamemail.py")
-	sys.exit()
+#if result == "PGN2mail":
+#	boardfunctions.clearScreen()
+#	os.chdir("/mnt/")
+#	os.system("./chessgamemail.py")
+#	sys.exit()
 #if result == "ANLG2Mail":
 	#boardfunctions.clearScreen()
 	#os.chdir("/mnt/")
 	#os.system("./chessgamemail.py")
 	#sys.exit()
-if result == "DGT":
-	boardfunctions.clearScreen()
-	os.chdir("/home/pi/dgt/")
-	os.system("./dgtbord.py")
-	sys.exit()
+#if result == "DGT":
+#	boardfunctions.clearScreen()
+#	os.chdir("/home/pi/v2/")
+#	os.system("./dgtbord.py")
+#	sys.exit()
 if result == "LichessAPI":
 	boardfunctions.clearScreen()
-	os.chdir("/mnt/")
-	os.system("./config.py")
+	os.chdir("/home/pi/v2/")
+	os.system("/usr/local/bin/python3.6 importlicheskey.py")
 	sys.exit()
 #if result == "FICS_User":
 	#boardfunctions.clearScreen()
@@ -71,10 +71,10 @@ if result == "LichessAPI":
 	#os.chdir("/mnt/")
 	#os.system("./config.py")
 	#sys.exit()
-if result == "Update":
-	boardfunctions.clearScreen()
-	os.chdir("/mnt/")
-	os.system("./update.py")
+#if result == "Update":
+#	boardfunctions.clearScreen()
+#	os.chdir("/home/pi/v2")
+	os.system("/usr/local/bin/python3.6 ./update.py")
 	sys.exit()
 if result == "Shutdown":
 	boardfunctions.clearScreen()
@@ -102,8 +102,8 @@ if result == "Lichess":
         if (result != "BACK"):
             if (result == "Current"):
                 boardfunctions.clearScreen()
-                os.chdir("/home/pi/centaur/py")
-                os.system("/bin/python3 /home/pi/centaur/py/lichess.py current")
+                os.chdir("/home/pi/v2")
+                os.system("/usr/local/bin/python3.6 /home/pi/v2/lichess.py current")
                 sys.exit()
 
             livemenu = {'Rated': 'Rated', 'Unrated': 'Unrated'}

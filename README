@@ -2,9 +2,11 @@ This is a merge of two projects about the DGT Centaur
 EdNekebo spend a lot of time to describe the internal interfaces. With my Unix experience I will megre the best of both sides to a really potential project.
 It was a long way to go before it was possible to expand the DGT Centaur software with new functions. Big thanks to Ed Nekebno, who
 made the work on the DGT Centaur a lot easier with his decompilation. 
-In the first step, we have released the option of saving games on a USB stick.
-If other inventors want to take part in this project, feel free to be a part of this.
+In the first step, I have released the option of saving games on a USB stick.
+If other inventors want to take part of this project, feel free to be a part of this.
 Big Thank's also for Topschachbenny starting the first Mods, codes, idea's and Hardwaresupport.
+
+/download vailable releases as a image
 /boot FAT partion for boot and config files, so any User can edit it with windows
 /mnt only partition with write access - dynamic chessfiles and PGN export are there
 /home/pi/v2 location for 80% of the V2 files
@@ -21,7 +23,7 @@ Simple roadmap
 5. Lichessplaying
 6. Version update
 
-inofficial not confirmed nest steps (I don't know if I have the time and motivation to do it)
+inofficial not confirmed next steps (I don't know if I have the time and motivation to do it)
 1. PGN export via email
 2. FICS playing
 3. ICC playing

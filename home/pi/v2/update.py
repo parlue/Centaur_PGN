@@ -17,7 +17,7 @@ def main():
 	if usbstick.exists() :
 	os.system('mount -t vfat /dev/sda1 /media')
 	if updatefile.exists():
-		boardfunctions.writeText(10, "Running Systemupdate... plz wait")
+		boardfunctions.writeText(10, "Running systemupdate... plz wait")
 		os.system('mkdir /media/tmp')
 		os.system('tar xvf /media/update.tar /media/tmp/')
 		os.system('/media/tmp/update.sh')
@@ -27,6 +27,11 @@ def main():
 		time.sleep(1)
 		boardfunctions.writeText(10, "done")
 		time.sleep(2)
+		boardfunctions.clearScreen()
+		boardfunctions.sleepScreen()
+		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+		os.system("/sbin/shutdown -r now")
+		sys.exit()
 		
 	else :
 		boardfunctions.writeText(10, "no update available")

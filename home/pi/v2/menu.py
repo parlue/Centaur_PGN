@@ -17,9 +17,9 @@ while True:
 	'Centaur': 'DGT Centaur',
 	'PGN2USB': 'Export PGN to USB',
 	#'PGN2Mail': 'Export PGN via Mail',
-	#'ANLG2Mail': 'Export analysed PGN via Mail',	
+	#'ANLG2Mail': 'Export analysed PGN via Mail',
 	'Lichess': 'Lichess',
-	#'LichessAPI': 'Import Key',
+	'configuration': 'Import configfile',
 	#'FICS': 'FICS',
 	#'FICS_User': 'Import FICS-User',
 	#'ICC': 'ICC',
@@ -43,6 +43,15 @@ if result == "PGN2USB":
 	os.system("/usr/bin/python3.6 ./chessgame.py")
 	boardfunctions.writeText(10,"done")
 #	sys.exit()
+if result == "configuration":
+	boardfunctions.clearScreen()
+	boardfunctions.writeText(10, "Load configfile")
+	boardfunctions.clearScreen()
+	os.chdir("/home/pi/v2/")
+	os.system("/usr/bin/python3.6 ./getconfig.py")
+	boardfunctions.writeText(10,"done")
+	
+#	sys.exit()
 #if result == "PGN2mail":
 #	boardfunctions.clearScreen()
 #	os.chdir("/mnt/")
@@ -58,11 +67,6 @@ if result == "PGN2USB":
 #	os.chdir("/home/pi/v2/")
 #	os.system("./dgtbord.py")
 #	sys.exit()
-if result == "LichessAPI":
-	boardfunctions.clearScreen()
-	os.chdir("/home/pi/v2/")
-	os.system("/usr/bin/python3.6 ./importlicheskey.py")
-	sys.exit()
 #if result == "FICS_User":
 	#boardfunctions.clearScreen()
 	#os.chdir("/mnt/")
@@ -74,10 +78,10 @@ if result == "LichessAPI":
 	#os.system("./config.py")
 	#sys.exit()
 if result == "Update":
-#	boardfunctions.clearScreen()
+	boardfunctions.clearScreen()
 	boardfunctions.writeText(10, "Looking for an Update")
-#	os.chdir("/home/pi/v2")
-#	os.system("/usr/bin/python3.6 ./update.py")
+	os.chdir("/home/pi/v2")
+	os.system("/usr/bin/python3.6 ./update.py")
 	time.sleep(2)
 	boardfunctions.writeText(10, "time to reboot")
 	boardfunctions.clearScreen()

@@ -1,7 +1,10 @@
 import urllib
+import boardfunctions
+boardfunctions.clearScreen()
 try :
     stri = "https://www.google.com"
     data = urllib.urlopen(stri)
-    echo "Connected"
+    boardfunctions.writeText(10, "internet alive")
 except e:
-    echo "not connected" ,e 
+    boardfunctions.writeText(10, "No Internet connection") 
+

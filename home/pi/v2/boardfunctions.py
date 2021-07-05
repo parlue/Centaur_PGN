@@ -1,4 +1,4 @@
-# DGT Centaur board control functions
+	# DGT Centaur board control functions
 #
 # I am not really a python programmer, but the language choice here
 # made sense!
@@ -7,13 +7,15 @@
 
 import serial
 import sys
+sys.path.append("/home/pi/centaur/")
 import os
 import epd2in9d
 import time
+import PIL
 from PIL import Image, ImageDraw, ImageFont
 
 # Open the serial port, baudrate is 1000000
-ser = serial.Serial("/dev/ttyS0", baudrate=1000000, timeout=0.2)
+ser = serial.Serial("/dev/ttyAMA0", baudrate=1000000, timeout=0.2)
 font18 = ImageFont.truetype("/home/pi/v2/Font.ttc", 18)
 screenbuffer = Image.new('1', (128, 296), 255)
 initialised = 0
@@ -25,7 +27,7 @@ def initScreen():
     global screenbuffer
     global initialised
     epd.init()
-    time.sleep(0.5)
+    time.sleep(1.5)
     epd.Clear(0xff)
     screenbuffer = Image.new('1', (128, 296), 255)
     initialised = 0

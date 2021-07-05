@@ -2,6 +2,6 @@ import urllib
 try :
     stri = "https://www.google.com"
     data = urllib.urlopen(stri)
-    print "Connected"
+    echo "Connected"
 except e:
-    print "not connected" ,e 
+    echo "not connected" ,e 

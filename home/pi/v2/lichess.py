@@ -1,5 +1,6 @@
-sys.path.append("/boot/")
 import sys
+sys.path.append("/boot/")
+sys.path.append("/home/pi/centaur/")
 import berserk
 import ssl
 import time

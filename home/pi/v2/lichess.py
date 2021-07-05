@@ -5,8 +5,8 @@ import berserk
 import ssl
 import time
 import threading
-import pyrasite
-import psutil
+#import pyrasite
+#import psutil
 import boardfunctions
 import chess
 import v2conf

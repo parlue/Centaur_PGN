@@ -7,7 +7,7 @@ import boardfunctions
 import chess
 import v2conf
 
-# Run a Cebtaur as an DGT Smartboard
+# Run a Centaur as an DGT Smartboard
 # Open the serial port, baudrate is 115200
 ser = serial.Serial("/dev/ttyUSB1", baudrate=115200, timeout=0.2)
 

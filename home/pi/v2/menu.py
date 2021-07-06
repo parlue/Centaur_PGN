@@ -15,6 +15,7 @@ boardfunctions.ledsOff()
 while True:
 	menu = {
 		'Centaur': 'DGT Centaur',
+		'shell': 'Go bash',
 		'PGN2USB': 'Export PGN',
 		'Lichess': 'Lichess',
 		'Configuration': 'Import conf',
@@ -38,6 +39,11 @@ while True:
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 ./getconfig.py")
 		sys.exit()
+	if result == "shell":
+		boardfunctions.clearScreen()
+		boardfunctions.writeText(1, "load shell")
+		os.system("/bin/bash")
+		sys.extit()
 	#if result == "PGN2mail":
 		#	os.chdir("/home/pi/v2")
 		#	os.system("./pgn2mail.py")

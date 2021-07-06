@@ -31,60 +31,38 @@ while True:
 		os.system("/home/pi/centaur/centaur")
 		sys.exit()
 	if result == "PGN2USB":
-		boardfunctions.clearScreen()
-		boardfunctions.writeText(1, "Save2USB")
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 ./chessgame.py")
-		boardfunctions.writeText(1,"...done")
 		sys.exit()
 	if result == "configuration":
-		boardfunctions.clearScreen()
-		boardfunctions.writeText(1, "load...")
-		boardfunctions.clearScreen()
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 ./getconfig.py")
-		boardfunctions.writeText(1,"...done")
-	
-	#	sys.exit()
+		sys.exit()
 	#if result == "PGN2mail":
-		#	boardfunctions.clearScreen()
 		#	os.chdir("/mnt/")
 		#	os.system("./chessgamemail.py")
 		#	sys.exit()
-		#if result == "ANLG2Mail":
-		#boardfunctions.clearScreen()
+	#if result == "ANLG2Mail":
 		#os.chdir("/mnt/")
 		#os.system("./chessgamemail.py")
 		#sys.exit()
 	#if result == "DGT":
-	#	boardfunctions.clearScreen()
-	#	os.chdir("/home/pi/v2/")
-	#	os.system("./dgtbord.py")
-	#	sys.exit()
+		#os.chdir("/home/pi/v2/")
+		#os.system("./dgtbord.py")
+		#sys.exit()
 	#if result == "FICS_User":
-		#boardfunctions.clearScreen()
 		#os.chdir("/mnt/")
 		#os.system("./config.py")
 		#sys.exit()
 	#if result == "ICC_User":
-		#boardfunctions.clearScreen()
 		#os.chdir("/mnt/")
 		#os.system("./config.py")
 		#sys.exit()
 	if result == "Update":
-		boardfunctions.clearScreen()
-		boardfunctions.writeText(1, "Search..")
 		os.chdir("/home/pi/v2")
 		os.system("/usr/bin/python3.6 ./update.py")
-		boardfunctions.writeText(1, "time to reboot")
-		time.sleep(1)
-		boardfunctions.clearScreen()
-		boardfunctions.sleepScreen()
-		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		os.system("/sbin/reboot")
 		sys.exit()
 	if result == "Connectiontest":
-		boardfunctions.clearScreen()
 		os.chdir("/home/pi/v2")
 		os.system("/usr/bin/python3.6 ./connectiontest.py")
 	if result == "Shutdown":

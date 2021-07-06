@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Open the serial port, baudrate is 1000000
 ser = serial.Serial("/dev/ttyAMA0", baudrate=1000000, timeout=0.2)
-font18 = ImageFont.truetype("/home/pi/v2/Font.ttc", 18)
+font14 = ImageFont.truetype("/home/pi/v2/Font.ttc", 14)
 screenbuffer = Image.new('1', (128, 296), 255)
 initialised = 0
 

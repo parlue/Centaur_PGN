@@ -17,18 +17,20 @@ Big Thank's also for Topschachbenny starting the first Mods, codes, idea's and H
 Simple roadmap
 
 1. Networksupport for PI Zero - done 80%
-2. Bootmenu - done 90%
+2. Bootmenu - done 
 3. PGN export via Menu - done
-4. Import of a configuration file with lichess API key - open
-5. Lichessplaying - done
-6. Version update - done 90%
+4. Import of a configuration file with lichess API key - done
+5. Lichessplaying - 90%
+6. Version update - done 95%
+7. PGN export via email 70%
+8. Connection test -done
 
 inofficial not confirmed next steps (I don't know if I have the time and motivation to do it)
-1. PGN export via email
-2. FICS playing
-3. ICC playing
-4. Export analizes PGNs
-5. DGT Board emulator
-6. White Pawn integration
-7. Engine for normal chessplaying - no chessfriend
+
+1. FICS playing
+2. ICC playing
+3. Export analizes PGNs
+4. DGT Board emulator
+5. White Pawn integration
+6. Engine for normal chessplaying - no chessfriend
 

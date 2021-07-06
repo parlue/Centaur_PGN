@@ -8,8 +8,8 @@ import time
 # Power on sound
 boardfunctions.beep(boardfunctions.SOUND_POWER_ON)
 boardfunctions.clearSerial()
-boardfunctions.initScreen()
-time.sleep(2)
+#boardfunctions.initScreen()
+time.sleep(1)
 boardfunctions.ledsOff()
 
 while True:
@@ -26,23 +26,24 @@ while True:
 	result = boardfunctions.doMenu(menu)
 	if result == "Centaur":
 		boardfunctions.clearScreen()
+		boardfunctions.writeText(1, "load game...")
 		os.chdir("/home/pi/centaur")
 		os.system("/home/pi/centaur/centaur")
 		sys.exit()
 	if result == "PGN2USB":
 		boardfunctions.clearScreen()
-		boardfunctions.writeText(10, "Save game to USB")
-		os.chdir("/mnt/")
+		boardfunctions.writeText(1, "Save2USB")
+		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 ./chessgame.py")
-		boardfunctions.writeText(10,"done")
+		boardfunctions.writeText(1,"...done")
 		sys.exit()
 	if result == "configuration":
 		boardfunctions.clearScreen()
-		boardfunctions.writeText(10, "Load")
+		boardfunctions.writeText(1, "load...")
 		boardfunctions.clearScreen()
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 ./getconfig.py")
-		boardfunctions.writeText(10,"done")
+		boardfunctions.writeText(1,"...done")
 	
 	#	sys.exit()
 	#if result == "PGN2mail":
@@ -72,37 +73,37 @@ while True:
 		#sys.exit()
 	if result == "Update":
 		boardfunctions.clearScreen()
-		boardfunctions.writeText(10, "Search")
-		os.chdir("cd /home/pi/v2")
+		boardfunctions.writeText(1, "Search..")
+		os.chdir("/home/pi/v2")
 		os.system("/usr/bin/python3.6 ./update.py")
-		time.sleep(2)
-		boardfunctions.writeText(10, "time to reboot")
+		boardfunctions.writeText(1, "time to reboot")
+		time.sleep(1)
 		boardfunctions.clearScreen()
 		boardfunctions.sleepScreen()
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		os.system("/sbin/shutdown -r now")
+		os.system("/sbin/reboot")
 		sys.exit()
 	if result == "Connectiontest":
 		boardfunctions.clearScreen()
-		os.chdir("cd /home/pi/v2")
+		os.chdir("/home/pi/v2")
 		os.system("/usr/bin/python3.6 ./connectiontest.py")
 	if result == "Shutdown":
 		boardfunctions.clearScreen()
 		boardfunctions.sleepScreen()
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		os.system("/sbin/shutdown now")
+		os.system("/sbin/poweroff")
 		sys.exit()
 	if result == "Reboot":
 		boardfunctions.clearScreen()
 		boardfunctions.sleepScreen()
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		os.system("/sbin/shutdown -r now")
+		os.system("/sbin/reboot")
 		sys.exit()
 	if result == "BACK":
 		boardfunctions.clearScreen()
 		boardfunctions.sleepScreen()
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		os.system("/sbin/shutdown now")
+		os.system("/sbin/reboot")
 		sys.exit()
 	if result == "Lichess":
 		lichessmenu = {'Current': 'Current', 'New': 'New Game'}

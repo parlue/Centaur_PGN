@@ -27,7 +27,7 @@ def initScreen():
     global screenbuffer
     global initialised
     epd.init()
-    time.sleep(1.5)
+    time.sleep(0.5)
     epd.Clear(0xff)
     screenbuffer = Image.new('1', (128, 296), 255)
     initialised = 0
@@ -112,7 +112,7 @@ def writeText(row, txt):
     image = screenbuffer.copy()
     draw = ImageDraw.Draw(image)
     draw.rectangle([(0,rpos),(128,rpos+20)],fill=255)
-    draw.text((0, rpos), txt, font=font18, fill=0)
+    draw.text((0, rpos), txt, font=font14, fill=0)
     screenbuffer = image.copy()
     image = image.transpose(Image.FLIP_TOP_BOTTOM)
     image = image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -136,7 +136,7 @@ def doMenu(items):
         draw = ImageDraw.Draw(image)
         rpos = 20
         for k, v in items.items():
-            draw.text((20, rpos), str(v), font=font18, fill=0)
+            draw.text((20, rpos), str(v), font=font14, fill=0)
             rpos = rpos + 20
         draw.polygon([(2, (selected * 20)), (2, (selected * 20) + 20),
                      (18, (selected * 20) + 10)], fill=0)

@@ -39,8 +39,8 @@ while True:
 		os.system("/usr/bin/python3.6 ./getconfig.py")
 		sys.exit()
 	#if result == "PGN2mail":
-		#	os.chdir("/mnt/")
-		#	os.system("./chessgamemail.py")
+		#	os.chdir("/home/pi/v2")
+		#	os.system("./pgn2mail.py")
 		#	sys.exit()
 	#if result == "ANLG2Mail":
 		#os.chdir("/mnt/")
@@ -62,7 +62,7 @@ while True:
 		os.chdir("/home/pi/v2")
 		os.system("/usr/bin/python3.6 ./update.py")
 		sys.exit()
-	if result == "Connectiontest":
+	if result == "Connection":
 		os.chdir("/home/pi/v2")
 		os.system("/usr/bin/python3.6 ./connectiontest.py")
 	if result == "Shutdown":

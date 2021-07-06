@@ -11,13 +11,13 @@
 
 
 import pickle
-import urlib
+import urllib
 import sys
 import chess
 import chess.pgn
 import pathlib
 import os
-import boardfuntions
+import boardfunctions
 import time
 import smtplib
 import v2.conf
@@ -36,14 +36,14 @@ boardfunctions.clearScreen()
 boardfunctions.writeText(1, "check connection")
 cStatus = 0
 try :
-    stri = "https://www.google.com"
-    data = urllib.urlopen(stri)
-    boardfunctions.writeText(2, "internet alive")
+	stri = "https://www.google.com"
+	data = urllib.urlopen(stri)
+	boardfunctions.writeText(2, "internet alive")
 	cStatus = 1
 except e:
-    boardfunctions.writeText(2, "No connection") 
+	boardfunctions.writeText(2, "No connection")
 	boardfunctions.writeText(3, "check internet")
-if (cgame.exists() AND cStatus = 1):
+if (cgame.exists() and (cStatus == 1)):
 	# print("in")
 
 	filecount= ""

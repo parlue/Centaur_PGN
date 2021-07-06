@@ -16,7 +16,7 @@ import chess
 import chess.pgn
 import pathlib
 import os
-import boardfuntions
+import boardfunctions
 import time
 from datetime import date
 from types import SimpleNamespace

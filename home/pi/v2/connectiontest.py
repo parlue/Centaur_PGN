@@ -1,6 +1,6 @@
 import urllib
 import boardfunctions
-import time()
+import time
 boardfunctions.clearScreen()
 boardfunctions.writeText(1, "check onlinesatus")
 try :

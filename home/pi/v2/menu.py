@@ -8,9 +8,10 @@ import time
 # Power on sound
 boardfunctions.beep(boardfunctions.SOUND_POWER_ON)
 boardfunctions.clearSerial()
-#boardfunctions.initScreen()
-time.sleep(1)
+boardfunctions.initScreen()
+#time.sleep(1)
 boardfunctions.ledsOff()
+boardfunctions.writeText(14, "Status: offline")
 
 while True:
 	menu = {
@@ -25,12 +26,13 @@ while True:
 		'Reboot': 'Reboot'}
 	boardfunctions.initialised = 0
 	result = boardfunctions.doMenu(menu)
+	boardfunctions.writeText(14, "Status: offline")
 	if result == "Centaur":
 		boardfunctions.clearScreen()
 		boardfunctions.writeText(1, "load game...")
 		os.chdir("/home/pi/centaur")
 		os.system("/home/pi/centaur/centaur")
-		sys.exit()
+		#sys.exit()
 	if result == "PGN2USB":
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 ./chessgame.py")

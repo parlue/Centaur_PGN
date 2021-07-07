@@ -9,9 +9,8 @@ from pathlib import Path
 # check if stick is available
 usbstick = pathlib.Path("/dev/sda1")
 updatefile = pathlib.Path("/media/update.tar")
-boardfunctions.clearScreen()
-time.sleep(1)
-boardfunctions.ledsOff()
+boardfunctions.clearSerial()
+boardfunctions.initScreen()
 boardfunctions.writeText(1, "check stick")
 
 def main():
@@ -42,7 +41,7 @@ def main():
 			time.sleep(2)
 		
 	else :
-		boardfunctions.writeText(2, "No stick found")
+		boardfunctions.writeText(2, "no stick found")
 		time.sleep(2)
 
 if __name__ == "__main__":

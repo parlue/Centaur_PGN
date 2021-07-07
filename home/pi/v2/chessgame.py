@@ -25,7 +25,9 @@ from pathlib import Path
 # check stick
 usbstick = pathlib.Path("/dev/sda1")
 cgame = pathlib.Path("/mnt/chessgame_1_2.dat")
-boardfunctions.clearScreen()
+boardfunctions.clearSerial()
+boardfunctions.initScreen()
+time.sleep(3)
 boardfunctions.writeText(1, "check stick")
 boardfunctions.writeText(2, "check game")
 if (usbstick.exists() and cgame.exists()) :

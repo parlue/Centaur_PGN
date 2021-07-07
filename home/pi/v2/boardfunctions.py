@@ -31,7 +31,7 @@ def initScreen():
     epd.Clear(0xff)
     screenbuffer = Image.new('1', (128, 296), 255)
     initialised = 0
-    time.sleep(4)
+    time.sleep(1.5)
 
 
 def clearScreen():
@@ -144,7 +144,7 @@ def doMenu(items):
         image = image.transpose(Image.FLIP_LEFT_RIGHT)
         if first == 1 and initialised == 0:
             epd.display(epd.getbuffer(image))
-            time.sleep(3)
+            time.sleep(1)
             first = 0
             epd.DisplayPartial(epd.getbuffer(image))
             initialised = 1

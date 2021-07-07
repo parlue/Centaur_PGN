@@ -9,9 +9,8 @@ from pathlib import Path
 # check if stick is available
 usbstick = pathlib.Path("/dev/sda1")
 updatefile = pathlib.Path("/media/v2conf.py")
-#boardfunctions.clearScreen()
-time.sleep(1)
-boardfunctions.ledsOff()
+boardfunctions.clearSerial()
+boardfunctions.initScreen())
 boardfunctions.writeText(1, "check Stick")
 
 def main():

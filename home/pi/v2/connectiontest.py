@@ -1,7 +1,8 @@
 import urllib
 import boardfunctions
 import time
-boardfunctions.clearScreen()
+boardfunctions.clearSerial()
+boardfunctions.initScreen()
 boardfunctions.writeText(1, "check onlinesatus")
 try :
     stri = "https://www.google.com"

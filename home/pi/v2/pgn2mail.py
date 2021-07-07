@@ -32,7 +32,8 @@ from pathlib import Path
 
 
 cgame = pathlib.Path("/mnt/chessgame_1_2.dat")
-boardfunctions.clearScreen()
+boardfunctions.clearSerial()
+boardfunctions.initScreen()
 boardfunctions.writeText(1, "check connection")
 cStatus = 0
 try :

@@ -4,6 +4,7 @@ import boardfunctions
 import os
 import sys
 import time
+import centaurv2
 
 # Power on sound
 boardfunctions.beep(boardfunctions.SOUND_POWER_ON)
@@ -12,6 +13,7 @@ boardfunctions.initScreen()
 #time.sleep(1)
 boardfunctions.ledsOff()
 boardfunctions.writeText(14, "Status: offline")
+os.chdir("/home/pi/v2/")
 
 while True:
 	menu = {
@@ -34,8 +36,9 @@ while True:
 		os.system("/home/pi/centaur/centaur")
 		#sys.exit()
 	if result == "PGN2USB":
-		os.chdir("/home/pi/v2/")
-		os.system("/usr/bin/python3.6 ./chessgame.py")
+		centaurv2.chessgame()
+#		os.chdir("/home/pi/v2/")
+#		os.system("/usr/bin/python3.6 ./chessgame.py")
 		sys.exit()
 	if result == "configuration":
 		os.chdir("/home/pi/v2/")

@@ -12,7 +12,6 @@ boardfunctions.clearSerial()
 boardfunctions.initScreen()
 #time.sleep(1)
 boardfunctions.ledsOff()
-boardfunctions.writeText(14, "Status: offline")
 os.chdir("/home/pi/v2/")
 
 while True:
@@ -28,7 +27,7 @@ while True:
 		'Reboot': 'Reboot'}
 	boardfunctions.initialised = 0
 	result = boardfunctions.doMenu(menu)
-	boardfunctions.writeText(14, "Status: offline")
+	
 	if result == "Centaur":
 		boardfunctions.clearScreen()
 		boardfunctions.writeText(1, "load game...")
@@ -37,12 +36,11 @@ while True:
 		#sys.exit()
 	if result == "PGN2USB":
 		centaurv2.chessgame()
-#		os.chdir("/home/pi/v2/")
-#		os.system("/usr/bin/python3.6 ./chessgame.py")
 		sys.exit()
-	if result == "configuration":
-		os.chdir("/home/pi/v2/")
-		os.system("/usr/bin/python3.6 ./getconfig.py")
+	if result == "Configuration":
+		centaurv2.getconfig()
+#		os.chdir("/home/pi/v2/")
+#		os.system("/usr/bin/python3.6 ./getconfig.py")
 		sys.exit()
 	if result == "shell":
 		boardfunctions.clearScreen()
@@ -70,8 +68,9 @@ while True:
 		#os.system("./config.py")
 		#sys.exit()
 	if result == "Update":
-		os.chdir("/home/pi/v2")
-		os.system("/usr/bin/python3.6 ./update.py")
+		centaurv2.update()
+#		os.chdir("/home/pi/v2")
+#		os.system("/usr#/bin/python3.6 ./update.py")
 		sys.exit()
 	if result == "Connection":
 		os.chdir("/home/pi/v2")

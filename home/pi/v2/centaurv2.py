@@ -24,9 +24,9 @@ cgame = pathlib.Path("/mnt/chessgame_1_2.dat")
 configfile = pathlib.Path("/media/v2conf.py")
 updatefile = pathlib.Path("/media/update.tar")
 
-def update();
+def update():
 	boardfunctions.clearScreen()
-	boardfunctions.writeText(1, "check stick )
+	boardfunctions.writeText(1, "check stick ")
 	if usbstick.exists() :
 		os.system('mount -t vfat /dev/sda1 /media')
 		boardfunctions.writeText(2, "stick found")
@@ -73,7 +73,7 @@ def connectiontest():
 	time.sleep(1)
 
 def getconfig():
-	boardfunctions:clearScreen()
+	boardfunctions.clearScreen()
 	time.sleep(1)
 	boardfunctions.writeText(1, "check stick ")
 	if usbstick.exists() :

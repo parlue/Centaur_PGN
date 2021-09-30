@@ -16,14 +16,16 @@ Big Thank's also for Topschach Benny starting the first Mods, codes, idea's and 
 
 Simple roadmap
 
-1. Networksupport for PI Zero - done 80%
+1. Networksupport for PI Zero - done
 2. Bootmenu - done 
 3. PGN export via Menu - done
 4. Import of a configuration file with lichess API key - done
-5. Lichessplaying - 90%
-6. Version update - done 95%
+5. Lichessplaying - done%
+6. Version update - done 99%
 7. PGN export via email 70%
 8. Connection test -done
+9. Bluetooth - open
+10. html server open
 
 inofficial not confirmed next steps (I don't know if I have the time and motivation to do it)
 

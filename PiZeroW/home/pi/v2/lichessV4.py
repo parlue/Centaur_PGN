@@ -13,7 +13,7 @@ import v2conf
 # Castling - move king, wait for beep, move rook
 # pawn promotion not yet implemented. Pick up pawn, put down queen
 
-# python3 lichess.py [current|live]
+# python3 lichess.py [current|New]
 
 # This is our lichess access token, the game id we're playing, fill it
 # in in config.py
@@ -26,12 +26,12 @@ pid = -1
 boardfunctions.clearSerial()
 
 if (len(sys.argv) == 1):
-    print("python3 lichess.py [current|live]")
+    print("python3 lichess.py [current|New1]")
     sys.exit()
 
 if (len(sys.argv) > 1):
-    if (str(sys.argv[1]) != "current" and str(sys.argv[1]) != "new"):
-        print("python3 lichess.py [current|live]")
+    if (str(sys.argv[1]) != "current" and str(sys.argv[1]) != "New"):
+        print("python3 lichess.py [current|New2]")
         sys.exit()
 
 session = berserk.TokenSession(token)
@@ -64,17 +64,73 @@ boardfunctions.writeText(4, player)
 running = True
 
 def newGameThread():
-    time.sleep(5)
+	time.sleep(5)
     # seek(self, time, increment, rated=False, variant='standard', color='random', rating_range=None):
     # For now try a 30 minute game
-    client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=None)
+	
+#mod by dso 3.10.21
+	gtime = str(sys.argv[2])
+	ginc = str(sys.argv[3])
+	grated = str(sys.argv[4])
+	gcolor = str(sys.argv[5])
+	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="white"):
+		client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=None)
+	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="black"):
+		client.board.seek(10, 5, rated=False, variant='standard', color='black', rating_range=None)
+	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="random"):
+		client.board.seek(10, 5, rated=False, variant='standard', color='random', rating_range=None)
+	if (gtime=='10' and ginc=='5' and grated=="True" and gcolor=="white"):
+		client.board.seek(10, 5, rated=True, variant='standard', color='white', rating_range=None)
+	if (gtime=='10' and ginc=='5' and grated=="True" and gcolor=="black"):
+		client.board.seek(10, 5, rated=True, variant='standard', color='black', rating_range=None)
+	if (gtime=='10' and ginc=='5' and grated=="True" and gcolor=="random"):
+		client.board.seek(10, 5, rated=True, variant='standard', color='random', rating_range=None)
+	
+	if (gtime=='15' and ginc=='10' and grated=="False" and gcolor=="white"):
+		client.board.seek(15, 10, rated=False, variant='standard', color='white', rating_range=None)
+	if (gtime=='15' and ginc=='10' and grated=="False" and gcolor=="black"):
+		client.board.seek(15, 10, rated=False, variant='standard', color='black', rating_range=None)
+	if (gtime=='15' and ginc=='10' and grated=="False" and gcolor=="random"):
+		client.board.seek(15, 10, rated=False, variant='standard', color='random', rating_range=None)
+	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="white"):
+			client.board.seek(15, 10, rated=True, variant='standard', color='white', rating_range=None)
+	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="white"):
+		client.board.seek(15, 10, rated=True, variant='standard', color='black', rating_range=None)
+	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="random"):
+		client.board.seek(15, 10, rated=True, variant='standard', color='random', rating_range=None)
+	if (gtime=='30' and ginc=='0' and grated=="False" and gcolor=="white"):
+		client.board.seek(30, 0, rated=False, variant='standard', color='white', rating_range=None)
+	if (gtime=='30' and ginc=='0' and grated=="False" and gcolor=="black"):
+		client.board.seek(30, 0, rated=False, variant='standard', color='black', rating_range=None)
+	if (gtime=='30' and ginc=='0' and grated=="False" and gcolor=="random"):
+		client.board.seek(30, 0, rated=False, variant='standard', color='random', rating_range=None)
+	if (gtime=='30' and ginc=='0' and grated=="True" and gcolor=="white"):
+		client.board.seek(30, 0, rated=True, variant='standard', color='white', rating_range=None)
+	if (gtime=='30' and ginc=='0' and grated=="True" and gcolor=="black"):
+		client.board.seek(30, 0, rated=True, variant='standard', color='black', rating_range=None)
+	if (gtime=='30' and ginc=='0' and grated=="True" and gcolor=="random"):
+		client.board.seek(30, 0, rated=True, variant='standard', color='random', rating_range=None)
+	
+	if (gtime=='30' and ginc=='20' and grated=="False" and gcolor=="white"):
+		client.board.seek(30, 20, rated=False, variant='standard', color='white', rating_range=None)
+	if (gtime=='30' and ginc=='20' and grated=="False" and gcolor=="black"):
+		client.board.seek(30, 20, rated=False, variant='standard', color='black', rating_range=None)
+	if (gtime=='30' and ginc=='20' and grated=="False" and gcolor=="random"):
+		client.board.seek(30, 20, rated=False, variant='standard', color='random', rating_range=None)
+	if (gtime=='30' and ginc=='20' and grated=="True" and gcolor=="white"):
+		client.board.seek(30, 20, rated=True, variant='standard', color='white', rating_range=None)
+	if (gtime=='30' and ginc=='20' and grated=="True" and gcolor=="black"):
+		client.board.seek(30, 20, rated=True, variant='standard', color='black', rating_range=None)
+	if (gtime=='30' and ginc=='20' and grated=="True" and gcolor=="random"):
+		client.board.seek(30, 20, rated=True, variant='standard', color='random', rating_range=None)
+	
 
 
 boardfunctions.writeText(5, 'Game ID')
 
 # Wait for a game to start and get the game id!
 gameid = ""
-if (str(sys.argv[1]) == "new"):
+if (str(sys.argv[1]) == "New"):
     #print("Looking for a game")
     gt = threading.Thread(target=newGameThread, args=())
     gt.daemon = True
@@ -119,6 +175,7 @@ def stateThread():
         gamestate = client.board.stream_game_state(gameid)
         for state in gamestate:
             print(state)
+#mod by dso 4.1021
             if ('state' in state.keys()):
                 remotemoves = state.get('state').get('moves')
                 status = state.get('state').get('status')
@@ -220,27 +277,29 @@ while status == "started" and ourturn != 0:
         boardfunctions.beep(boardfunctions.SOUND_GENERAL)
         # Pass the move through
         if (len(move) == 2):
-                fromsq = move[0] * -1
-                mylastfrom = fromsq
-                tosq = move[1]
+			fromsq = move[0] * -1
+			mylastfrom = fromsq
+			tosq = move[1]
         if (len(move) == 3):
                 # This move should consist of two lifted and one place (two positives, 1 negative)
                 # it is a piece take. So the negative that is not the inverse of the positive
                 # is the piece that has moved and the positive is the tosq
-                tosq = -1
-                if move[0] >= 0:
-                        tosq = move[0]
-                if move[2] >= 0:
-                        tosq = move[2]
-                if move[1] >= 0:
-                        tosq = move[1]
-                fromsq = -1
-                if move[0] != (tosq * -1) and move[0] != tosq:
-                        fromsq = move[0] * -1
-                if move[1] != (tosq * -1) and move[1] != tosq:
-                        fromsq = move[1] * -1
-                if move[2] != (tosq * -1) and move[2] != tosq:
-                        fromsq = move[2] * -1
+				
+#mod by dso 4.10.21
+			tosq = -1
+#			if move[0] >= 0:
+#				tosq = move[0]
+#			if move[2] >= 0:
+			tosq = move[2]
+#			if move[1] >= 0:
+#				tosq = move[1]
+			fromsq = -1
+			if move[0] != (tosq * -1)  #and move[0] != tosq:
+				fromsq = move[0] * -1
+			if move[1] != (tosq * -1) # and move[1] != tosq:
+				fromsq = move[1] * -1
+#			if move[2] != (tosq * -1) and move[2] != tosq:
+#					fromsq = move[2] * -1
         mylastfrom = fromsq
         # Convert to letter number square format
         fromln = boardfunctions.convertField(fromsq)
@@ -267,28 +326,28 @@ while status == "started" and ourturn != 0:
                     mv = chess.Move.from_uci(lastmove)
                     print("Checked")
                     if (mv in board.legal_moves):
-                            board.push(mv)
-                            if lastmove == "e1g1":
-                                    castled = "h1f1"
-                            if lastmove == "e1c1":
-                                    castled = "a1d1"
-                            if lastmove == "e8g8":
-                                    castled = "h8f8"
-                            if lastmove == "e8c8":
-                                    castled = "a8d8"
-                            ourturn = 0
-                            print("Making move with client")
-                            ret = client.board.make_move(gameid, fromln + toln)
-                            print("Made move with client")
-                            halfturn = halfturn + 1
+						board.push(mv)
+						if lastmove == "e1g1":
+								castled = "h1f1"
+						if lastmove == "e1c1":
+								castled = "a1d1"
+						if lastmove == "e8g8":
+								castled = "h8f8"
+						if lastmove == "e8c8":
+								castled = "a8d8"
+						ourturn = 0
+						print("Making move with client")
+						ret = client.board.make_move(gameid, fromln + toln)
+						print("Made move with client")
+						halfturn = halfturn + 1
                     else:
-                            print("not a legal move checking for half turn")
-                            if halfturn != 0:
-                                    print("Not a legal move!")
-                                    print(board.legal_moves)
-                                    boardfunctions.clearBoardData()
-                                    boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
-                                    correcterror = fromsq
+						print("not a legal move checking for half turn")
+						if halfturn != 0:
+							print("Not a legal move!")
+							print(board.legal_moves)
+							boardfunctions.clearBoardData()
+							boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+							correcterror = fromsq
                 except:
                     print("exception checking for half turn")
                     if halfturn != 0:
@@ -350,13 +409,13 @@ while status == "started" and ourturn != 0:
                 move = boardfunctions.waitMove()
                 valid = 0
                 if move[0] == lrtocalc:
-                        valid = 1
+					valid = 1
                 if len(move) > 1:
                     if move[1] == lrtocalc:
-                            valid = 1
+						valid = 1
                 if len(move) == 3:
-                        if move[2] == lrtocalc:
-                                valid = 1
+					if move[2] == lrtocalc:
+						valid = 1
                 if valid == 0:
                     boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
                 movedto = lrtocalc 

@@ -1,4 +1,4 @@
-	# DGT Centaur board control functions
+# DGT Centaur board control functions
 #
 # I am not really a python programmer, but the language choice here
 # made sense!
@@ -7,15 +7,14 @@
 
 import serial
 import sys
-sys.path.append("/home/pi/centaur/")
 import os
-import epd2in9d
+from dgt_centaur_mods.display import epd2in9d
 import time
-import PIL
 from PIL import Image, ImageDraw, ImageFont
+import pathlib
 
 # Open the serial port, baudrate is 1000000
-ser = serial.Serial("/dev/ttyAMA0", baudrate=1000000, timeout=0.2)
+ser = serial.Serial("/dev/ttyS0", baudrate=1000000, timeout=0.2)
 font14 = ImageFont.truetype("/home/pi/v2/Font.ttc", 14)
 screenbuffer = Image.new('1', (128, 296), 255)
 initialised = 0
@@ -31,7 +30,7 @@ def initScreen():
     epd.Clear(0xff)
     screenbuffer = Image.new('1', (128, 296), 255)
     initialised = 0
-    time.sleep(1.5)
+    time.sleep(4)
 
 
 def clearScreen():
@@ -112,7 +111,7 @@ def writeText(row, txt):
     image = screenbuffer.copy()
     draw = ImageDraw.Draw(image)
     draw.rectangle([(0,rpos),(128,rpos+20)],fill=255)
-    draw.text((0, rpos), txt, font=font14, fill=0)
+    draw.text((0, rpos), txt, font=font18, fill=0)
     screenbuffer = image.copy()
     image = image.transpose(Image.FLIP_TOP_BOTTOM)
     image = image.transpose(Image.FLIP_LEFT_RIGHT)
@@ -136,7 +135,7 @@ def doMenu(items):
         draw = ImageDraw.Draw(image)
         rpos = 20
         for k, v in items.items():
-            draw.text((20, rpos), str(v), font=font14, fill=0)
+            draw.text((20, rpos), str(v), font=font18, fill=0)
             rpos = rpos + 20
         draw.polygon([(2, (selected * 20)), (2, (selected * 20) + 20),
                      (18, (selected * 20) + 10)], fill=0)
@@ -144,7 +143,7 @@ def doMenu(items):
         image = image.transpose(Image.FLIP_LEFT_RIGHT)
         if first == 1 and initialised == 0:
             epd.display(epd.getbuffer(image))
-            time.sleep(1)
+            time.sleep(3)
             first = 0
             epd.DisplayPartial(epd.getbuffer(image))
             initialised = 1
@@ -225,22 +224,16 @@ def waitMove():
                     if (resp[x] == 64):
                         # Calculate the square to 0(a1)-63(h8) so that
                         # all functions match
-                        square = resp[x + 1]
-                        squarerow = (square // 8)
-                        squarecol = (square % 8)
-                        squarerow = 7 - squarerow
-                        newsquare = (squarerow * 8) + squarecol
+                        fieldHex = resp[x + 1]
+                        newsquare = rotateFieldHex(fieldHex)
                         lifted = newsquare
                         print(lifted)
                         moves.append(newsquare * -1)
                     if (resp[x] == 65):
                         # Calculate the square to 0(a1)-63(h8) so that
                         # all functions match
-                        square = resp[x + 1]
-                        squarerow = (square // 8)
-                        squarecol = (square % 8)
-                        squarerow = 7 - squarerow
-                        newsquare = (squarerow * 8) + squarecol
+                        fieldHex = resp[x + 1]
+                        newsquare = rotateFieldHex(fieldHex)
                         placed = newsquare
                         moves.append(newsquare)
                         print(placed)
@@ -271,21 +264,15 @@ def poll():
                     print("PIECE LIFTED")
                     # Calculate the square to 0(a1)-63(h8) so that
                     # all functions match
-                    square = resp[x + 1]
-                    squarerow = (square // 8)
-                    squarecol = (square % 8)
-                    squarerow = 7 - squarerow
-                    newsquare = (squarerow * 8) + squarecol
+                    fieldHex = resp[x + 1]
+                    newsquare = rotateFieldHex(fieldHex)
                     print(newsquare)
                 if (resp[x] == 65):
                     print("PIECE PLACED")
                     # Calculate the square to 0(a1)-63(h8) so that
                     # all functions match
-                    square = resp[x + 1]
-                    squarerow = (square // 8)
-                    squarecol = (square % 8)
-                    squarerow = 7 - squarerow
-                    newsquare = (squarerow * 8) + squarecol
+                    fieldHex = resp[x + 1]
+                    newsquare = rotateFieldHex(fieldHex)
                     print(newsquare)
     tosend = bytearray(b'\x94\x06\x50\x6a')
     ser.write(tosend)
@@ -336,32 +323,113 @@ def ledsOff():
     ser.write(bytearray(b'\xb0\x00\x07\x06\x50\x00\x0d'))
 
 
-def ledFromTo(lfrom, lto):
+def ledFromTo(lfrom, lto, intensity=5):
     # Light up a from and to LED for move indication
     # Note the call to this function is 0 for a1 and runs to 63 for h8
     # but the electronics runs 0x00 from a8 right and down to 0x3F for h1
     tosend = bytearray(b'\xb0\x00\x0c\x06\x50\x05\x03\x00\x05\x3d\x31\x0d')
     # Recalculate lfrom to the different indexing system
-    lfromrow = (lfrom // 8)
-    lfromcol = (lfrom % 8)
-    # Now lfromrow and lfromcol run from 0 to 7, flip the row
-    lfromrow = 7 - lfromrow
-    newlfrom = (lfromrow * 8) + lfromcol
-    tosend[9] = newlfrom
+    tosend[8] = intensity
+    tosend[9] = rotateField(lfrom)
     # Same for lto
-    ltorow = (lto // 8)
-    ltocol = (lto % 8)
-    ltorow = 7 - ltorow
-    newlto = (ltorow * 8) + ltocol
-    tosend[10] = newlto
-    # The last byte seems to be some sort of checksum that I haven't worked
-    # out. You must send the right value. But there's only 256 options so
-    # it's quick to brute force it
-    for x in range(0, 255):
-        tosend[11] = x
-        ser.write(tosend)
+    tosend[10] = rotateField(lto)
+    # Wipe checksum byte and append the new checksum.
+    tosend.pop()
+    tosend.append(checksum(tosend))
+    ser.write(tosend)
     # Read off any data
     ser.read(100000)
+
+def led(num, intensity=5):
+    # Flashes a specific led
+    # Note the call to this function is 0 for a1 and runs to 63 for h8
+    # but the electronics runs 0x00 from a8 right and down to 0x3F for h1
+    tosend = bytearray(b'\xb0\x00\x0b\x06\x50\x05\x0a\x01\x01\x3d\x5f')
+    # Recalculate num to the different indexing system
+    # Last bit is the checksum
+    tosend[8] = intensity
+    tosend[9] = rotateField(num)
+    # Wipe checksum byte and append the new checksum.
+    tosend.pop()
+    tosend.append(checksum(tosend))
+    ser.write(tosend)
+    # Read off any data
+    ser.read(100000)
+
+def ledFlash():
+    # Flashes the last led lit by led(num) above
+    tosend = bytearray(b'\xb0\x00\x0a\x06\x50\x05\x0a\x00\x01\x20')
+    ser.write(tosend)
+    ser.read(100000)
+
+def checksum(barr):
+    csum = 0
+    for c in bytes(barr):
+        csum += c
+    barr_csum = (csum % 128)
+    return barr_csum
+
+def rotateField(field):
+    lrow = (field // 8)
+    lcol = (field % 8)
+    newField = (7 - lrow) * 8 + lcol
+    return newField
+
+def rotateFieldHex(fieldHex):
+    squarerow = (fieldHex // 8)
+    squarecol = (fieldHex % 8)
+    field = (7 - squarerow) * 8 + squarecol
+    return field
+
+def convertField(field):
+    square = chr((ord('a') + (field % 8))) + chr(ord('1') + (field // 8))
+    return square
+
+def shutdown():
+    """
+    Initiate shutdown sequence.
+    """
+    initScreen()
+    clearScreenBuffer()
+    sleepScreen()
+    tosend = bytearray(b'\xb2\x00\x07\x06\x50\x0a\x19')
+    ser.write(tosend)
+
+def getBoardState(field=None):
+    # Query the board and return a representation of it
+    # Consider this function experimental
+    # lowerlimit/upperlimit may need adjusting
+    # Get the board data
+    tosend = bytearray(b'\xf0\x00\x07\x06\x50\x7f\x4c')
+    ser.write(tosend)
+    resp = ser.read(10000)
+    resp = resp = resp[6:(64 * 2) + 6]
+    boarddata = [None] * 64
+    for x in range(0, 127, 2):
+        tval = (resp[x] * 256) + resp[x+1];
+        boarddata[(int)(x/2)] = tval
+    # Any square lower than 400 is empty
+    # Any square higher than upper limit is also empty
+    upperlimit = 32000
+    lowerlimit = 300
+    for x in range(0,64):
+        if ((boarddata[x] < lowerlimit) or (boarddata[x] > upperlimit)):
+            boarddata[x] = 0
+        else:
+            boarddata[x] = 1
+    if field:
+        return boarddata[field]
+    return boarddata
+
+def printBoardState():
+    # Helper to display board state
+    state = getBoardState()
+    for x in range(0,64,8):
+        print("+---+---+---+---+---+---+---+---+")
+        for y in range(0,8):
+            print("| " + str(state[x+y]) + " ", end='')
+        print("|\r")
+    print("+---+---+---+---+---+---+---+---+")
 
 
 # poll()

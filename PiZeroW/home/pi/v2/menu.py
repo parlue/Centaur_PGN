@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import centaurv2
+# import lichessV4
 
 # Power on sound
 boardfunctions.beep(boardfunctions.SOUND_POWER_ON)
@@ -17,12 +18,11 @@ os.chdir("/home/pi/v2/")
 while True:
 	menu = {
 		'Centaur': 'DGT Centaur',
-		'shell': 'Go bash',
-		'PGN2USB': 'Export PGN',
 		'Lichess': 'Lichess',
+		'DGT': 'DGT Board',
+		'shell': 'Go bash',
 		'Configuration': 'Import conf',
 		'Update': 'Systemupdate',
-		'Connection': 'Tethering', 
 		'Shutdown': 'Shutdown',
 		'Reboot': 'Reboot'}
 	boardfunctions.initialised = 0
@@ -102,17 +102,41 @@ while True:
 			if (result == "Current"):
 				boardfunctions.clearScreen()
 				os.chdir("/home/pi/v2")
-				os.system("/usr/local/bin/python3.6 /home/pi/v2/lichess.py current")
+				os.system("/usr/bin/python3.6 /home/pi/v2/lichessV4.py current")
+				#lichessV4(current)
 				sys.exit()
 
-				livemenu = {'Rated': 'Rated', 'Unrated': 'Unrated'}
-				result = boardfunctions.doMenu(livemenu)
-				print(result)
+			livemenu = {'Rated': 'Rated', 'Unrated': 'Unrated'}
+			result = boardfunctions.doMenu(livemenu)
+			print(result)
+			if result == "Rated":
+				rated=True
+			else:	
+				rated=False
+			
 
-				colormenu = {'Random': 'Random', 'Black': 'Black', 'White': 'White'}
-				result = boardfunctions.doMenu(colormenu)
-				print(result)
+			colormenu = {'White': 'White', 'Random': 'Random', 'Black': 'Black'}
+			result = boardfunctions.doMenu(colormenu)
+			print(result)
+			color = result
 
-				timemenu = {'15': '15 Minutes', '30': '30 Minutes', '60': '60 Minutes'}
-				result = boardfunctions.doMenu(timemenu)
-				print(result)
+			timemenu = {'10 , 5': '10+5 Minutes' , '15 , 10': '15+10 Minutes', '30': '30 Minutes', '30 , 20': '30+20 Minutes'}
+			result = boardfunctions.doMenu(timemenu)
+			if result =='10 , 5':
+				gtime = '10'
+				gincrement = '5'
+			if result == '15 , 10':
+				gtime = '15'
+				gincrement = '10'
+			if result == '30':
+				gtime = '30'
+				gincrement = '0'
+			if result == '30 , 20':	
+				gtime = '30'
+				gincrement = '20'
+		
+			print(gtime + ',' + gincrement)
+			os.chdir("/home/pi/v2")
+			os.system("/usr/bin/python3.6 /home/pi/v2/lichessV4.py New gtime gincrement rated color")
+			#lichessV4(New, gtime, gincrement, rated, color)
+			sys.exit()

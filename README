@@ -20,7 +20,7 @@ Simple roadmap
 2. Bootmenu - done 
 3. PGN export via Menu - done
 4. Import of a configuration file with lichess API key - done
-5. Lichessplaying - done%
+5. Lichessplaying - done
 6. Version update - done 99%
 7. PGN export via email 70%
 8. Connection test -done
@@ -32,6 +32,6 @@ inofficial not confirmed next steps (I don't know if I have the time and motivat
 1. FICS playing
 2. ICC playing
 3. Export analizes PGNs
-4. DGT Board emulator for White Pawn integration - 40%
+4. DGT Board emulator for White Pawn integration - 90%
 5. Engine for normal chessplaying - no chessfriend -40%
 

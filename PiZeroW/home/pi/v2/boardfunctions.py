@@ -173,7 +173,8 @@ def doMenu(items):
                 buttonPress = 3
             if (resp.hex() == "b10010065000140a050200000000611d"):
                 buttonPress = 4
-        ser.write(bytearray(b'\xb1\x00\x08\x06\x50\x4c\x08\x63'))
+#dso changed 6.10.21 switch off beeb in menu to get a better performance 
+ #ser.write(bytearray(b'\xb1\x00\x08\x06\x50\x4c\x08\x63'))
         if (buttonPress == 2):
             # Tick, so return the key for this menu item
             c = 1

@@ -194,6 +194,7 @@ def stateThread():
 	global whiteincrement
 	global blackincrement
 	global resign
+	global winner
 	while running:
 		gamestate = client.board.stream_game_state(gameid)
 		for state in gamestate:
@@ -209,6 +210,10 @@ def stateThread():
 					status = state.get('status')
 			remotemoves = str(remotemoves)
 			status = str(status)
+# dso add event resign and stop the game
+			if status == 'resign':
+				winner = str(state.get('winner'))
+				running = False
 			if (remotemoves == "None"):
 				remotemoves = ""
 			if ('black' in state.keys()):
@@ -233,7 +238,7 @@ def stateThread():
 					binc = int(state.get('state').get('binc'))
 					blackincrement = binc
 
-			time.sleep(1)
+			#time.sleep(1)
 
 
 #print("Starting thread to track the game on Lichess")
@@ -507,9 +512,10 @@ while status == "started" and ourturn != 0 and resign != 99:
 
 running = False
 if resign == 99 :
-	boardfunctions.writeText(12, 'Player resign')
+	boardfunctions.writeText(11, 'Player resign')
 else:
-	boardfunctions.writeText(12, 'Game over')
+	boardfunctions.writeText(11, 'Game over')
+	boardfunctions.writeText(12, f'Winner: {winner}'
 time.sleep(2)
 boardfunctions.sleepScreen()
 # sys.exit()

@@ -279,7 +279,7 @@ for x in range(0,64):
 	pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
 boardfunctions.drawBoard(pieces)
 
-client.board.post_message(gameid, 'Playing with DGT-Centaur V2 by dso, can\'t chat - have fun' , spectator=False)
+client.board.post_message(gameid, 'I\'m playing with DGT-Centaur V2 by dso, can\'t chat - I\'m not a bot, sry if it struggle, this Version is in a beta status - have fun' , spectator=False)
 resign = 1
 while status == "started" and ourturn != 0 and resign != 99:
 
@@ -317,9 +317,9 @@ while status == "started" and ourturn != 0 and resign != 99:
 			fromsq = move[0] * -1
 			mylastfrom = fromsq
 			tosq = move[1]
-			boardfunctions.writeText(15, 'normal move')
+			#boardfunctions.writeText(12, 'normal move')
 		if (len(move) == 3):
-			boardfunctions.writeText(15, 'kick move')
+			#boardfunctions.writeText(12, 'kick move')
 			# This move should consist of two lifted and one place (two positives, 1 negative)
 			# it is a piece take. So the negative that is not the inverse of the positive
 			# is the piece that has moved and the positive is the tosq
@@ -507,9 +507,9 @@ while status == "started" and ourturn != 0 and resign != 99:
 
 running = False
 if resign == 99 :
-	boardfunctions.writeText(20, 'Player resign')
+	boardfunctions.writeText(12, 'Player resign')
 else:
-	boardfunctions.writeText(20, 'Game over')
+	boardfunctions.writeText(12, 'Game over')
 time.sleep(2)
 boardfunctions.sleepScreen()
 # sys.exit()

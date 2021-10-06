@@ -213,6 +213,7 @@ def stateThread():
 # dso add event resign and stop the game
 			if status == 'resign':
 				winner = str(state.get('winner'))
+				status = 'Ende'
 				running = False
 			if (remotemoves == "None"):
 				remotemoves = ""
@@ -403,22 +404,24 @@ while status == "started" and ourturn != 0 and resign != 99:
 		if playeriswhite == 1:
 			whiteclock = whiteclock + whiteincrement
 			whiteclock = whiteclock - ((playertime - movestart)*1000)
+			
 		else:
 			blackclock = blackclock + blackincrement
 			blackclock = blackclock - ((playertime - movestart)*1000)
+			
 
 		wtext = ""
 		# dso timefix 5.10.21
-		if whiteclock//60000 == 0:
+		if whiteclock//60000 < 1:
 			wtext = "0:" + str(whiteclock//1000) + " min      "
 		else:
-			wtext = str(whiteclock//60000)+":"+str(whiteclock//1000) + " mins      "
+			wtext = str(int(whiteclock//60000))+":"+str(whiteclock//1000) + " mins      "
 		boardfunctions.writeText(10,wtext)
 		btext = ""
-		if blackclock // 60000 == 0:
+		if blackclock // 60000 < 1:
 			btext = "0:" + str(blackclock//1000) + " min      "
 		else:
-			btext = str(blackclock // 60000)+":"+ str(blackclock//1000) + " mins      "
+			btext = str(int(blackclock//60000))+":"+ str(blackclock//1000) + " mins      "
 		boardfunctions.writeText(1, btext)
 
 	fen = board.fen()
@@ -479,22 +482,24 @@ while status == "started" and ourturn != 0 and resign != 99:
 		if playeriswhite == 0:
 			whiteclock = whiteclock + whiteincrement
 			whiteclock = whiteclock - ((lichesstime - movestart) * 1000)
+			
 		else:
 			blackclock = blackclock + blackincrement
 			blackclock = blackclock - ((lichesstime - movestart) * 1000)
+			
 
 
 		wtext = ""
-		if whiteclock//60000 == 0:
+		if whiteclock//60000 < 1:
 			wtext = "0:" + str(whiteclock//1000) + " min      "
 		else:
-			wtext = str(whiteclock//60000)+":"+str(whiteclock//1000) + " mins      "
+			wtext = str(int(whiteclock//60000))+":"+str(whiteclock//1000) + " mins      "
 		boardfunctions.writeText(10,wtext)
 		btext = ""
-		if blackclock // 60000 == 0:
+		if blackclock // 60000 < 1:
 			btext = "0:" + str(blackclock//1000) + " min      "
 		else:
-			btext = str(blackclock // 60000)+":"+ str(blackclock//1000) + " mins      "
+			btext = str(int(blackclock // 60000))+":"+ str(blackclock//1000) + " mins      "
 		boardfunctions.writeText(1, btext)
 
 

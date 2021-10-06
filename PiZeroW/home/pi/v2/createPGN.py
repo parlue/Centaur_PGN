@@ -16,31 +16,23 @@ import chess
 import chess.pgn
 import pathlib
 import os
-import boardfunctions
 import time
 from datetime import date
 from types import SimpleNamespace
 from pathlib import Path
 
-# check stick
-usbstick = pathlib.Path("/dev/sda1")
-cgame = pathlib.Path("/mnt/chessgame_1_2.dat")
-boardfunctions.clearSerial()
-boardfunctions.initScreen()
-time.sleep(3)
-boardfunctions.writeText(1, "check stick")
-boardfunctions.writeText(2, "check game")
-if (usbstick.exists() and cgame.exists()) :
+cgame = pathlib.Path("/home/pi/centaur/settings/chessgame_1_2.dat")
+
+if cgame.exists() :
 	# print("in")
-	os.system('mount -t vfat /dev/sda1 /media')
-	boardfunctions.writeText(3, "stick found")
-	counter = pathlib.Path("/media/gamecount.pkl")
+	
+	counter = pathlib.Path("/home/pi/centaur/settings/gamecount.pkl")
 	if counter.exists()  :
-		f = open('/media/gamecount.pkl', 'rb')
+		f = open('/home/pi/centaur/settings/gamecount.pkl', 'rb')
 		data = pickle.load(f)
 		f.close()
 		data = data + 1
-		f = open ('/media/gamecount.pkl', 'wb')
+		f = open ('/home/pi/centaur/settings/gamecount.pkl', 'wb')
 		pickle.dump(data, f)
 		f.close()
 
@@ -48,7 +40,7 @@ if (usbstick.exists() and cgame.exists()) :
 		
 	else :
 		data=(1)
-		output = open('/media/gamecount.pkl', 'wb')
+		output = open('/home/pi/centaur/settings/gamecount.pkl', 'wb')
 		pickle.dump(data, output)
 		output.close()
 		filecount=str(data)
@@ -61,7 +53,7 @@ if (usbstick.exists() and cgame.exists()) :
 	game.headers["Site"] = ""
 	game.headers["Date"] = ""
 	game.headers["Round"] = ""
-	boardfunctions.writeText(4, "open game")
+	
 
 
 	def create_dummy_module(type_names):
@@ -75,8 +67,7 @@ if (usbstick.exists() and cgame.exists()) :
              "engine": create_dummy_module(["Score_data"]),
 			}
 		)
-		with open("/mnt/chessgame_1_2.dat", "rb") as file:
-			boardfunctions.writeText(5, "read game")
+		with open("/home/pi/centaur/settings/chessgame_1_2.dat", "rb") as file:
 			chess_game = pickle.load(file)
 			b=len(chess_game.board.move_stack)
 			i=1
@@ -87,15 +78,11 @@ if (usbstick.exists() and cgame.exists()) :
 				node = node.add_variation(chess.Move.from_uci(str(cmove)))
 				i += 1
 			#write pgn to disk 
-			boardfunctions.writeText(6, "write game")
-			filename = "/media/" + filecount + "_mygame.pgn"
+			filename = "/home/pi/centaur/settings/" + filecount + "_mygame.pgn"
 			print(game, file=open(filename, "w"), end="\n\n")
-			os.system('umount /media')
-			boardfunctions.writeText(7, "done..")
+			
 
 	if __name__ == "__main__":
 		main()
 else:
-	boardfunctions.writeText(3, "no stick or game")
-	boardfunctions.writeText(4, "ciao...")
-	time.sleep(1)
+	print('No Game')

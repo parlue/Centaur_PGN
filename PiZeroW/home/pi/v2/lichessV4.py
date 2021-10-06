@@ -16,7 +16,7 @@ import v2conf
 # python3 lichess.py [current|New]
 
 # This is our lichess access token, the game id we're playing, fill it
-# in in config.py
+# in in v2conf.py
 #
 # Note the API requires that the raspberry pi clock has a reasonably
 # accurate time for the SSL

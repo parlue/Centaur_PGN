@@ -236,13 +236,13 @@ def waitMove():
                         newsquare = rotateFieldHex(fieldHex)
                         placed = newsquare
                         moves.append(newsquare)
-                        print(placed)
+                        #print(placed)
         tosend = bytearray(b'\x94\x06\x50\x6a')
         ser.write(tosend)
         expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
         resp = ser.read(10000)
         resp = bytearray(resp)
-    print(moves)
+    #print(moves)
     return moves
 
 
@@ -261,19 +261,19 @@ def poll():
         if (resp[0] == 133 and resp[1] == 0):
             for x in range(0, len(resp) - 1):
                 if (resp[x] == 64):
-                    print("PIECE LIFTED")
+                    #print("PIECE LIFTED")
                     # Calculate the square to 0(a1)-63(h8) so that
                     # all functions match
                     fieldHex = resp[x + 1]
                     newsquare = rotateFieldHex(fieldHex)
-                    print(newsquare)
+                    #print(newsquare)
                 if (resp[x] == 65):
-                    print("PIECE PLACED")
+                   # print("PIECE PLACED")
                     # Calculate the square to 0(a1)-63(h8) so that
                     # all functions match
                     fieldHex = resp[x + 1]
                     newsquare = rotateFieldHex(fieldHex)
-                    print(newsquare)
+                    #print(newsquare)
     tosend = bytearray(b'\x94\x06\x50\x6a')
     ser.write(tosend)
     expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
@@ -432,10 +432,3 @@ def printBoardState():
     print("+---+---+---+---+---+---+---+---+")
 
 
-# poll()
-# beep(SOUND_GENERAL)
-# ledsOff()
-# ledFromTo(0,63)
-# while True:
-#	poll()
-# sys.exit()

@@ -15,14 +15,16 @@ import pathlib
 import os
 import boardfunctions
 import time
+import urllib
+import requests
+
 from datetime import date
 from types import SimpleNamespace
 from pathlib import Path
 
-usbstick = pathlib.Path("/dev/sda1")
-cgame = pathlib.Path("/mnt/chessgame_1_2.dat")
-configfile = pathlib.Path("/media/v2conf.py")
-updatefile = pathlib.Path("/media/update.tar")
+cgame = pathlib.Path("settings/chessgame_1_2.dat")
+configfile = pathlib.Path("./v2conf.py")
+# updatefile = pathlib.Path("/media/update.tar")
 
 def update():
 	boardfunctions.clearScreen()
@@ -63,12 +65,13 @@ def connectiontest():
 	boardfunctions.clearScreen()
 	time.sleep(1)
 	boardfunctions.writeText(1, "check onlinesatus")
-	try :
-		stri = "https://www.google.com"
-		data = urllib.urlopen(stri)
-		boardfunctions.writeText(2, "internet alive")
-	except e:
-		boardfunctions.writeText(2, "No connection") 
+	url = "http://www.google.com"
+	timeout = 5
+	try:
+		request = requests.get(url, timeout=timeout)
+		boardfunctions.writeText(2, "Internet alive")
+	except (requests.ConnectionError, requests.Timeout) as exception:
+		boardfunctions.writeText(2, "No connection")	 
 	boardfunctions.writeText(3, "ciao...")
 	time.sleep(1)
 

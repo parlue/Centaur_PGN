@@ -1,15 +1,14 @@
 import urllib
-import boardfunctions
 import time
-boardfunctions.clearSerial()
-boardfunctions.initScreen()
-boardfunctions.writeText(1, "check onlinesatus")
-try :
-    stri = "https://www.google.com"
-    data = urllib.urlopen(stri)
-    boardfunctions.writeText(2, "internet alive")
-except e:
-    boardfunctions.writeText(2, "No connection") 
-boardfunctions.writeText(3, "ciao...")
+import requests
+print("check onlinesatus")
+url = "http://www.google.com"
+timeout= 5
+try:
+	request = requests.get(url, timeout=timeout)
+	print("internet alive")
+except (requests.ConnectionError, requests.Timeout) as exception:
+	print("No connection") 
+print ("ciao...")
 time.sleep(1)
 

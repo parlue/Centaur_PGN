@@ -26,40 +26,7 @@ cgame = pathlib.Path("settings/chessgame_1_2.dat")
 configfile = pathlib.Path("./v2conf.py")
 # updatefile = pathlib.Path("/media/update.tar")
 
-def update():
-	boardfunctions.clearScreen()
-	boardfunctions.writeText(1, "check stick ")
-	if usbstick.exists() :
-		os.system('mount -t vfat /dev/sda1 /media')
-		boardfunctions.writeText(2, "stick found")
-		boardfunctions.writeText(3, "check update")
-		if updatefile.exists():
-			boardfunctions.writeText(4, "update found")
-			boardfunctions.writeText(5, "process update")
-			os.system('mkdir /media/tmp')
-			os.system('tar xvf /media/update.tar /media/tmp/')
-			os.system('/media/tmp/update.sh')
-			os.system('rm -rf /media/tmp')
-			os.system('rm /media/update.tar')
-			os.system('umount /media')
-			boardfunctions.writeText(6, "done")
-			boardfunctions.writeText(7, "reboot now")
-			time.sleep(1)
-			boardfunctions.clearScreen()
-			boardfunctions.sleepScreen()
-			boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-			os.system("/sbin/reboot")
-			sys.exit()
-		
-		else :
-			boardfunctions.writeText(4, "update missed")
-			boardfunctions.writeText(5, "ciao...")
-			time.sleep(1)
-		
-	else :
-		boardfunctions.writeText(2, "no stick found")
-		boardfunctions.writeText(3, "ciao...")
-		time.sleep(1)
+
 
 def connectiontest():
 	boardfunctions.clearScreen()
@@ -75,39 +42,7 @@ def connectiontest():
 	boardfunctions.writeText(3, "ciao...")
 	time.sleep(1)
 
-def getconfig():
-	boardfunctions.clearScreen()
-	time.sleep(1)
-	boardfunctions.writeText(1, "check stick ")
-	if usbstick.exists() :
-			os.system('mount -t vfat /dev/sda1 /media')
-			boardfunctions.writeText(2, "stick found")
-			boardfunctions.writeText(3, "check update")
-			if configfilefile.exists():
-				boardfunctions.writeText(4, "config found")
-				os.system('mount -o remount,rw /')
-				boardfunctions.writeText(5, "import config")
-				os.system('cp /media/v2conf.py /home/pi/v2/')
-				os.system('sync')
-				os.system('mount -o remount,r /')
-				boardfunctions.writeText(6, "done")
-				time.sleep(1)
-				os.system('unount /media')
-				boardfunctions.writeText(7, "reboot now")
-				boardfunctions.clearScreen()
-				boardfunctions.sleepScreen()
-				boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-				os.system("/sbin/reboot")
-				sys.exit()
-			
-			else :
-				boardfunctions.writeText(4, "no config")
-				time.sleep(2)
-			
-	else :
-		boardfunctions.writeText(2, "No stick")
-		boardfunctions.writeText(3, "ciao....")
-		time.sleep(2)
+
 
 def chessgame():
 	boardfunctions.clearScreen()

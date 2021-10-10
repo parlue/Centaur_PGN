@@ -281,8 +281,9 @@ while status == "started":
             whiteclock = whiteclock - ((time.time() - movestart) * 1000)
             whiteclock = whiteclock + whiteincrement
         else:
-            blackclock = blackclock + blackincrement
+            
             blackclock = blackclock - ((time.time() - movestart) * 1000)
+			blackclock = blackclock + blackincrement
 
         wtext = ""
         if whiteclock//60000 == 0:

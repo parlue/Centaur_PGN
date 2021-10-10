@@ -15,7 +15,7 @@ epd = epd2in9d.EPD()
 boardfunctions.beep(boardfunctions.SOUND_POWER_ON)
 boardfunctions.clearSerial()
 boardfunctions.initScreen()
-#time.sleep(1)
+time.sleep(1)
 boardfunctions.ledsOff()
 os.chdir("/home/pi/v2/")
 
@@ -51,6 +51,9 @@ while True:
 		#os.chdir("/home/pi/v2")
 		#os.system("/usr/bin/python3.6 ./connectiontest.py")
 	if result == "Shutdown":
+		#boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+		#boardfunctions.shutdown()
+		
 		boardfunctions.clearScreen()
 		boardfunctions.writeText(1, "Please shutdown")
 		boardfunctions.writeText(2, 'from the centaur')

@@ -6,6 +6,7 @@ import threading
 import boardfunctions
 import chess
 import v2conf
+import os
 
 # Run a game on lichess
 # This is version two so we do it directly and with screen control!
@@ -76,9 +77,9 @@ def newGameThread():
 #	print(grated)
 	gcolor = str(sys.argv[5])
 #	print(gcolor)
-	boardfunctions.writeText(2, f'time {gtime} , {ginc}')
-	boardfunctions.writeText(3, f'ratedt={grated}')
-	boardfunctions.writeText(4, f'color={gcolor}')
+	boardfunctions.writeText(5, f'time {gtime} , {ginc}')
+	boardfunctions.writeText(6, f'ratedt={grated}')
+	boardfunctions.writeText(7, f'color={gcolor}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="white"):
 		client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=None)
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="black"):
@@ -150,7 +151,7 @@ def newGameThread():
 # Wait for a game to start and get the game id!
 gameid = ""
 if (str(sys.argv[1]) == "New"):
-	boardfunctions.writeText(2, 'gamesearch')
+	boardfunctions.writeText(4, 'gamesearch')
 	#print("Looking for a game")
 	gt = threading.Thread(target=newGameThread, args=())
 	gt.daemon = True
@@ -177,6 +178,7 @@ whiteclock = 0
 blackclock = 0
 whiteincrement = 0
 blackincrement = 0
+winner= 'No winner'
 
 # Lichess doesn't start the clocks until white moves
 starttime = -1
@@ -195,6 +197,8 @@ def stateThread():
 	global blackincrement
 	global resign
 	global winner
+	global wtime
+	global btime
 	while running:
 		gamestate = client.board.stream_game_state(gameid)
 		for state in gamestate:
@@ -212,9 +216,33 @@ def stateThread():
 			status = str(status)
 # dso add event resign and stop the game
 			if status == 'resign':
+				boardfunctions.writeText(11, 'Resign')
 				winner = str(state.get('winner'))
-				status = 'Ende'
-				running = False
+				boardfunctions.writeText(12, winner +' wins')
+				time.sleep(3)
+				os._exit(0)
+				#running = False
+			if status == 'aborted':
+				boardfunctions.writeText(11, 'Game aborted')
+				winner = 'No Winner'
+				boardfunctions.writeText(12, 'No winner')
+				time.sleep(3)
+				os._exit(0)
+				
+			if status == 'outoftime':
+				boardfunctions.writeText(11, 'Out of time')
+				winner = str(state.get('winner'))
+				boardfunctions.writeText(12, winner +' wins')
+				time.sleep(3)
+				os.exit_(0)
+			if status == 'timeout':
+				boardfunctions.writeText(11, 'Out of time')
+				winner = str(state.get('winner'))
+				boardfunctions.writeText(12, winner +' wins')
+				time.sleep(3)
+				os.exit_(0)
+				
+						
 			if (remotemoves == "None"):
 				remotemoves = ""
 			if ('black' in state.keys()):
@@ -239,7 +267,7 @@ def stateThread():
 					binc = int(state.get('state').get('binc'))
 					blackincrement = binc
 
-			#time.sleep(1)
+			time.sleep(1)
 
 
 #print("Starting thread to track the game on Lichess")
@@ -299,14 +327,17 @@ while status == "started" and ourturn != 0 and resign != 99:
 			currentmover = 1
 		else:
 			currentmover = 0
-	currentmovestart = time.time()
+#	currentmovestart = time.time()
 
 	if ourturn == 1 and status == "started":
 		# Wait for the player's move
 #		print('Player move')
 		movestart = time.time()
+		startzeit=time.time()
+		print(str(startzeit-startzeit))
 		move = boardfunctions.waitMove()
 		boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+		
 		# Pass the move through
         
 		#resign by dso place a new figure on the board
@@ -340,12 +371,14 @@ while status == "started" and ourturn != 0 and resign != 99:
 				fromsq = move[0] * -1
 			if move[1] != (tosq * -1):
 				fromsq = move[1] * -1
-
+		print('zugverstehen= ' + str(time.time()-startzeit))
 		mylastfrom = fromsq
 		# Convert to letter number square format
 		fromln = boardfunctions.convertField(fromsq)
 		#print(fromln)
+		print('fromfiledtime= ' + str(time.time()-startzeit))
 		toln = boardfunctions.convertField(tosq)
+		print('tofieldtime= ' + str(time.time()-startzeit))
 		#print(toln)
 		#print("Felder OK?")
 		# If the piece is a pawn we should take care of promotion here. You could choose it from
@@ -365,10 +398,12 @@ while status == "started" and ourturn != 0 and resign != 99:
 		else:
 			try:
 				#print("Checking validity")
+				print('checktimeifvalid= ' + str(time.time()-startzeit))
 				mv = chess.Move.from_uci(lastmove)
-				#print("Checked")
+				print("Checked")
 				if (mv in board.legal_moves):
 					board.push(mv)
+					
 					if lastmove == "e1g1":
 							castled = "h1f1"
 					if lastmove == "e1c1":
@@ -377,11 +412,15 @@ while status == "started" and ourturn != 0 and resign != 99:
 							castled = "h8f8"
 					if lastmove == "e8c8":
 							castled = "a8d8"
-					ourturn = 0
+					playertime=time.time()
 					#print("Making move with client")
+					#check if lichess accept this move
 					ret = client.board.make_move(gameid, fromln + toln)
+					if ret :
+						ourturn = 0
+						halfturn = halfturn + 1
 					#print("Made move with client")
-					halfturn = halfturn + 1
+					# old place outturn ans halfturn
 				else:
 					#print("not a legal move checking for half turn")
 					if halfturn != 0:
@@ -398,32 +437,32 @@ while status == "started" and ourturn != 0 and resign != 99:
 					boardfunctions.clearBoardData()
 					boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 					correcterror = fromsq
-		playertime = time.time()
+				
 		#print(board)
-
+		
 		if playeriswhite == 1:
+			
+			whiteclock = whiteclock - ((time.time() - movestart) * 1000)
 			whiteclock = whiteclock + whiteincrement
-			whiteclock = whiteclock - ((playertime - movestart)*1000)
 			
 		else:
 			blackclock = blackclock + blackincrement
-			blackclock = blackclock - ((playertime - movestart)*1000)
+			blackclock = blackclock - ((time.time() - movestart) * 1000)
 			
 
 		wtext = ""
-		# dso timefix 5.10.21
-		if whiteclock//60000 < 1:
-			wtext = "0:" + str(whiteclock//1000) + " min      "
+		if whiteclock//60000 == 0:
+			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
 		else:
-			wtext = str(int(whiteclock//60000))+":"+str(whiteclock//1000) + " mins      "
+			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
 		boardfunctions.writeText(10,wtext)
 		btext = ""
-		if blackclock // 60000 < 1:
-			btext = "0:" + str(blackclock//1000) + " min      "
+		if blackclock // 60000 == 0:
+			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
 		else:
-			btext = str(int(blackclock//60000))+":"+ str(blackclock//1000) + " mins      "
+			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
 		boardfunctions.writeText(1, btext)
-
+		
 	fen = board.fen()
 	sfen = fen[0 : fen.index(" ")]
 	baseboard = chess.BaseBoard(sfen)
@@ -479,33 +518,30 @@ while status == "started" and ourturn != 0 and resign != 99:
 
 		#print(board)
 # dso timefix 5.10.21
+		
 		if playeriswhite == 0:
+			whiteclock = whiteclock - ((time.time() - movestart) * 1000)
 			whiteclock = whiteclock + whiteincrement
-			whiteclock = whiteclock - ((lichesstime - movestart) * 1000)
-			
 		else:
+			blackclock = blackclock - ((time.time() - movestart) * 1000)
 			blackclock = blackclock + blackincrement
-			blackclock = blackclock - ((lichesstime - movestart) * 1000)
-			
-
 
 		wtext = ""
-		if whiteclock//60000 < 1:
-			wtext = "0:" + str(whiteclock//1000) + " min      "
+		if whiteclock//60000 == 0:
+			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
 		else:
-			wtext = str(int(whiteclock//60000))+":"+str(whiteclock//1000) + " mins      "
+			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
 		boardfunctions.writeText(10,wtext)
 		btext = ""
-		if blackclock // 60000 < 1:
-			btext = "0:" + str(blackclock//1000) + " min      "
+		if blackclock // 60000 == 0:
+			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
 		else:
-			btext = str(int(blackclock // 60000))+":"+ str(blackclock//1000) + " mins      "
+			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
 		boardfunctions.writeText(1, btext)
-
 
 		if starttime < 0:
 			starttime = time.time()
-
+		
 	fen = board.fen()
 	sfen = fen[0 : fen.index(" ")]
 	baseboard = chess.BaseBoard(sfen)
@@ -516,11 +552,9 @@ while status == "started" and ourturn != 0 and resign != 99:
 	boardfunctions.writeText(12,str(mv))
 
 running = False
-if resign == 99 :
-	boardfunctions.writeText(11, 'Player resign')
-else:
-	boardfunctions.writeText(11, 'Game over')
-	boardfunctions.writeText(12, f'Winner: {winner}'
-time.sleep(2)
+boardfunctions.writeText(11, 'Game over')
+boardfunctions.writeText(12, f'Winner: {winner}')
+boardfunctions.writeText(13, 'reason =' + status)
+time.sleep(5)
 boardfunctions.sleepScreen()
-# sys.exit()
+sys.exit()

@@ -26,13 +26,13 @@ cgame = pathlib.Path("/home/pi/centaur/settings/chessgame_1_2.dat")
 if cgame.exists() :
 	# print("in")
 	
-	counter = pathlib.Path("/home/pi/centaur/settings/gamecount.pkl")
+	counter = pathlib.Path("/home/pi/www/pgn/gamecount.pkl")
 	if counter.exists()  :
-		f = open('/home/pi/centaur/settings/gamecount.pkl', 'rb')
+		f = open('/home/pi/www/pgn/settings/gamecount.pkl', 'rb')
 		data = pickle.load(f)
 		f.close()
 		data = data + 1
-		f = open ('/home/pi/centaur/settings/gamecount.pkl', 'wb')
+		f = open ('/home/pi/www/pgn/gamecount.pkl', 'wb')
 		pickle.dump(data, f)
 		f.close()
 
@@ -40,7 +40,7 @@ if cgame.exists() :
 		
 	else :
 		data=(1)
-		output = open('/home/pi/centaur/settings/gamecount.pkl', 'wb')
+		output = open('/home/pi/www/pgn/gamecount.pkl', 'wb')
 		pickle.dump(data, output)
 		output.close()
 		filecount=str(data)
@@ -52,7 +52,7 @@ if cgame.exists() :
 	game.headers["Black"] = "Black"
 	game.headers["Site"] = ""
 	game.headers["Date"] = ""
-	game.headers["Round"] = ""
+	game.headers["Round"] = ""	
 	
 
 
@@ -71,6 +71,7 @@ if cgame.exists() :
 			chess_game = pickle.load(file)
 			b=len(chess_game.board.move_stack)
 			i=1
+			
 			cmove=chess_game.board.move_stack[0]
 			node = game.add_variation(chess.Move.from_uci(str(cmove)))
 			while i < b:
@@ -78,7 +79,7 @@ if cgame.exists() :
 				node = node.add_variation(chess.Move.from_uci(str(cmove)))
 				i += 1
 			#write pgn to disk 
-			filename = "/home/pi/centaur/settings/" + filecount + "_mygame.pgn"
+			filename = "/home/pi/www/pgn/" + filecount + "_mygame.pgn"
 			print(game, file=open(filename, "w"), end="\n\n")
 			
 

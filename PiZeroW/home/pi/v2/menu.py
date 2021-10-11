@@ -23,13 +23,15 @@ while True:
 	menu = {
 		'Centaur': 'DGT Centaur',
 		'Lichess': 'Lichess',
-		#'DGT': 'DGT Board',
+		'DGT': 'DGT Board',
+		'BT': 'BT paring',
+		'wifi': 'Wifi Setup',
 		'Connection': 'WiFi check',
 		#'Configuration': 'Import conf',
 		#'Update': 'Systemupdate',
 		'Reboot': 'Reboot',
 		'Shutdown': 'Shutdown'}
-		
+#	boardfunctions.ledsOff()	
 	boardfunctions.initialised = 0
 	result = boardfunctions.doMenu(menu)
 	
@@ -40,11 +42,16 @@ while True:
 		os.system("/home/pi/centaur/centaur")
 		#sys.exit()
 
-	#if result == "DGT":
-		#os.chdir("/home/pi/v2/")
-		#os.system("./dgtbord.py")
-		#sys.exit()
-		#sys.exit()
+	if result == "DGT":
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 dgte.py")
+	
+	if result == "BT":
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 bt.py &")
+	if result == "wifi":
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 wifi.py")	
 
 	if result == "Connection":
 		centaurv2.connectiontest()
@@ -72,7 +79,7 @@ while True:
 		#sys.exit()
 	if result == "Reboot":
 		boardfunctions.clearScreen()
-		boardfunctions.writeText('reboot now')
+		boardfunctions.writeText(1, 'reboot now')
 		time.sleep(2)
 		boardfunctions.sleepScreen()
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)

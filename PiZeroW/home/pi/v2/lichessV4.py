@@ -215,6 +215,20 @@ def stateThread():
 			remotemoves = str(remotemoves)
 			status = str(status)
 # dso add event resign and stop the game
+			if ('text' in state.keys()):
+				message = state.get('text')
+				if message == "Takeback sent":
+					client.board.post_message(gameid, 'Sorry , external boards can\'t handle takeback', spectator=False)
+					
+				if message == "Black offers draw":
+					client.board.decline_draw(gameid)
+				
+				if message == "White offers draw":
+					client.board.decline_draw(gameid)
+					
+				
+				
+			
 			if status == 'resign':
 				boardfunctions.writeText(11, 'Resign')
 				winner = str(state.get('winner'))
@@ -239,6 +253,12 @@ def stateThread():
 				boardfunctions.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
 				boardfunctions.writeText(12, winner +' wins')
+				time.sleep(3)
+				os.exit_(0)
+			if status == 'draw':
+				boardfunctions.writeText(11, 'Draw')
+				winner = str(state.get('winner'))
+				boardfunctions.writeText(12, winner +' No Winner')
 				time.sleep(3)
 				os.exit_(0)
 				
@@ -280,7 +300,7 @@ boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 boardmoves = ""
 lastboardmove = ""
 beeped = 0
-
+newgame=1
 while playeriswhite == -1:
 	time.sleep(0.1)
 #boardfunctions.writeText(7, "Playing as")
@@ -291,8 +311,8 @@ while playeriswhite == -1:
 
 # ready for white
 ourturn = 1
-if playeriswhite == 0:
-	ourturn = 0
+#if playeriswhite == 0 or playeriswhite == 1:
+#	ourturn = 0
 
 boardfunctions.clearBoardData()
 
@@ -371,14 +391,13 @@ while status == "started" and ourturn != 0 and resign != 99:
 				fromsq = move[0] * -1
 			if move[1] != (tosq * -1):
 				fromsq = move[1] * -1
-		print('zugverstehen= ' + str(time.time()-startzeit))
 		mylastfrom = fromsq
 		# Convert to letter number square format
 		fromln = boardfunctions.convertField(fromsq)
 		#print(fromln)
-		print('fromfiledtime= ' + str(time.time()-startzeit))
+		
 		toln = boardfunctions.convertField(tosq)
-		print('tofieldtime= ' + str(time.time()-startzeit))
+		
 		#print(toln)
 		#print("Felder OK?")
 		# If the piece is a pawn we should take care of promotion here. You could choose it from
@@ -513,6 +532,7 @@ while status == "started" and ourturn != 0 and resign != 99:
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			board.push(mv)
 			boardfunctions.ledsOff()
+			newgame = 0
 			ourturn = 1
 			#print('lichess move abgeschlossen')
 
@@ -557,4 +577,4 @@ boardfunctions.writeText(12, f'Winner: {winner}')
 boardfunctions.writeText(13, 'reason =' + status)
 time.sleep(5)
 boardfunctions.sleepScreen()
-sys.exit()
+os.exit(0)

@@ -446,9 +446,10 @@ while status == "started" and ourturn != 0 :
 			whiteclock = whiteclock - ((time.time() - movestart) * 1000)
 			whiteclock = whiteclock + whiteincrement
 			
+			
 		else:
-			blackclock = blackclock + blackincrement
 			blackclock = blackclock - ((time.time() - movestart) * 1000)
+			blackclock = blackclock + blackincrement
 			
 
 		wtext = ""

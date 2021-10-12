@@ -3,9 +3,9 @@ import berserk
 import ssl
 import time
 import threading
-import boardfunctions
+from DGTCentaurMods.board import boardfunctions
 import chess
-import v2conf
+from DGTCentaurMods.config import config
 import os
 
 # Run a game on lichess
@@ -21,7 +21,7 @@ import os
 #
 # Note the API requires that the raspberry pi clock has a reasonably
 # accurate time for the SSL
-token = v2conf.lichesstoken
+token = config.lichesstoken
 pid = -1
 boardfunctions.clearSerial()
 

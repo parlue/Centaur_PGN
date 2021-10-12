@@ -228,7 +228,7 @@ def waitMove():
 						fieldHex = resp[x + 1]
 						newsquare = rotateFieldHex(fieldHex)
 						lifted = newsquare
-						print(lifted)
+						#print(lifted)
 						moves.append(newsquare * -1)
 					if (resp[x] == 65):
 						# Calculate the square to 0(a1)-63(h8) so that

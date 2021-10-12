@@ -24,7 +24,7 @@ while True:
 		'Centaur': 'DGT Centaur',
 		'Lichess': 'Lichess',
 		'DGT': 'DGT Board',
-		'BT': 'BT paring',
+		#'BT': 'BT paring',
 		'wifi': 'Wifi Setup',
 		'Connection': 'WiFi check',
 		#'Configuration': 'Import conf',

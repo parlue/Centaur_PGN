@@ -457,13 +457,13 @@ while status == "started" and ourturn != 0 :
 			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
 		else:
 			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
-		boardfunctions.writeText(10,wtext)
+		boardfunctions.writeTextToBuffer(10,wtext)
 		btext = ""
 		if blackclock // 60000 == 0:
 			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
 		else:
 			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
-		boardfunctions.writeText(1, btext)
+		boardfunctions.writeTextToBuffer(1, btext)
 	
 		fen = board.fen()
 		sfen = fen[0 : fen.index(" ")]
@@ -471,8 +471,9 @@ while status == "started" and ourturn != 0 :
 		pieces = []
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
+		boardfunctions.displayScreenBufferPartial()
 		boardfunctions.drawBoard(pieces)
-		boardfunctions.writeText(12,str(mv))
+		boardfunctions.writeTextToBuffer(12,str(mv))
 	if playeriswhite == 0 and newgame == 1 : 
 		ourturn = 0
 		if str(remotemoves)!= '1234':
@@ -540,13 +541,13 @@ while status == "started" and ourturn != 0 :
 			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
 		else:
 			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
-		boardfunctions.writeText(10,wtext)
+		boardfunctions.writeTextToBuffer(10,wtext)
 		btext = ""
 		if blackclock // 60000 == 0:
 			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
 		else:
 			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
-		boardfunctions.writeText(1, btext)
+		boardfunctions.writeTextToBuffer(1, btext)
 
 		if starttime < 0:
 			starttime = time.time()
@@ -557,8 +558,9 @@ while status == "started" and ourturn != 0 :
 		pieces = []
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
+		boardfunctions.displayScreenBufferPartial()
 		boardfunctions.drawBoard(pieces)
-		boardfunctions.writeText(12,str(mv))
+		boardfunctions.writeTextToBuffer(12,str(mv))
 
 running = False
 boardfunctions.writeText(11, 'Game over')

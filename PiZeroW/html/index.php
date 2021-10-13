@@ -1,5 +1,18 @@
 <html>
 	
+<form action="check4update.php" method="post">
+	<table>
+		<tr><td>Check for Software-Update:</td><td><input type="submit" name="create_pgn" value="Update" /></td></tr>
+  </table>
+</form>	
+	
+<form action="create_pgn.php" method="post">
+	<table>
+		<tr><td>Create PGN:</td><td><input type="submit" name="create_pgn" value="new" /></td></tr>
+  </table>
+</form>
+
+
 <form action="create_pgn.php" method="post">
 	<table>
 		<tr><td>PGN-Datei erstellen:</td><td><input type="submit" name="create_pgn" value="new" /></td></tr>

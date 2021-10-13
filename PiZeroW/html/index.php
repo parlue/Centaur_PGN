@@ -2,7 +2,7 @@
 	
 <form action="check4update.php" method="post">
 	<table>
-		<tr><td>Check for Software-Update:</td><td><input type="submit" name="create_pgn" value="Update" /></td></tr>
+		<tr><td>Check for Software-Update:</td><td><input type="submit" name="update_check" value="Update" /></td></tr>
   </table>
 </form>	
 	

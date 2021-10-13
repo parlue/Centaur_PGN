@@ -54,7 +54,7 @@ echo "</ol>";
 	
 	<table>
    <tr><td>Lichess Tokken:</td><td><input type="text" name="lichess_tokken" /></td></tr>
-   <tr><td>Email:</td><td><input type="text" name="email" /></td></tr>
+   <tr><td>Email:</td><td><input type="text" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="email" /></td></tr>
    <tr><td>SMTP Server:</td><td><input type="text" name="smtp_server" /></td></tr>
    <tr><td>SMTP Username:</td><td><input type="text" name="smtp_username" /></td></tr>
    <tr><td>SMTP encrypted?</td><td><input type="radio" name="smtp_encrypted" value="yes" />Yes <input type="radio" name="smtp_encrypted" value="no" />No<br /></td></tr>

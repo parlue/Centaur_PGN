@@ -10,7 +10,7 @@ import pathlib
 import threading
 import hashlib
 
-font18 = ImageFont.truetype(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/Font.ttc", 18)
+font14 = ImageFont.truetype(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/Font.ttc", 18)
 # Screenbuffer is what we want to display on the screen
 epaperbuffer = Image.new('1', (128, 296), 255) # You can also use pillow to directly change this image
 lastepaperhash = 0

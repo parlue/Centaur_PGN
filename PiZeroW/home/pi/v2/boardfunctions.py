@@ -247,7 +247,26 @@ def waitMove():
 		resp = bytearray(resp)
 	#print('return moves: ' + str(moves))
 	return moves
-
+def promotionOptionsToBuffer(row):
+	# Draws the promotion options to the screen buffer
+	global screenbuffer
+	nimage = screenbuffer.copy()
+	image = Image.new('1', (128, 20), 255)
+	draw = ImageDraw.Draw(image)
+	draw.text((0, 0), "    Q    R    N    B", font=font14, fill=0)
+	draw.polygon([(2, 18), (18, 18), (10, 3)], fill=0)
+	draw.polygon([(35, 3), (51, 3), (43, 18)], fill=0)
+	o = 66
+	draw.line((0+o,16,16+o,16), fill=0, width=5)
+	draw.line((14+o,16,14+o,5), fill=0, width=5)
+	draw.line((16+o,6,4+o,6), fill=0, width=5)
+	draw.polygon([(8+o, 2), (8+o, 10), (0+o, 6)], fill=0)
+	o = 97
+	draw.line((6+o,16,16+o,4), fill=0, width=5)
+	draw.line((2+o,10, 8+o,16), fill=0, width=5)
+	nimage.paste(image, (0, (row * 20)))
+	screenbuffer = nimage.copy()
+	
 def getText(title):
 	# Allows text to be entered using a virtual keyboard where a chess piece
 	# is placed on the board in the correct position

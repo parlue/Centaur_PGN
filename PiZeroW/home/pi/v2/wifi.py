@@ -62,3 +62,4 @@ if section.find("ssid") != -1:
 	wpas.write(section)
 	wpas.close()
 	os.system("sudo wpa_cli -i wlan0 reconfigure")
+

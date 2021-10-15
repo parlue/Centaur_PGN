@@ -12,6 +12,7 @@ import epd2in9d
 import time
 from PIL import Image, ImageDraw, ImageFont
 import pathlib
+import socket
 
 # Open the serial port, baudrate is 1000000
 ser = serial.Serial("/dev/ttyS0", baudrate=1000000, timeout=0.2)
@@ -130,6 +131,8 @@ def checkInternetSocket(host="8.8.8.8", port=53, timeout=1):
 	except socket.error as ex:
 		print(ex)
 		return False
+		
+
 
 def writeText(row, txt):
 	# Writes some text on the screen at the given row
@@ -145,7 +148,7 @@ def writeText(row, txt):
 	epd.DisplayPartial(epd.getbuffer(image))
 	time.sleep(0.1)
 
-def doMenu2(items, fast = 0):
+def doMenu(items, fast = 0):
     # Draw a menu, let the user navigate and return the value
     # or "BACK" if the user backed out
     # pass a menu like: menu = {'Lichess': 'Lichess', 'Centaur': 'DGT
@@ -295,37 +298,72 @@ def doMenu2(items, fast = 0):
         buttonPress = 0
 
 
-def doMenu(items):
-	# Draw a menu, let the user navigate and return the value
-	# or "BACK" if the user backed out
-	# pass a menu like: menu = {'Lichess': 'Lichess', 'Centaur': 'DGT
-	# Centaur', 'Shutdown': 'Shutdown', 'Reboot': 'Reboot'}
+def doMenu2(items):
+# Draw a menu, let the user navigate and return the value
+    # or "BACK" if the user backed out
+    # pass a menu like: menu = {'Lichess': 'Lichess', 'Centaur': 'DGT
+    # Centaur', 'Shutdown': 'Shutdown', 'Reboot': 'Reboot'}
 	selected = 1
 	buttonPress = 0
 	first = 1
 	global initialised
-	if initialised == 0:
-		epd.Clear(0xff)
+	#if initialised == 0 and fast == 0:
+	#    epd.Clear(0xff)
+	connected = 0
+	if fast == 0:
+		connected = checkInternetSocket()
+	quickselect = 0
+	quickselectpossible = -1
+	res = getBoardState()
+	if res[32] == 0 and res[33] == 0 and res[34] == 0 and res[35] == 0 and res[36]==0 and res[37] == 0 and res[38] == 0 and res[39] == 0:
+		# If the 4th rank is empty then enable quick select mode. Then we can choose a menu option by placing and releasing a piece
+		quickselect = 1
+	image = Image.new('1', (epd.width, epd.height), 255)
 	while (buttonPress != 2):
-		image = Image.new('1', (epd.width, epd.height), 255)
+		time.sleep(0.05)
 		draw = ImageDraw.Draw(image)
-		rpos = 20
-		for k, v in items.items():
-			draw.text((20, rpos), str(v), font=font14, fill=0)
-			rpos = rpos + 20
-		draw.polygon([(2, (selected * 20)), (2, (selected * 20) + 20),
-					 (18, (selected * 20) + 10)], fill=0)
-		image = image.transpose(Image.FLIP_TOP_BOTTOM)
-		image = image.transpose(Image.FLIP_LEFT_RIGHT)
+		if first == 1:
+			rpos = 20
+			draw.rectangle([(0,0),(127,295)], fill=255, outline=255)
+			for k, v in items.items():
+				draw.text((20, rpos), str(v), font=font18, fill=0)
+				rpos = rpos + 20
+			draw.rectangle([(-1, 0), (17, 294)], fill=255, outline=0)
+			draw.polygon([(2, (selected * 20) + 2), (2, (selected * 20) + 18),
+						  (18, (selected * 20) + 10)], fill=0)
+			# Draw an image representing internet connectivity
+			wifion = Image.open("resources/wifiontiny.bmp")
+			wifioff = Image.open("resources/wifiofftiny.bmp")
+			if connected == True:
+				wifidispicon = wifion.resize((20,16))
+				image.paste(wifidispicon, (105, 5))
+			else:
+				wifidispicon = wifioff.resize((20, 16))
+				image.paste(wifidispicon, (105, 5))
+			image = image.transpose(Image.FLIP_TOP_BOTTOM)
+			image = image.transpose(Image.FLIP_LEFT_RIGHT)
+
+		draw.rectangle([(110,0),(128,294)],fill=255,outline=0)
+		draw.polygon([(128 - 2, 276 - (selected * 20) + 2), (128 - 2, 276 - (selected * 20) + 18),
+					  (128 - 18, 276 - (selected * 20) + 10)], fill=0)
+
 		if first == 1 and initialised == 0:
-			epd.display(epd.getbuffer(image))
-			time.sleep(3)
+			if fast == 0:
+				epd.init()
+				epd.display(epd.getbuffer(image))
 			first = 0
-			epd.DisplayPartial(epd.getbuffer(image))
+			epd.DisplayRegion(0,295,epd.getbuffer(image))
+			time.sleep(2)
 			initialised = 1
 		else:
-			epd.DisplayPartial(epd.getbuffer(image))
-			time.sleep(0.2)
+			if first == 1 and initialised == 1:
+				first = 0
+				epd.DisplayRegion(0, 295, epd.getbuffer(image))
+				time.sleep(2)
+			else:
+				sl = 295 - (selected * 20) - 40
+				epd.DisplayRegion(sl,sl + 60,epd.getbuffer(image.crop((0,sl,127,sl+60))))
+
 		# Next we wait for either the up/down/back or tick buttons to get
 		# pressed
 		timeout = time.time() + 60 * 15
@@ -349,8 +387,42 @@ def doMenu(items):
 				buttonPress = 3
 			if (resp.hex() == "b10010065000140a050200000000611d"):
 				buttonPress = 4
-#dso changed 6.10.21 switch off beeb in menu to get a better performance 
- #ser.write(bytearray(b'\xb1\x00\x08\x06\x50\x4c\x08\x63'))
+			# check for quickselect
+			if quickselect == 1 and quickselectpossible < 1:
+				res = getBoardState()
+				if res[32] > 0:
+					quickselectpossible = 1
+				if res[33] > 0:
+					quickselectpossible = 2
+				if res[34] > 0:
+					quickselectpossible = 3
+				if res[35] > 0:
+					quickselectpossible = 4
+				if res[36] > 0:
+					quickselectpossible = 5
+				if res[37] > 0:
+					quickselectpossible = 6
+				if res[38] > 0:
+					quickselectpossible = 7
+				if res[39] > 0:
+					quickselectpossible = 8
+				if quickselectpossible > 0:
+					beep(SOUND_GENERAL)
+			if quickselect == 1 and quickselectpossible > 0:
+				res = getBoardState()
+				if res[32] == 0 and res[33] == 0 and res[34] == 0 and res[35] == 0 and res[36] == 0 and res[37] == 0 and res[38] == 0 and res[39] == 0:
+					# Quickselect possible has been chosen
+					c = 1
+					r = ""
+					for k, v in items.items():
+						if (c == quickselectpossible):
+							# epd.unsetRegion()
+							# epd.Clear(0xff)
+							selected = 99999
+							return k
+						c = c + 1
+
+		#ser.write(bytearray(b'\xb1\x00\x08\x06\x50\x4c\x08\x63'))
 		if (buttonPress == 2):
 			# Tick, so return the key for this menu item
 			c = 1
@@ -360,6 +432,7 @@ def doMenu(items):
 					#epd.unsetRegion()
 					#epd.Clear(0xff)
 					selected = 99999
+					#epd.display(epd.getbuffer(image))
 					return k
 				c = c + 1
 		if (buttonPress == 4 and selected < len(items)):
@@ -759,3 +832,87 @@ def printBoardState():
 		print("|\r")
 	print("+---+---+---+---+---+---+---+---+")
 
+# This section is the start of a new way of working with the board functions
+import threading
+eventsthreadpointer = ""
+eventsrunning = 1
+
+BTNBACK = 1
+BTNTICK = 2
+BTNUP = 3
+BTNDOWN = 4
+BTNHELP = 5
+BTNPLAY = 6
+	
+def eventsThread(keycallback, fieldcallback):
+	# This monitors the board for events
+	# at the moment it only records keypress
+	global eventsrunning
+	while True:
+		if eventsrunning == 1:
+			buttonPress = 0
+			try:
+				tosend = bytearray(b'\x83\x06\x50\x59')
+				ser.write(tosend)
+				expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
+				resp = ser.read(10000)
+				resp = bytearray(resp)
+				if (bytearray(resp) != expect):
+					if (resp[0] == 133 and resp[1] == 0):
+						for x in range(0, len(resp) - 1):
+							if (resp[x] == 64):
+								#print("PIECE LIFTED")
+								# Calculate the square to 0(a1)-63(h8) so that
+								# all functions match
+								fieldHex = resp[x + 1]
+								newsquare = rotateFieldHex(fieldHex)
+								fieldcallback(newsquare)
+							if (resp[x] == 65):
+								#print("PIECE PLACED")
+								# Calculate the square to 0(a1)-63(h8) so that
+								# all functions match
+								fieldHex = resp[x + 1]
+								newsquare = rotateFieldHex(fieldHex)
+								fieldcallback(newsquare * -1)
+			except:
+				pass
+			try:
+				tosend = bytearray(b'\x94\x06\x50\x6a')
+				ser.write(tosend)
+				expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+				resp = ser.read(10000)
+				resp = bytearray(resp)
+				if (resp.hex() == "b10011065000140a0501000000007d4700"):
+					buttonPress = BTNBACK  # BACK
+				if (resp.hex() == "b10011065000140a0510000000007d175f"):
+					buttonPress = BTNTICK  # TICK
+				if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
+					buttonPress = BTNUP  # UP
+				if (resp.hex() == "b10010065000140a050200000000611d"):
+					buttonPress = BTNDOWN  # DOWN
+				if (resp.hex() == "b10010065000140a0540000000006d67"):
+					buttonPress = BTNHELP   # HELP
+				if (resp.hex() == "b10010065000140a0504000000002a68"):
+					buttonPress = BTNPLAY   # PLAY
+			except:
+				pass
+			time.sleep(0.2)
+			if buttonPress != 0:
+				keycallback(buttonPress)
+		time.sleep(0.05)
+
+def subscribeEvents(keycallback, fieldcallback):
+	# Called by any program wanting to subscribe to events
+	# Arguments are firstly the callback function for key presses, secondly for piece lifts and places
+	eventsthreadpointer = threading.Thread(target=eventsThread, args=([keycallback, fieldcallback]))
+	eventsthreadpointer.daemon = True
+	eventsthreadpointer.start()
+
+def pauseEvents():
+	global eventsrunning
+	eventsrunning = 0
+	time.sleep(0.5)
+
+def unPauseEvents():
+	global eventsrunning
+	eventsrunning = 1

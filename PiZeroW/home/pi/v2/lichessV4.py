@@ -7,6 +7,9 @@ import boardfunctions
 import chess
 import v2conf
 import os
+sys.path.append('/home/pi/v2/board')
+import epaper
+
 
 # Run a game on lichess
 # This is version two so we do it directly and with screen control!
@@ -24,6 +27,7 @@ import os
 token = v2conf.lichesstoken
 pid = -1
 boardfunctions.clearSerial()
+epaper.initEpaper()
 
 if (len(sys.argv) == 1):
 #	print("python3 lichess.py [current|New1]")
@@ -43,20 +47,20 @@ status = ""
 board = chess.Board()
 
 # First start up the screen
-boardfunctions.initScreen()
+# boardfunctions.initScreen()
 if (sys.argv[1] == "current"):
-	boardfunctions.writeText(0, 'Joining Game')
+	epaper.writeText(0, 'Joining Game')
 else:
-	boardfunctions.writeText(0, 'New Game')
-boardfunctions.writeText(1, 'on Lichess')
+	epaper.writeText(0, 'New Game')
+epaper.writeText(1, 'on Lichess')
 #boardfunctions.writeText(2, 'LEDs Off')
 boardfunctions.ledsOff()
 
 # Get the current player's username
 who = client.account.get()
 player = str(who.get('username'))
-boardfunctions.writeText(2, 'Player:')
-boardfunctions.writeText(3, player)
+epaper.writeText(2, 'Player:')
+epaper.writeText(3, player)
 
 # We'll use this thread to start a game. Probably not the best way to do it but
 # let's make the thread pause 5 seconds when it starts up so that we can be
@@ -77,9 +81,9 @@ def newGameThread():
 #	print(grated)
 	gcolor = str(sys.argv[5])
 #	print(gcolor)
-	boardfunctions.writeText(5, f'time {gtime} , {ginc}')
-	boardfunctions.writeText(6, f'ratedt={grated}')
-	boardfunctions.writeText(7, f'color={gcolor}')
+	epaper.writeText(5, f'time {gtime} , {ginc}')
+	epaper.writeText(6, f'ratedt={grated}')
+	epaper.writeText(7, f'color={gcolor}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="white"):
 		client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=None)
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="black"):
@@ -151,7 +155,7 @@ def newGameThread():
 # Wait for a game to start and get the game id!
 gameid = ""
 if (str(sys.argv[1]) == "New"):
-	boardfunctions.writeText(4, 'gamesearch')
+	epaper.writeText(4, 'gamesearch')
 	#print("Looking for a game")
 	gt = threading.Thread(target=newGameThread, args=())
 	gt.daemon = True
@@ -167,7 +171,7 @@ while gameid == "":
 					gameid = event.get('game').get('id')
 					break
 
-boardfunctions.writeText(9, gameid)
+epaper.writeText(9, gameid)
 
 playeriswhite = -1
 whiteplayer = ""
@@ -227,35 +231,35 @@ def stateThread():
 			
 			
 			if status == 'resign':
-				boardfunctions.writeText(11, 'Resign')
+				epaper.writeText(11, 'Resign')
 				winner = str(state.get('winner'))
-				boardfunctions.writeText(12, winner +' wins')
+				epaper.writeText(12, winner +' wins')
 				time.sleep(3)
 				os._exit(0)
 				#running = False
 			if status == 'aborted':
-				boardfunctions.writeText(11, 'Game aborted')
+				epaper.writeText(11, 'Game aborted')
 				winner = 'No Winner'
-				boardfunctions.writeText(12, 'No winner')
+				epaper.writeText(12, 'No winner')
 				time.sleep(3)
 				os._exit(0)
 				
 			if status == 'outoftime':
-				boardfunctions.writeText(11, 'Out of time')
+				epaper.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
-				boardfunctions.writeText(12, winner +' wins')
+				epaper.writeText(12, winner +' wins')
 				time.sleep(3)
 				os._exit(0)
 			if status == 'timeout':
-				boardfunctions.writeText(11, 'Out of time')
+				epaper.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
-				boardfunctions.writeText(12, winner +' wins')
+				epaper.writeText(12, winner +' wins')
 				time.sleep(3)
 				os._exit(0)
 			if status == 'draw':
-				boardfunctions.writeText(11, 'Draw')
+				epaper.writeText(11, 'Draw')
 				winner = str(state.get('winner'))
-				boardfunctions.writeText(12, winner +' No Winner')
+				epaper.writeText(12, winner +' No Winner')
 				time.sleep(3)
 				os._exit(0)
 				
@@ -319,16 +323,16 @@ correcterror = -1
 halfturn = 0
 castled = ""
 
-boardfunctions.clearScreenBuffer()
-boardfunctions.writeText(0,blackplayer)
-boardfunctions.writeText(9,whiteplayer)
+epaper.clearScreen()
+epaper.writeText(0,blackplayer)
+epaper.writeText(9,whiteplayer)
 fen = board.fen()
 sfen = fen[0 : fen.index(" ")]
 baseboard = chess.BaseBoard(sfen)
 pieces = []
 for x in range(0,64):
 	pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
-boardfunctions.drawBoard(pieces)
+epaper.drawBoard(pieces)
 
 client.board.post_message(gameid, 'I\'m playing with DGT-Centaur V2 by dso, can\'t chat - I\'m not a bot, sry if it struggle, this Version is in a beta status - have fun' , spectator=False)
 resign = 1
@@ -457,13 +461,13 @@ while status == "started" and ourturn != 0 :
 			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
 		else:
 			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
-		boardfunctions.writeTextToBuffer(10,wtext)
+		epaper.writeText(10,wtext)
 		btext = ""
 		if blackclock // 60000 == 0:
 			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
 		else:
 			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
-		boardfunctions.writeTextToBuffer(1, btext)
+		epaper.writeText(1, btext)
 	
 		fen = board.fen()
 		sfen = fen[0 : fen.index(" ")]
@@ -472,8 +476,8 @@ while status == "started" and ourturn != 0 :
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
 		boardfunctions.displayScreenBufferPartial()
-		boardfunctions.drawBoard(pieces)
-		boardfunctions.writeTextToBuffer(12,str(mv))
+		epaper.drawBoard(pieces)
+		epaper.writeTextToBuffer(12,str(mv))
 	if playeriswhite == 0 and newgame == 1 : 
 		ourturn = 0
 		if str(remotemoves)!= '1234':
@@ -541,13 +545,13 @@ while status == "started" and ourturn != 0 :
 			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
 		else:
 			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
-		boardfunctions.writeTextToBuffer(10,wtext)
+		epaper.writeText(10,wtext)
 		btext = ""
 		if blackclock // 60000 == 0:
 			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
 		else:
 			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
-		boardfunctions.writeTextToBuffer(1, btext)
+		epaper.writeText(1, btext)
 
 		if starttime < 0:
 			starttime = time.time()
@@ -559,14 +563,14 @@ while status == "started" and ourturn != 0 :
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
 		boardfunctions.displayScreenBufferPartial()
-		boardfunctions.drawBoard(pieces)
-		boardfunctions.writeTextToBuffer(12,str(mv))
+		epaper.drawBoard(pieces)
+		epaper.writeText(12,str(mv))
 
 running = False
-boardfunctions.writeText(11, 'Game over')
-boardfunctions.writeText(12, f'Winner: {winner}')
-boardfunctions.writeText(13, 'reason =' + status)
+epaper.writeText(11, 'Game over')
+epaper.writeText(12, f'Winner: {winner}')
+epaper.writeText(13, 'reason =' + status)
 time.sleep(5)
-boardfunctions.clearScreen()
+epaper.clearScreen()
 time.sleep(2)
 #os._exit(0)

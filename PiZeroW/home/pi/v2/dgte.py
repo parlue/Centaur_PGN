@@ -69,6 +69,8 @@ import time
 import sys
 from os.path import exists
 import boardfunctions
+sys.path.append('/home/pi/v2/board')
+import epaper
 import threading
 import chess
 import os
@@ -170,11 +172,12 @@ turnhistory = []
 litsquares = []
 startstate = bytearray(b'\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01')
 
-boardfunctions.initScreen()
+# Initialise epaper display
+epaper.initEpaper()
 
 if bytearray(boardfunctions.getBoardState()) != startstate:
-	boardfunctions.writeTextToBuffer(0,'Place pieces')
-	boardfunctions.writeText(1,'in startpos')
+	epaper.writeText(0,'Place pieces')
+	epaper.writeText(1,'in startpos')
 	# As the centaur can light up squares - let's use the
 	# squares to help people out
 	while bytearray(boardfunctions.getBoardState()) != startstate:
@@ -349,9 +352,14 @@ def drawCurrentBoard():
 			pieces[x]='k'
 		if pieces[x] == EMPTY:
 			pieces[x]=' '
-	boardfunctions.drawBoard(pieces)
+	epaper.drawBoard(pieces)
 
 boardtoscreen = 0
+
+fenlog = "/home/pi/centaur/fen.log"
+f = open(fenlog, "w")
+f.write("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+f.close()
 
 def screenUpdate():
 	# Separate thread to display the screen/pieces should improve
@@ -512,7 +520,7 @@ def pieceMoveDetectionThread():
 										boardfunctions.ser.write(tosend)
 										boardtoscreen = 0
 										time.sleep(1)
-										boardfunctions.promotionOptionsToBuffer(9)
+										epaper.promotionOptions(9)
 										boardtoscreen = 2
 										# Wait for a button press and set last lift according to the choice
 										buttonPress = 0
@@ -540,7 +548,7 @@ def pieceMoveDetectionThread():
 												buttonPress = 4  # DOWN
 												lastlift = WROOK
 											time.sleep(0.2)
-										boardfunctions.writeTextToBuffer(9,"              ")
+										epaper.writeText(9,"              ")
 										promoted = 1
 									if lastlift == BPAWN and field < 8:
 										tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
@@ -549,7 +557,7 @@ def pieceMoveDetectionThread():
 										boardfunctions.ser.write(tosend)
 										boardtoscreen = 0
 										time.sleep(1)
-										boardfunctions.promotionOptionsToBuffer(9)
+										epaper.promotionOptions(9)
 										boardtoscreen = 2
 										# Wait for a button press and set last lift according to the choice
 										buttonPress = 0
@@ -577,7 +585,7 @@ def pieceMoveDetectionThread():
 												buttonPress = 4  # DOWN
 												lastlift = BROOK
 											time.sleep(0.2)
-										boardfunctions.writeTextToBuffer(9,"              ")
+										epaper.writeText(9,"              ")
 										promoted = 1
 									board[field] = lastlift
 									tosend = bytearray(b'')
@@ -734,6 +742,10 @@ def pieceMoveDetectionThread():
 			if lastcurturn != curturn:
 				lastcurturn = curturn
 				print("--------------")
+				fenlog = "/home/pi/centaur/fen.log"
+				f = open(fenlog,"w")
+				f.write(cb.fen())
+				f.close()
 				if curturn == 1:
 					print("White turn")
 				else:
@@ -744,6 +756,10 @@ def pieceMoveDetectionThread():
 				r = boardfunctions.getBoardState()
 				if bytearray(r) == startstate and startstateflag == 0:
 					print("start state detected")
+					fenlog = "/home/pi/centaur/fen.log"
+					f = open(fenlog, "w")
+					f.write("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+					f.close()
 					tosend = bytearray(
 						b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x50\x08\x00\x08\x59\x08\x00\x08\x50\x08\x00\x08\x00');
 					tosend[2] = len(tosend)
@@ -878,36 +894,39 @@ def pieceMoveDetectionThread():
 					if bytearray(r) != startstate:
 						startstateflag = 0
 				timer = 0
-		tosend = bytearray(b'\x94\x06\x50\x6a')
-		boardfunctions.ser.write(tosend)
-		resp = boardfunctions.ser.read(1000)
-		resp = bytearray(resp)
-		if (resp.hex() == "b10011065000140a0501000000007d4700"):
-			# The back button has been pressed. Use this to exit eboard mode by setting a flag
-			# for the main thread
-			print("exit")
-			dodie = 1
-			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-		if (resp.hex() == "b10010065000140a0504000000002a68"):
-			# The play button has been pressed. This button resends the last update move as
-			# the WP app occassionally misses it
-			print("Resending last packet")
-			dump = bt.read(3)
-			tosend = lastchangepacket
-			bt.write(tosend)
-			bt.flushOutput()
-			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-		if (resp.hex() == "b10010065000140a050200000000611d"):
-			# The down button will scroll back one in the history to allow aligning the start described
-			# in epaper with the actual board in case of takeback errors
-			oldboard = boardhistory.pop()
-			curturn = turnhistory.pop()
-			board[:] = oldboard
-			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+		try:
+			tosend = bytearray(b'\x94\x06\x50\x6a')
+			boardfunctions.ser.write(tosend)
+			resp = boardfunctions.ser.read(1000)
+			resp = bytearray(resp)
+			if (resp.hex() == "b10011065000140a0501000000007d4700"):
+				# The back button has been pressed. Use this to exit eboard mode by setting a flag
+				# for the main thread
+				print("exit")
+				dodie = 1
+				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+			if (resp.hex() == "b10010065000140a0504000000002a68"):
+				# The play button has been pressed. This button resends the last update move as
+				# the WP app occassionally misses it
+				print("Resending last packet")
+				dump = bt.read(3)
+				tosend = lastchangepacket
+				bt.write(tosend)
+				bt.flushOutput()
+				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+			if (resp.hex() == "b10010065000140a050200000000611d"):
+				# The down button will scroll back one in the history to allow aligning the start described
+				# in epaper with the actual board in case of takeback errors
+				oldboard = boardhistory.pop()
+				curturn = turnhistory.pop()
+				board[:] = oldboard
+				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+		except:
+			pass
 
 drawCurrentBoard()
-boardfunctions.writeTextToBuffer(0,'Connect remote')
-boardfunctions.writeText(1,'Device Now')
+epaper.writeText(0,'Connect remote')
+epaper.writeText(1,'Device Now')
 
 start = time.time()
 
@@ -915,16 +934,17 @@ while exists("/dev/rfcomm0") == False and (time.time() - start < 30):
 	time.sleep(.01)
 
 if (time.time() - start >= 30):
-	boardfunctions.writeText(0,"TIMEOUT")
-	boardfunctions.writeText(1,"             ")
+	epaper.writeText(0,"TIMEOUT")
+	epaper.writeText(1,"             ")
+	time.sleep(2)
 	sys.exit()
 
 print("Connected")
 
 bt = serial.Serial("/dev/rfcomm0",baudrate=9600, timeout=10)
-boardfunctions.clearScreen()
-boardfunctions.writeTextToBuffer(0,'Connected')
-boardfunctions.writeText(1,'         ')
+epaper.clearScreen()
+epaper.writeText(0,'Connected')
+epaper.writeText(1,'         ')
 print("start")
 
 cb = chess.Board()
@@ -1193,6 +1213,10 @@ while True and dodie == 0:
 				if debugcmds == 1:
 					print("DGT_BUS_SET_START_GAME " + dump.hex())
 				print("Bus set start game")
+				fenlog = "/home/pi/centaur/fen.log"
+				f = open(fenlog, "w")
+				f.write("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+				f.close()
 				# Write EE_START_TAG to EEPROM
 				# Followed by piece positions
 				# Return DGT_MSG_BUS_START_GAME_WRITTEN message
@@ -1488,4 +1512,4 @@ while True and dodie == 0:
 bt.close()
 # Annoyingly this is needed to force a drop of the connection
 os.system('sudo systemctl restart rfcomm')
-boardfunctions.writeText(0,'Disconnected')
+epaper.writeText(0,'Disconnected')

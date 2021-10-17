@@ -21,7 +21,7 @@ def keyPressed(id):
 	global menuitem
 	global curmenu
 	global selection
-	boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+#	boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 	if id == boardfunctions.BTNDOWN:
 		menuitem = menuitem + 1
 	if id == boardfunctions.BTNUP:
@@ -116,15 +116,12 @@ while True:
 		'Centaur': ' DGT Centaur',
 		'Lichess': ' Lichess',
 		'DGT': ' DGT Board',
-#		#'BT': 'BT paring',
+		#'BT': 'BT paring',
 		'wifi': ' Wifi Setup',
 		'Connection': ' WiFi check',
-		#'Configuration': 'Import conf',
 		#'Update': 'Systemupdate',
 		'Reboot': ' Reboot',
 		'Shutdown': ' Shutdown'}
-#	boardfunctions.ledsOff()	
-#	boardfunctions.initialised = 0
 	result = doMenu(menu)
 	
 	if result == "Centaur":
@@ -185,21 +182,24 @@ while True:
 
 	if result == "Connection":
 		centaurv2.connectiontest()
-		#os.chdir("/home/pi/v2")
-		#os.system("/usr/bin/python3.6 ./connectiontest.py")
+		
 	if result == "Shutdown":
 		#boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
 		#boardfunctions.shutdown()
+		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+        boardfunctions.pauseEvents()
+        boardfunctions.shutdown()
 		
-		boardfunctions.clearScreen()
-		boardfunctions.writeText(1, "Please shutdown")
-		boardfunctions.writeText(2, 'from the centaur')
-		boardfunctions.writeText(3, 'aplication')
-		boardfunctions.writeText(4, '...')
-		boardfunctions.writeText(5, 'load centaur')
-		time.sleep(2)
-		os.chdir("/home/pi/centaur")
-		os.system("/home/pi/centaur/centaur")
+		#boardfunctions.clearScreen()
+		#boardfunctions.writeText(1, "Please shutdown")
+		#boardfunctions.writeText(2, 'from the centaur')
+		#boardfunctions.writeText(3, 'aplication')
+		#boardfunctions.writeText(4, '...')
+		#boardfunctions.writeText(5, 'load centaur')
+		#time.sleep(2)
+		#os.chdir("/home/pi/centaur")
+		#os.system("/home/pi/centaur/centaur")
+		
 		#image = Image.open('/home/pi/centaur/fonts/logo.bmp')
 		#epd.DisplayPartial(epd.getbuffer(image))
 		#time.sleep(3)

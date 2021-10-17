@@ -234,6 +234,7 @@ def stateThread():
 				epaper.writeText(11, 'Resign')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' wins')
+				epaper.writeText(13,'pls wait restart..')
 				time.sleep(3)
 				os._exit(0)
 				#running = False
@@ -241,6 +242,7 @@ def stateThread():
 				epaper.writeText(11, 'Game aborted')
 				winner = 'No Winner'
 				epaper.writeText(12, 'No winner')
+				epaper.writeText(13,'pls wait restart..')
 				time.sleep(3)
 				os._exit(0)
 				
@@ -248,18 +250,21 @@ def stateThread():
 				epaper.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' wins')
+				epaper.writeText(13,'pls wait restart..')
 				time.sleep(3)
 				os._exit(0)
 			if status == 'timeout':
 				epaper.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' wins')
+				epaper.writeText(13,'pls wait restart..')
 				time.sleep(3)
 				os._exit(0)
 			if status == 'draw':
 				epaper.writeText(11, 'Draw')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' No Winner')
+				epaper.writeText(13,'pls wait restart..')
 				time.sleep(3)
 				os._exit(0)
 				
@@ -423,6 +428,10 @@ while status == "started" and ourturn != 0 :
 					#check if lichess accept this move
 					ret = client.board.make_move(gameid, fromln + toln)
 					if ret :
+						fenlog = "/home/pi/centaur/fen.log"
+						f = open(fenlog,"w")
+						f.write(chess.board.fen())
+						f.close()
 						ourturn = 0
 						halfturn = halfturn + 1
 										# old place outturn ans halfturn
@@ -477,7 +486,7 @@ while status == "started" and ourturn != 0 :
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
 		boardfunctions.displayScreenBufferPartial()
 		epaper.drawBoard(pieces)
-		epaper.writeTextToBuffer(12,str(mv))
+		epaper.writeText(12,str(mv))
 	if playeriswhite == 0 and newgame == 1 : 
 		ourturn = 0
 		if str(remotemoves)!= '1234':
@@ -526,6 +535,10 @@ while status == "started" and ourturn != 0 :
 			boardfunctions.clearSerial()
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			board.push(mv)
+			fenlog = "/home/pi/centaur/fen.log"
+			f = open(fenlog,"w")
+			f.write(chess.board.fen())
+			f.close()
 			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1

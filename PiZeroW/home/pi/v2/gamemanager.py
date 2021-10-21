@@ -7,8 +7,8 @@
 
 # TODO
 
-from DGTCentaurMods.board import boardfunctions
-from DGTCentaurMods.display import epaper
+boardfunctions
+import epaper
 import threading
 import time
 import chess

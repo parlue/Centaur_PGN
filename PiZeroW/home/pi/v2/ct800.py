@@ -1,7 +1,7 @@
 # Play pure stockfish without DGT Centaur Adaptive Play
 #
-from DGTCentaurMods.game import gamemanager
-from DGTCentaurMods.display import epaper
+import gamemanager
+import epaper
 
 import time
 import chess
@@ -51,7 +51,7 @@ def eventCallback(event):
 		curturn = 1
 		epaper.writeText(0,"White turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci(str(pathlib.Path(__file__).parent.resolve()) + "/../engines/ct800")
+			engine = chess.engine.SimpleEngine.popen_uci("engines/ct800")
 			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
 			engine.configure(options)
 			limit = chess.engine.Limit(time=5)
@@ -64,7 +64,7 @@ def eventCallback(event):
 		curturn = 0
 		epaper.writeText(0,"Black turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci(str(pathlib.Path(__file__).parent.resolve()) + "/../engines/ct800")
+			engine = chess.engine.SimpleEngine.popen_uci("engines/ct800")
 			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
 			engine.configure(options)
 			limit = chess.engine.Limit(time=5)

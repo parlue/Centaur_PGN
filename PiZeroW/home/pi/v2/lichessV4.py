@@ -76,6 +76,7 @@ epaper.writeText(3, player)
 
 running = True
 
+	
 def newGameThread():
 	time.sleep(5)
 
@@ -215,6 +216,7 @@ def stateThread():
 	global wtime
 	global btime
 	while running:
+		
 		gamestate = client.board.stream_game_state(gameid)
 		for state in gamestate:
 			print(state)
@@ -240,8 +242,34 @@ def stateThread():
 				
 				if message == "White offers draw":
 					client.board.decline_draw(gameid)				
-			
-			
+# dso 21.10. activate buttons for remis, resign	and hard abord		
+#			ser.read(1000000)
+#			tosend = bytearray(b'\x83\x06\x50\x59')
+#			ser.write(tosend)
+#			expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
+#			resp = ser.read(10000)
+#			resp = bytearray(resp)
+#			tosend = bytearray(b'\x94\x06\x50\x6a')
+#			ser.write(tosend)
+#			expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+#			resp = ser.read(10000)
+#			resp = bytearray(resp)
+#			if (resp.hex() == "b10011065000140a0501000000007d4700"):
+#			buttonPress = 1 # BACK
+#				if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
+#				buttonPress = 2 # UP
+#			if (resp.hex() == "b10010065000140a050200000000611d"):
+#				buttonPress = 3 # DOWN
+#abord all - please use only if ther is no way out 
+#			if buttonPress == 1 :
+#				os._exit(0)
+#offer remis
+#			if buttonPress = 2:
+#				client.board.offer_draw(gameid)
+# resign my game				
+#			if buttonPress = 3:
+#				client.board.resign_game(gameid)
+					
 			if status == 'resign':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
@@ -441,14 +469,14 @@ dso field corection
 				if (mv in board.legal_moves):
 					
 					print("Castled")
-					if lastmove == "e1g1":
-							castled = "h1f1"
-					if lastmove == "e1c1":
-							castled = "a1d1"
-					if lastmove == "e8g8":
-							castled = "h8f8"
-					if lastmove == "e8c8":
-							castled = "a8d8"
+						if lastmove == "e1g1":
+								castled = "h1f1"
+						if lastmove == "e1c1":
+								castled = "a1d1"
+						if lastmove == "e8g8":
+								castled = "h8f8"
+						if lastmove == "e8c8":
+								castled = "a8d8"
 
 # new dso 21.10.21 fix castled problem
 					if castled =="h1f1" or castled == "a1d1" or castled == h8f8" or castled == "a8d8" :
@@ -470,7 +498,8 @@ dso field corection
 							
 							if valid == 0:
 								boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
-							#else:
+							else:
+								boardfunctions.ledsOff()
 					boardfunctions.clearSerial()
 					playertime=time.time()
 					board.push(mv)
@@ -582,13 +611,51 @@ dso field corection
 						valid = 1
 				if valid == 0:
 					boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				
+				
 				else:
 					movedto = lrtocalc 
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+			boardfunctions.ledsOff()
 			boardfunctions.clearSerial()
+# check for caslte
+			if lrmove == "e1g1":
+				castled = "h1f1"
+			if lrmove == "e1c1":
+				castled = "a1d1"
+			if lrmove == "e8g8":
+				castled = "h8f8"
+			if lrmove == "e8c8":
+				castled = "a8d8"
+			if castled =="h1f1" or castled == "a1d1" or castled == h8f8" or castled == "a8d8" :
+				print("move the rook")
+				lrfromcalc = (ord(castled[:1]) - 97) + ((int(castled[1:2]) - 1) * 8)
+				lrtocalc = (ord(castled[1:3]) - 97) + ((int(castled[1:4]) - 1) * 8)
+				
+				boardfunctions.clearBoardData()
+				boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
+				while movedto != lrtocalc and status == "started":
+					move = boardfunctions.waitMove()
+					valid = 0
+		# dso todo prüfen ob der zug richtig abgesetzt wurde
+					#if move[0] == lrtocalc:
+					#	valid = 1
+					if len(move) > 1:
+						if move[1] == lrtocalc:
+							valid = 1
+					
+					if valid == 0:
+						boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+					else:
+						
+						boardfunctions.ledsOff()
+						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+						boardfunctions.clearSerial()
+			 
+			
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			board.push(mv)
-			boardfunctions.ledsOff()
+#			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1
 	

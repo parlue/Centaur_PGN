@@ -122,6 +122,7 @@ while True:
 		'Centaur': ' DGT Centaur',
 		'Lichess': ' Lichess',
 		'DGT': ' DGT Board',
+		'ENGINE": 'Play Engine',
 		#'BT': 'BT paring',
 		'wifi': ' Wifi Setup',
 		'Connection': ' WiFi check',
@@ -240,6 +241,42 @@ while True:
 		boardfunctions.pauseEvents()
 		os.system("/sbin/shutdown -r now &")
 		sys.exit()
+	if result == "ENGINE":
+		enginemenu = {'CT800': ' CT800', 'stockfish': ' Stockfish'}
+		result = doMenu(enginemenu)
+		print(result)
+		If result == 'CT800':
+			ct800menu = {'white': 'White', 'black': 'Black', 'random': 'Random'}
+			color = doMenu(ct800menu)
+			print(color)
+			# Current game will launch the screen for the current
+			if (color != "BACK"):
+				ratingmenu = {'1000': '1000 ELO', '1100': '1100 ELO', '1200': '1200 ELO', '1400': '1400 ELO', '1500': '1500 ELO', '1600': '1600 ELO', '1800': '1800 ELO', '2000': '2000 ELO', '2200': '2200 ELO', '2400': '2400 ELO'}
+				elo = doMenu(ratingmenu)
+				if elo != "BACK":
+					epaper.clearScreen()
+					epaper.writeText(0, "Loading...")
+					boardfunctions.pauseEvents()
+					os.system("/usr/bin/python3.6 ct800.py " + color + " " + elo)
+					epaper.epd.init()
+					boardfunctions.unPauseEvents()
+			#
+	if result == "stockfish":
+		sfmenu = {'white': 'White', 'black': 'Black', 'random': 'Random'}
+		color = doMenu(sfmenu)
+		print(color)
+		# Current game will launch the screen for the current
+		if (color != "BACK"):
+			ratingmenu = {'2850': 'Pure', '1350': '1350 ELO', '1500': '1500 ELO', '1700': '1700 ELO', '1800': '1800 ELO', '2000': '2000 ELO', '2200': '2200 ELO', '2400': '2400 ELO', '2600': '2600 ELO'}
+			elo = doMenu(ratingmenu)
+			if elo != "BACK":
+				epaper.clearScreen()
+				epaper.writeText(0, "Loading...")
+				boardfunctions.pauseEvents()
+				os.system("/usr/bin/python3.6 stockfish.py " + color + " " + elo)
+				epaper.epd.init()
+				boardfunctions.unPauseEvents()
+			#
 	
 	if result == "Lichess":
 		lichessmenu = {'Current': ' Current', 'New': ' New Game'}

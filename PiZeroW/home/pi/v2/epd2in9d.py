@@ -242,6 +242,16 @@ class EPD:
                     if pixels[x, y] == 0:
                         buf[int((newx + newy * self.width) / 8)
                             ] &= ~(0x80 >> (y % 8))
+        else:
+            # A different sized image
+            logging.debug("Other")
+            for y in range(imheight):
+                for x in range(imwidth):
+                    # Set the bits for the column of pixels at the current
+                    # position.
+                    if pixels[x, y] == 0:
+                        buf[int((x + y * self.width) / 8)
+                        ] &= ~(0x80 >> (x % 8))
         return buf
 
     def display(self, image):
@@ -265,8 +275,8 @@ class EPD:
         self.send_data(128 - 1)
         self.send_data(0)
         self.send_data(0)
-        self.send_data(int(296 / 256))
-        self.send_data(296 % 256 - 1)
+        self.send_data(int(self.height / 256))
+        self.send_data(self.height % 256 - 1)
         self.send_data(0x28)
         epdconfig.delay_ms(20)
         self.TurnOnDisplay()
@@ -283,32 +293,6 @@ class EPD:
         self.send_data(296 % 256 - 1)
         self.send_data(0x28)
         epdconfig.delay_ms(20)
-
-    def DisplayRegion(self, y0, y1, image):
-        self.SetPartReg()
-        self.send_command(0x91)
-        self.send_command(0x90)
-
-        self.send_data(0)
-        self.send_data(self.width - 1)
-        self.send_data(int(y0 / 256))
-        self.send_data(y0 % 256)
-        self.send_data(int(y1 / 256))
-        self.send_data(y1 % 256)
-
-        self.send_data(0x28)
-
-        # self.send_command(0x10)
-        # for i in range(0, int(self.width * self.height / 8)):
-        # self.send_data(image[i])
-        # epdconfig.delay_ms(10)
-
-        self.send_command(0x13)
-        for i in range(0, int(self.width * (y1 - y0) / 8)):
-            self.send_data(image[i])
-        epdconfig.delay_ms(10)
-
-        # self.TurnOnDisplay()
 
     def DisplayPartial(self, image):
         self.SetPartReg()
@@ -335,6 +319,27 @@ class EPD:
 
         self.TurnOnDisplay()
 
+    def DisplayRegion(self, y0, y1, image):
+        self.SetPartReg()
+        self.send_command(0x91)
+        self.send_command(0x90)
+        self.send_data(0)
+        self.send_data(self.width - 1)
+        self.send_data(int(y0 / 256))
+        self.send_data(y0 % 256)
+        #self.send_data(0)
+        #self.send_data(0)
+        self.send_data(int(y1 / 256))
+        self.send_data(y1 % 256 - 1)
+        self.send_data(0x28)
+        epdconfig.delay_ms(20)
+        self.send_command(0x13)
+        for i in range(0, int(self.width * (y1 - y0) / 8)):
+            self.send_data(image[i])
+        #epdconfig.delay_ms(10)
+        self.TurnOnDisplay()
+
+
     def Clear(self, color):
         self.send_command(0x10)
         for i in range(0, int(self.width * self.height / 8)):
@@ -346,6 +351,13 @@ class EPD:
             self.send_data(0xFF)
         epdconfig.delay_ms(10)
 
+        self.TurnOnDisplay()
+
+    def HalfClear(self):
+        self.send_command(0x13)
+        for i in range(0, int(self.width * self.height / 8)):
+            self.send_data(0xFF)
+        epdconfig.delay_ms(10)
         self.TurnOnDisplay()
 
     def sleep(self):

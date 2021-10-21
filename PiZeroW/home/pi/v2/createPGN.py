@@ -28,7 +28,7 @@ if cgame.exists() :
 	
 	counter = pathlib.Path("/home/pi/www/pgn/gamecount.pkl")
 	if counter.exists()  :
-		f = open('/home/pi/www/pgn/settings/gamecount.pkl', 'rb')
+		f = open('/home/pi/www/pgn/gamecount.pkl', 'rb')
 		data = pickle.load(f)
 		f.close()
 		data = data + 1

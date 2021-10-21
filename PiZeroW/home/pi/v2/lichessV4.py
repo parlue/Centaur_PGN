@@ -25,9 +25,17 @@ import epaper
 # Note the API requires that the raspberry pi clock has a reasonably
 # accurate time for the SSL
 token = v2conf.lichesstoken
+
+
 pid = -1
 boardfunctions.clearSerial()
 epaper.initEpaper()
+
+if str(token) == "":
+	epaper.writeText(1, "No lichesstoken")
+	epaper.writeText(2, "try later")
+	time.sleep(3)
+	sys.exit()
 
 if (len(sys.argv) == 1):
 #	print("python3 lichess.py [current|New1]")
@@ -182,6 +190,10 @@ blackclock = 0
 whiteincrement = 0
 blackincrement = 0
 winner= ''
+fenlog = "/home/pi/centaur/fen.log"
+f = open(fenlog, "w")
+f.write("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+f.close()
 
 # Lichess doesn't start the clocks until white moves
 starttime = -1
@@ -231,6 +243,8 @@ def stateThread():
 			
 			
 			if status == 'resign':
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Resign')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' wins')
@@ -239,6 +253,8 @@ def stateThread():
 				os._exit(0)
 				#running = False
 			if status == 'aborted':
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Game aborted')
 				winner = 'No Winner'
 				epaper.writeText(12, 'No winner')
@@ -247,6 +263,8 @@ def stateThread():
 				os._exit(0)
 				
 			if status == 'outoftime':
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' wins')
@@ -254,6 +272,8 @@ def stateThread():
 				time.sleep(3)
 				os._exit(0)
 			if status == 'timeout':
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Out of time')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' wins')
@@ -261,6 +281,8 @@ def stateThread():
 				time.sleep(3)
 				os._exit(0)
 			if status == 'draw':
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Draw')
 				winner = str(state.get('winner'))
 				epaper.writeText(12, winner +' No Winner')
@@ -293,7 +315,7 @@ def stateThread():
 					binc = int(state.get('state').get('binc'))
 					blackincrement = binc
 
-			time.sleep(1)
+			time.sleep(0.1)
 
 
 #print("Starting thread to track the game on Lichess")
@@ -339,7 +361,7 @@ for x in range(0,64):
 	pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
 epaper.drawBoard(pieces)
 
-client.board.post_message(gameid, 'I\'m playing with DGT-Centaur V2 by dso, can\'t chat - I\'m not a bot, sry if it struggle, this Version is in a beta status - have fun' , spectator=False)
+client.board.post_message(gameid, 'I\'m playing with an external board, can\'t chat - I\'m not a bot, sry if it struggle, - have fun' , spectator=False)
 resign = 1
 while status == "started" and ourturn != 0 :
 
@@ -356,11 +378,12 @@ while status == "started" and ourturn != 0 :
 
 	if ourturn == 1 and status == "started" and lastmove != '1234':
 		# Wait for the player's move
-		movestart = time.time()
+		
 		startzeit=time.time()
 		# print(str(startzeit-startzeit))
 		move = boardfunctions.waitMove()
 		boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+		movestart = time.time()
 		
 		# Pass the move through
         
@@ -388,6 +411,9 @@ while status == "started" and ourturn != 0 :
 				fromsq = move[0] * -1
 			if move[1] != (tosq * -1):
 				fromsq = move[1] * -1
+dso field corection
+		fromsq = fromsq -1
+		tosq = tosq -1
 		mylastfrom = fromsq
 		# Convert to letter number square format
 		fromln = boardfunctions.convertField(fromsq)
@@ -413,8 +439,8 @@ while status == "started" and ourturn != 0 :
 				mv = chess.Move.from_uci(lastmove)
 				print("Checked")
 				if (mv in board.legal_moves):
-					board.push(mv)
 					
+					print("Castled")
 					if lastmove == "e1g1":
 							castled = "h1f1"
 					if lastmove == "e1c1":
@@ -423,18 +449,37 @@ while status == "started" and ourturn != 0 :
 							castled = "h8f8"
 					if lastmove == "e8c8":
 							castled = "a8d8"
+
+# new dso 21.10.21 fix castled problem
+					if castled =="h1f1" or castled == "a1d1" or castled == h8f8" or castled == "a8d8" :
+						print("move the rook")
+						lrfromcalc = (ord(castled[:1]) - 97) + ((int(castled[1:2]) - 1) * 8)
+						lrtocalc = (ord(castled[1:3]) - 97) + ((int(castled[1:4]) - 1) * 8)
+						
+						boardfunctions.clearBoardData()
+						boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
+						while movedto != lrtocalc and status == "started":
+							move = boardfunctions.waitMove()
+							valid = 0
+				# dso todo prüfen ob der zug richtig abgesetzt wurde
+							#if move[0] == lrtocalc:
+							#	valid = 1
+							if len(move) > 1:
+								if move[1] == lrtocalc:
+									valid = 1
+							
+							if valid == 0:
+								boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+							#else:
+					boardfunctions.clearSerial()
 					playertime=time.time()
-					
+					board.push(mv)
 					#check if lichess accept this move
 					ret = client.board.make_move(gameid, fromln + toln)
 					if ret :
-						fenlog = "/home/pi/centaur/fen.log"
-						f = open(fenlog,"w")
-						f.write(chess.board.fen())
-						f.close()
 						ourturn = 0
 						halfturn = halfturn + 1
-										# old place outturn ans halfturn
+#dso todo zugrückführung bei falschen zug										# old place outturn ans halfturn
 				else:
 					#print("not a legal move checking for half turn")
 					if halfturn != 0:
@@ -456,12 +501,12 @@ while status == "started" and ourturn != 0 :
 		
 		if playeriswhite == 1:
 			
-			whiteclock = whiteclock - ((time.time() - movestart) * 1000)
+			whiteclock = whiteclock - ((movestart - startzeit) * 1000)
 			whiteclock = whiteclock + whiteincrement
 			
 			
 		else:
-			blackclock = blackclock - ((time.time() - movestart) * 1000)
+			blackclock = blackclock - ((movestart- startzeit) * 1000)
 			blackclock = blackclock + blackincrement
 			
 
@@ -484,9 +529,14 @@ while status == "started" and ourturn != 0 :
 		pieces = []
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
-		boardfunctions.displayScreenBufferPartial()
-		epaper.drawBoard(pieces)
+		fenlog = "/home/pi/centaur/fen.log"
+		f = open(fenlog, "w")
+		f.write(sfen)
+		f.close()
+		#boardfunctions.displayScreenBufferPartial()
+		
 		epaper.writeText(12,str(mv))
+		epaper.drawBoard(pieces)
 	if playeriswhite == 0 and newgame == 1 : 
 		ourturn = 0
 		if str(remotemoves)!= '1234':
@@ -498,13 +548,14 @@ while status == "started" and ourturn != 0 :
 	if ourturn == 0 and status == "started":
         # Here we wait to get a move from the other player on lichess
 		
-		movestart = time.time()
+		startzeit = time.time()
 		
 		while status == "started" and str(remotemoves)[-4:] == lastmove : 
 			time.sleep(0.5)
+		movestart= time.time()
 		if status == "started":
 			# There's an incoming move to deal with
-			lichesstime = time.time()
+			#lichesstime = time.time()
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			rr = "   " + str(remotemoves)
 			lrmove = rr[-5:].strip()
@@ -520,6 +571,7 @@ while status == "started" and ourturn != 0 :
 			while movedto != lrtocalc and status == "started":
 				move = boardfunctions.waitMove()
 				valid = 0
+# dso todo prüfen ob der zug richtig abgesetzt wurde
 				if move[0] == lrtocalc:
 					valid = 1
 				if len(move) > 1:
@@ -530,15 +582,12 @@ while status == "started" and ourturn != 0 :
 						valid = 1
 				if valid == 0:
 					boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
-				movedto = lrtocalc 
+				else:
+					movedto = lrtocalc 
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			boardfunctions.clearSerial()
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			board.push(mv)
-			fenlog = "/home/pi/centaur/fen.log"
-			f = open(fenlog,"w")
-			f.write(chess.board.fen())
-			f.close()
 			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1
@@ -547,10 +596,10 @@ while status == "started" and ourturn != 0 :
 # dso timefix 5.10.21
 		
 		if playeriswhite == 0:
-			whiteclock = whiteclock - ((time.time() - movestart) * 1000)
+			whiteclock = whiteclock - ((movestart - startzeit) * 1000)
 			whiteclock = whiteclock + whiteincrement
 		else:
-			blackclock = blackclock - ((time.time() - movestart) * 1000)
+			blackclock = blackclock - ((movestart - startzeit) * 1000)
 			blackclock = blackclock + blackincrement
 
 		wtext = ""
@@ -575,9 +624,13 @@ while status == "started" and ourturn != 0 :
 		pieces = []
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
-		boardfunctions.displayScreenBufferPartial()
-		epaper.drawBoard(pieces)
+		#boardfunctions.displayScreenBufferPartial()
+		fenlog = "/home/pi/centaur/fen.log"
+		f = open(fenlog, "w")
+		f.write(sfen)
+		f.close()
 		epaper.writeText(12,str(mv))
+		epaper.drawBoard(pieces)
 
 running = False
 epaper.writeText(11, 'Game over')

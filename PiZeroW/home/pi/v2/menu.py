@@ -1,10 +1,11 @@
+#!/usr/bin/python3
 # Bootup menu
 
 import boardfunctions
 import os
 import sys
 import time
-# import centaurv2
+import centaurv2
 import epd2in9d
 sys.path.append("/home/pi/v2/board")
 import epaper , network
@@ -27,6 +28,11 @@ def keyPressed(id):
 	if id == boardfunctions.BTNUP:
 		menuitem = menuitem - 1
 	if id == boardfunctions.BTNTICK:
+		if not curmenu:
+			selection = "BTNTICK"
+			print(selection)
+			#event_key.set()
+			return
 		c = 1
 		r = ""
 		for k, v in curmenu.items():
@@ -119,6 +125,7 @@ while True:
 		#'BT': 'BT paring',
 		'wifi': ' Wifi Setup',
 		'Connection': ' WiFi check',
+		'lichessapi': ' Lichesskey',
 		#'Update': 'Systemupdate',
 		'Reboot': ' Reboot',
 		'Shutdown': ' Shutdown'}
@@ -134,6 +141,13 @@ while True:
 		os.system("/home/pi/centaur/centaur")
 		#sys.exit()
 
+	if result == "lichessapi":
+		epaper.clearScreen()
+		boardfunctions.pauseEvents()
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 lichessapi.py")
+		boardfunctions.unPauseEvents()
+		
 	if result == "DGT":
 		epaper.clearScreen()
 		boardfunctions.pauseEvents()
@@ -145,51 +159,60 @@ while True:
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 bt.py &")
 	if result == "wifi":
-		wifimenu = {'wpa2': 'WPA2-PSK', 'wps': 'WPS Setup'}
-		result = doMenu(wifimenu)
-		if (result != "BACK"):
-			if (result == 'wpa2'):
-				boardfunctions.pauseEvents()
-				os.chdir("/home/pi/v2/")
-				os.system("/usr/bin/python3.6 wifi.py")
-				boardfunctions.unPauseEvents()
-			if (result == 'wps'):
-				if network.check_network():
-					#from DGTCentaurMods.display import epd2in9d
-					#epd = epd2in9d.EPD()
-					#epd.init()
-					IP = network.check_network()
-					epaper.clearScreen()
-					epaper.writeText(0, 'Network is up.')
-					epaper.writeText(1, 'Press OK to')
-					epaper.writeText(2, 'disconnect')
-					epaper.writeText(4, IP)
-					time.sleep(10)
-					# TODO: Remove sleep() and wait to get OK button here
-					# execute connect
-				else:
-					wpsMenu = {'connect': 'Connect wifi'}
-					result = doMenu(wpsMenu)
-					if (result == 'connect'):
-						print('connect')
-						# TODO: Enable this afet we implement recovery :)
-						epaper.writeText(0, 'Press WPS button')
-						#network.wps_connect()
-		if (result == 'recover'):
-			print() # placeholer
-			# TODO: Build funtion in network.py to force restore wifi.
-			
+			wifimenu = {'wpa2': ' WPA2-PSK', 'wps': ' WPS Setup' }
+			#' Recover wifi'}
+			result = doMenu(wifimenu)
+			if (result != "BACK"):
+				if (result == 'wpa2'):
+					boardfunctions.pauseEvents()
+					os.chdir("/home/pi/v2/")
+					os.system("/usr/bin/python3.6 wifi.py")
+					boardfunctions.unPauseEvents()
+				if (result == 'wps'):
+					if network.check_network():
+						selection = ""
+						#from DGTCentaurMods.display import epd2in9d
+						#epd = epd2in9d.EPD()
+						#epd.init()
+						# TODO: put here script to backup network.
+						IP = network.check_network()
+						epaper.clearScreen()
+						epaper.writeText(0, ' Network is up.')
+						epaper.writeText(1, ' Press OK to')
+						epaper.writeText(2, ' disconnect')
+						epaper.writeText(4, IP)
+						timeout = time.time() + 15
+						while selection == "" and time.time() < timeout:
+							if selection == "BTNTICK":
+								print("") # Placeholder
+								# network.disconnect_all() not enable until Restore
+								# function is finished
+					else:
+						wpsMenu = {'connect': 'Connect wifi'}
+						result = doMenu(wpsMenu)
+						if (result == 'connect'):
+							epaper.clearScreen()
+							epaper.writeText(0, 'Press WPS button')
+							network.wps_connect()
+							time.sleep(30)
+				if (result == 'recover'):
+					print() # placeholer
+					# TODO: Build funtion in network.py to force restore wifi.
 
 	if result == "Connection":
 		centaurv2.connectiontest()
 		
 	if result == "Shutdown":
-		#boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		#boardfunctions.shutdown()
-		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-        boardfunctions.pauseEvents()
-        boardfunctions.shutdown()
 		
+		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
+		epaper.epd.init()
+		epaper.epd.HalfClear()
+		time.sleep(6)
+		epaper.stopEpaper()
+		time.sleep(2)
+		boardfunctions.pauseEvents()
+		boardfunctions.shutdown()
+
 		#boardfunctions.clearScreen()
 		#boardfunctions.writeText(1, "Please shutdown")
 		#boardfunctions.writeText(2, 'from the centaur')
@@ -208,12 +231,14 @@ while True:
 		#os.system("/sbin/poweroff")
 		#sys.exit()
 	if result == "Reboot":
-		boardfunctions.clearScreen()
-		boardfunctions.writeText(1, 'reboot now')
-		time.sleep(2)
-		boardfunctions.sleepScreen()
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		os.system("/sbin/reboot")
+		epaper.epd.init()
+		epaper.epd.HalfClear()
+		time.sleep(6)
+		epaper.stopEpaper()
+		time.sleep(2)
+		boardfunctions.pauseEvents()
+		os.system("/sbin/shutdown -r now &")
 		sys.exit()
 	
 	if result == "Lichess":

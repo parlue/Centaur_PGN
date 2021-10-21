@@ -1,4 +1,5 @@
 #!/bin/sh
+sleep 45
 
 if ps -ef | grep -v grep | grep menu.py ; then
 

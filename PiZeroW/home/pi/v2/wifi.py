@@ -25,12 +25,15 @@ for i in range(0,len(result)):
 	networks[result[i]] = result[i]
 
 print(networks)
-answer = boardfunctions.doMenu(networks)
+answer = boardfunctions.doMenu(networks,1)
 
 print(answer)
 
 if answer == "BACK":
 	sys.exit()
+#boardfunctions.initScreen()
+#time.sleep(2)
+boardfunctions.epd.init()
 
 # If the answer is not "BACK" then answer contains our SSID
 # Now we need to get the password
@@ -61,5 +64,4 @@ if section.find("ssid") != -1:
 	wpas = open('/etc/wpa_supplicant/wpa_supplicant.conf','a')
 	wpas.write(section)
 	wpas.close()
-	os.system("sudo wpa_cli -i wlan0 reconfigure")
-
+	os.system("sudo /sbin/shutdown -r now")

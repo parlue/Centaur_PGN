@@ -42,13 +42,23 @@ if cgame.exists() :
 			b=len(chess_game.board.move_stack)
 			
 			
-			cmove=chess_game.board.move_stack[b-1]
-			chess.Move.from_uci(str(cmove))
-			#write fen to disk 
-			fenlog = "/home/pi/centaur/fen.log"
-			f = open(fenlog,"w")
-			f.write(chess.board.fen())
-			f.close()
+			if b == 0:
+				fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+				fenlog = "/home/pi/centaur/fen.log"
+				f = open(fenlog,"w")
+				f.write(fen)
+				f.close()
+			
+			else :
+				b = b -1
+				cmove=chess_game.board.move_stack[b]
+				chess.Move.from_uci(str(cmove))
+				fenlog = "/home/pi/centaur/fen.log"
+				f = open(fenlog,"w")
+				f.write(chess.board.fen())
+				f.close()
+			
+			
 			
 
 	if __name__ == "__main__":

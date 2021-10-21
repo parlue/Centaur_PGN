@@ -18,10 +18,10 @@ epaperprocesschange = 1
 epd = epd2in9d.EPD()
 epaperUpd = ""
 kill = 0
-
-def saveImage():
-    filename = str(pathlib.Path(__file__).parent.resolve()) + "/../web/static/epaper.jpg"
-    epaperbuffer.save(filename)
+epapermode = 0
+lastepaperbytes = bytearray(b'')
+first = 1
+event_refresh = threading.Event()
 
 def epaperUpdate():
     # This is used as a thread to update the e-paper if the image has changed
@@ -29,28 +29,59 @@ def epaperUpdate():
     global lastepaperhash
     global epaperprocesschange
     global kill
+    global epapermode
+    global lastepaperbytes
+    global first
+    global event_refresh
     print("started epaper update thread")
     epd.display(epd.getbuffer(epaperbuffer))
-    time.sleep(4)
-    print("epaper init image sent")
+    time.sleep(6)
+    print("epaper2 init image sent")
     while True and kill == 0:
-        thishash = hashlib.md5(epaperbuffer.tobytes()).hexdigest()
-        if thishash != lastepaperhash and epaperprocesschange == 1:
-            starttime = time.time()
-            im = epaperbuffer.copy()
-            saveScreenToImage = threading.Thread(target=saveImage, args=())
-            saveScreenToImage.daemon = True
-            saveScreenToImage.start()
+        im = epaperbuffer.copy()
+        im2 = im.copy()
+        if epaperprocesschange == 1:
+            tepaperbytes = im.tobytes()
+        if lastepaperbytes != tepaperbytes and epaperprocesschange == 1:
+            filename = "/home/pi/v2/web/static/epaper.jpg"
+            epaperbuffer.save(filename)
             im = im.transpose(Image.FLIP_TOP_BOTTOM)
             im = im.transpose(Image.FLIP_LEFT_RIGHT)
-            epd.DisplayPartial(epd.getbuffer(im))
-            lastepaperhash = thishash
+            if epapermode == 0 or first == 1:
+                epd.DisplayPartial(epd.getbuffer(im))
+                first = 0
+            else:
+                rs = 0
+                re = 295
+                for x in range(0, len(tepaperbytes)):
+                    if lastepaperbytes[x] != tepaperbytes[x]:
+                        rs = (x // 16) - 1
+                        break;
+                for x in range(len(tepaperbytes) - 1, 0, -1):
+                    if lastepaperbytes[x] != tepaperbytes[x]:
+                        re = (x // 16) + 1
+                        break;
+                if rs < 0:
+                    rs = 0
+                if re > 295:
+                    re = 295
+                if rs >= re:
+                    rs = 0
+                    re = 295
+                bb = im2.crop((0, rs + 1, 128, re))
+                bb = bb.transpose(Image.FLIP_TOP_BOTTOM)
+                bb = bb.transpose(Image.FLIP_LEFT_RIGHT)
+                epd.DisplayRegion(296 - re, 295 - rs, epd.getbuffer(bb))
+            lastepaperbytes = tepaperbytes
+            event_refresh.set()
         time.sleep(0.2)
 
-def initEpaper():
+def initEpaper(mode = 0):
     # Set the screen to a known start state and start the epaperUpdate thread
     global epaperbuffer
     global epaperUpd
+    global epapermode
+    epapermode = mode
     epaperbuffer = Image.new('1', (128, 296), 255)
     print("init epaper")
     epd.init()
@@ -76,13 +107,19 @@ def stopEpaper():
     global lastepaperbytes
     global epaperbuffer
     global kill
-    filename = str(pathlib.Path(__file__).parent.resolve()) + "/../resources/logo_mods_screen.jpg"
-    #epaperbuffer = Image.new('1', (128, 296), 255)
-    epaperbuffer = Image.open(filename)
+    filename = "/home/pi/centaur/fonts/logo.bmp"
+    lg = Image.open(filename)
+    lgs = Image.new('1', (128, 296), 255)
+    lgs.paste(lg,(0,0))
+    epaperbuffer = lgs.copy()
     time.sleep(3)
     kill = 1
-    time.sleep(0.5)
+    time.sleep(2)
     epd.sleep()
+
+def killEpaper():
+    global kill
+    kill = 1
 
 def writeText(row,txt):
     # Write Text on a give line number
@@ -107,7 +144,12 @@ def clearArea(x1, y1, x2, y2):
 def clearScreen():
     # Set the ePaper back to white
     global epaperbuffer
-    epaperbuffer = Image.new('1', (128, 296), 255)
+    global event_refresh
+    global first
+    #epaperbuffer = Image.new('1', (128, 296), 255)
+    draw = ImageDraw.Draw(epaperbuffer)
+    draw.rectangle([(0, 0), (128, 296)], fill=255, outline=255)
+    first = 1
 
 def drawBoard(pieces):
     global epaperbuffer
@@ -151,12 +193,31 @@ def drawBoard(pieces):
         piece = chessfont.crop((px, py, px+16, py+16))
         epaperbuffer.paste(piece,(col, row))
 
+def drawFen(fen):
+    # As drawboard but draws a fen
+    curfen = fen
+    curfen = curfen.replace("/", "")
+    curfen = curfen.replace("1", " ")
+    curfen = curfen.replace("2", "  ")
+    curfen = curfen.replace("3", "   ")
+    curfen = curfen.replace("4", "    ")
+    curfen = curfen.replace("5", "     ")
+    curfen = curfen.replace("6", "      ")
+    curfen = curfen.replace("7", "       ")
+    curfen = curfen.replace("8", "        ")
+    nfen = ""
+    for a in range(8,0,-1):
+        for b in range(0,8):
+            nfen = nfen + curfen[((a-1)*8)+b]
+    drawBoard(nfen)
+
 def promotionOptions(row):
     # Draws the promotion options to the screen buffer
     global epaperbuffer
+    print("drawing promotion options")
     offset = row * 20
     draw = ImageDraw.Draw(epaperbuffer)
-    draw.text((0, offset+0), "    Q    R    N    B", font=font14, fill=0)
+    draw.text((0, offset+0), "    Q    R    N    B", font=font18, fill=0)
     draw.polygon([(2, offset+18), (18, offset+18), (10, offset+3)], fill=0)
     draw.polygon([(35, offset+3), (51, offset+3), (43, offset+18)], fill=0)
     o = 66

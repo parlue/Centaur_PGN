@@ -7,7 +7,10 @@
 
 # TODO
 
-boardfunctions
+import boardfunctions
+import os
+import sys
+sys.path.append('/home/pi/v2/board')
 import epaper
 import threading
 import time

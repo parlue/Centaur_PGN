@@ -127,6 +127,7 @@ while True:
 		'wifi': ' Wifi Setup',
 		'Connection': ' WiFi check',
 		'lichessapi': ' Lichesskey',
+		'lichessrating': ' Lichessrating',
 		#'Update': 'Systemupdate',
 		'Reboot': ' Reboot',
 		'Shutdown': ' Shutdown'}
@@ -148,6 +149,14 @@ while True:
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 lichessapi.py")
 		boardfunctions.unPauseEvents()
+		
+	if result == "lichessrating":
+		epaper.clearScreen()
+		boardfunctions.pauseEvents()
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 lichessrating.py")
+		boardfunctions.unPauseEvents()
+		
 		
 	if result == "DGT":
 		epaper.clearScreen()
@@ -205,32 +214,17 @@ while True:
 		
 	if result == "Shutdown":
 		
-		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		epaper.epd.init()
-		epaper.epd.HalfClear()
-		time.sleep(6)
-		epaper.stopEpaper()
+		boardfunctions.clearScreen()
+		boardfunctions.writeText(1, "Please shutdown")
+		boardfunctions.writeText(2, 'from the centaur')
+		boardfunctions.writeText(3, 'aplication')
+		boardfunctions.writeText(4, '...')
+		boardfunctions.writeText(5, 'load centaur')
 		time.sleep(2)
-		boardfunctions.pauseEvents()
-		boardfunctions.shutdown()
-
-		#boardfunctions.clearScreen()
-		#boardfunctions.writeText(1, "Please shutdown")
-		#boardfunctions.writeText(2, 'from the centaur')
-		#boardfunctions.writeText(3, 'aplication')
-		#boardfunctions.writeText(4, '...')
-		#boardfunctions.writeText(5, 'load centaur')
-		#time.sleep(2)
-		#os.chdir("/home/pi/centaur")
-		#os.system("/home/pi/centaur/centaur")
+		os.chdir("/home/pi/centaur")
+		os.system("/home/pi/centaur/centaur")
 		
-		#image = Image.open('/home/pi/centaur/fonts/logo.bmp')
-		#epd.DisplayPartial(epd.getbuffer(image))
-		#time.sleep(3)
-		#boardfunctions.sleepScreen()
-		#boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
-		#os.system("/sbin/poweroff")
-		#sys.exit()
+	
 	if result == "Reboot":
 		boardfunctions.beep(boardfunctions.SOUND_POWER_OFF)
 		epaper.epd.init()

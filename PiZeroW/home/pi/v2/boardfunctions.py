@@ -514,6 +514,87 @@ def waitMove():
 		resp = bytearray(resp)
 	#print('return moves: ' + str(moves))
 	return moves
+	
+def MywaitMove():
+	# Wait for a player to lift a piece and set it down somewhere different
+	lifted = -1
+	placed = -1
+	keypressed = 0
+	moves = []
+	while placed == -1: # and keypressed == 0:
+		
+# dso scan for move		
+		try:
+			ser.read(100000)
+			tosend = bytearray(b'\x83\x06\x50\x59')
+			ser.write(tosend)
+			expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
+			resp = ser.read(10000)
+			resp = bytearray(resp)
+			if (bytearray(resp) != expect):
+				if (resp[0] == 133 and resp[1] == 0):
+					for x in range(0, len(resp) - 1):
+						if (resp[x] == 64):
+							# Calculate the square to 0(a1)-63(h8) so that
+							# all functions match
+							fieldHex = resp[x + 1]
+							newsquare = rotateFieldHex(fieldHex)
+							lifted = newsquare
+							#print(lifted)
+							moves.append((newsquare+1) * -1)
+						if (resp[x] == 65):
+							# Calculate the square to 0(a1)-63(h8) so that
+							# all functions match
+							fieldHex = resp[x + 1]
+							newsquare = rotateFieldHex(fieldHex)
+							placed = newsquare
+							# no move detection
+							if lifted == placed and len(moves) == 1:
+								moves = []
+								placed = -1
+							else:
+								moves.append(newsquare+1)
+							#print(placed)
+			#print('lifted= ' + str(lifted))
+			#print('placed= ' + str(placed))
+#			tosend = bytearray(b'\x94\x06\x50\x6a')
+#			ser.write(tosend)
+#			expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+#			resp = ser.read(10000)
+#			resp = bytearray(resp)
+		except :
+			pass
+		try:
+			tosend = bytearray(b'\x94\x06\x50\x6a')
+			ser.write(tosend)
+			expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+			resp = ser.read(10000)
+			resp = bytearray(resp)
+			if (resp.hex() == "b10011065000140a0501000000007d4700"):
+				moves.append(200)  # BACK
+				placed = 199
+			if (resp.hex() == "b10011065000140a0510000000007d175f"):
+				moves.append(201) # TICK
+				placed = 199
+			if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
+				moves.append(202)  # UP
+				placed = 199
+			if (resp.hex() == "b10010065000140a050200000000611d"):
+				moves.append(203)  # DOWN
+				placed = 199
+			if (resp.hex() == "b10010065000140a0540000000006d67"):
+				moves.append(204)   # HELP
+				placed = 199
+			if (resp.hex() == "b10010065000140a0504000000002a68"):
+				moves.append(295)   # PLAY
+				placed = 199
+
+					
+		except:
+			pass
+		
+	#print('return moves: ' + str(moves))
+	return moves
 def promotionOptionsToBuffer(row):
 	# Draws the promotion options to the screen buffer
 	global screenbuffer
@@ -630,6 +711,93 @@ def getText(title):
 			beep(SOUND_GENERAL)
 			charpage = 2
 			changed = 1
+		time.sleep(0.2)
+def getTextnumbers(title):
+	# Allows text to be entered using a virtual keyboard where a chess piece
+	# is placed on the board in the correct position
+	global screenbuffer
+	clearstate = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+	printableascii = "-0123456789"
+	charpage = 1
+	typed = ""
+	# First we need a clear board
+	res = getBoardState()
+	if bytearray(res) != clearstate:
+		writeText(0,'Remove board')
+		writeText(1,'pieces')
+		while bytearray(res) != clearstate:
+			time.sleep(0.5)
+			res = getBoardState()
+	changed = 1
+	clearBoardData()
+	while True:
+		if changed == 1:
+			# print our title and our box that the answer will go in
+			image = screenbuffer.copy()
+			draw = ImageDraw.Draw(image)
+			draw.rectangle([(0, 0), (128, 250)], fill=255)
+			draw.text((0,20),title, font=font14, fill=0)
+			draw.rectangle([(0,39),(128,61)],fill=255,outline=0)
+			tt = typed
+			if len(tt) > 10:
+				tt = tt[-11:]
+			draw.text((0,40),tt, font=font14, fill=0)
+			# Using the current charpage display the symbols that a square would represent
+			pos = (charpage -1) * 64
+			lchars = []
+			for i in range(pos,pos+64):
+				lchars.append(printableascii[i])
+			pos = 0
+			for i in range(0,len(lchars),8):
+				tsts = ""
+				for q in range(0,8):
+					tsts = tsts + lchars[i + q]
+					draw.text(((q*16),(pos*20)+80),lchars[i + q], font=font14, fill=0)
+				pos = pos + 1
+			screenbuffer = image.copy()
+			image = image.transpose(Image.FLIP_TOP_BOTTOM)
+			image = image.transpose(Image.FLIP_LEFT_RIGHT)
+			epd.DisplayPartial(epd.getbuffer(image))
+			time.sleep(0.1)
+			changed = 0
+		buttonPress = 0
+		ser.read(1000000)
+		tosend = bytearray(b'\x83\x06\x50\x59')
+		ser.write(tosend)
+		expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
+		resp = ser.read(10000)
+		resp = bytearray(resp)
+		# If a piece is placed it will type a character!
+		if (bytearray(resp) != expect):
+			if (resp[0] == 133 and resp[1] == 0):
+				for x in range(0, len(resp) - 1):
+					if resp[x] == 65:
+						# Calculate the square to 0(a1)-63(h8) so that
+						# all functions match
+						fieldHex = resp[x + 1]
+						typed = typed + lchars[fieldHex]
+						beep(SOUND_GENERAL)
+						changed = 1
+		tosend = bytearray(b'\x94\x06\x50\x6a')
+		ser.write(tosend)
+		expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+		resp = ser.read(10000)
+		resp = bytearray(resp)
+		if (resp.hex() == "b10011065000140a0501000000007d4700"):
+			buttonPress = 1 # BACK
+		if (resp.hex() == "b10011065000140a0510000000007d175f"):
+			buttonPress = 2 # TICK
+		
+		if buttonPress == 1 and len(typed) > 0:
+			typed = typed[:-1]
+			beep(SOUND_GENERAL)
+			changed = 1
+		if buttonPress == 2:
+			beep(SOUND_GENERAL)
+			initScreen()
+			time.sleep(2)
+			return typed
+		
 		time.sleep(0.2)
 
 def poll():

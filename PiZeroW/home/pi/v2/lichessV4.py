@@ -1,3 +1,25 @@
+# dso lichess module
+# Run a standalone game on lichess
+# This is version four so we do it directly and with screen control!
+
+# Castling - move king, wait for beep, move rook
+# pawn promotion not yet implemented. Pick up pawn, put down queen
+
+# python3 lichess.py [current|New]
+
+# This is our lichess access token, the game id we're playing, fill it
+# in in v2conf.py
+#
+# the chessclock only update after a move from any player. I won't struggle the display with permant
+# updates. If you need livetime data, please follow the game on lichess via web.
+# Button up, offer a draw
+# Button down resign the game
+# Button back will abort the game.... hard :-)
+# Button ? will toggle the board in a sielence mode
+
+# Please play exact and slowly
+
+
 import sys
 import berserk
 import ssl
@@ -11,19 +33,7 @@ sys.path.append('/home/pi/v2/board')
 import epaper
 
 
-# Run a game on lichess
-# This is version two so we do it directly and with screen control!
 
-# Castling - move king, wait for beep, move rook
-# pawn promotion not yet implemented. Pick up pawn, put down queen
-
-# python3 lichess.py [current|New]
-
-# This is our lichess access token, the game id we're playing, fill it
-# in in v2conf.py
-#
-# Note the API requires that the raspberry pi clock has a reasonably
-# accurate time for the SSL
 token = v2conf.lichesstoken
 
 
@@ -215,11 +225,58 @@ def stateThread():
 	global winner
 	global wtime
 	global btime
+	global whitetime
+	global blacktime
+	global whiterating
+	global blackrating
+	global message1
+	global sound
 	while running:
-		
+		buttonPress=0
 		gamestate = client.board.stream_game_state(gameid)
 		for state in gamestate:
 			print(state)
+			message1=str(state)
+			#print(message1)
+			if message1.find('moves'):
+				c=message1.find("wtime")
+				messagehelp = message1[c:len(message1)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				whitetimemin=messagehelp[1:c]
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				whitetimesec=messagehelp[1:c]
+				if whitetimesec[:2]=="tz" or whitetimesec[1:3]=="st" :
+					whitetimesec = "0"
+				print (whitetimesec)
+				whitetime = str(whitetimemin)+"min "+str(whitetimesec) +"sec"
+				c=message1.find("btime")
+				messagehelp = message1[c:len(message1)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				blacktimemin=messagehelp[1:c]
+				messagehelp = messagehelp[c+1:len(messagehelp)]
+				c = messagehelp.find(", ")
+				blacktimesec=messagehelp[1:c]
+				print(blacktimesec)
+				if blacktimesec[:2]=="tz" or blacktimesec[1:3]=="st":
+					blacktimesec = "0"
+				blacktime = str(blacktimemin)+"min "+str(blacktimesec)+ "sec"
 #mod by dso 4.1021
 			if ('state' in state.keys()):
 				remotemoves = state.get('state').get('moves')
@@ -242,33 +299,7 @@ def stateThread():
 				
 				if message == "White offers draw":
 					client.board.decline_draw(gameid)				
-# dso 21.10. activate buttons for remis, resign	and hard abord		
-#			ser.read(1000000)
-#			tosend = bytearray(b'\x83\x06\x50\x59')
-#			ser.write(tosend)
-#			expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
-#			resp = ser.read(10000)
-#			resp = bytearray(resp)
-#			tosend = bytearray(b'\x94\x06\x50\x6a')
-#			ser.write(tosend)
-#			expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
-#			resp = ser.read(10000)
-#			resp = bytearray(resp)
-#			if (resp.hex() == "b10011065000140a0501000000007d4700"):
-#			buttonPress = 1 # BACK
-#				if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
-#				buttonPress = 2 # UP
-#			if (resp.hex() == "b10010065000140a050200000000611d"):
-#				buttonPress = 3 # DOWN
-#abord all - please use only if ther is no way out 
-#			if buttonPress == 1 :
-#				os._exit(0)
-#offer remis
-#			if buttonPress = 2:
-#				client.board.offer_draw(gameid)
-# resign my game				
-#			if buttonPress = 3:
-#				client.board.resign_game(gameid)
+
 					
 			if status == 'resign':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
@@ -326,24 +357,17 @@ def stateThread():
 					print(str(state.get('white').get('name')) +
 						  " vs " + str(state.get('black').get('name')))
 					whiteplayer = str(state.get('white').get('name'))
+					whiterating = str(state.get('white').get('rating'))
 					blackplayer = str(state.get('black').get('name'))
+					blackrating = str(state.get('black').get('rating'))
+					
 					if (str(state.get('white').get('name')) == player):
 						playeriswhite = 1
 					else:
 						playeriswhite = 0
-			if ('state' in state.keys()):
-				if ('wtime' in state.get('state').keys()):
-					wtime = int(state.get('state').get('wtime'))
-					whiteclock = wtime
-					winc = int(state.get('state').get('winc'))
-					whiteincrement = winc
-				if ('btime' in state.get('state').keys()):
-					btime = int(state.get('state').get('btime'))
-					blackclock = btime
-					binc = int(state.get('state').get('binc'))
-					blackincrement = binc
+				
 
-			time.sleep(0.1)
+			time.sleep(0.2)
 
 
 #print("Starting thread to track the game on Lichess")
@@ -377,10 +401,11 @@ oldremotemoves = ""
 correcterror = -1
 halfturn = 0
 castled = ""
+sound = "off"
 
 epaper.clearScreen()
-epaper.writeText(0,blackplayer)
-epaper.writeText(9,whiteplayer)
+epaper.writeText(0,blackplayer + " " + blackrating)
+epaper.writeText(9,whiteplayer + " " + whiterating)
 fen = board.fen()
 sfen = fen[0 : fen.index(" ")]
 baseboard = chess.BaseBoard(sfen)
@@ -391,7 +416,7 @@ epaper.drawBoard(pieces)
 
 client.board.post_message(gameid, 'I\'m playing with an external board, can\'t chat - I\'m not a bot, sry if it struggle, - have fun' , spectator=False)
 resign = 1
-while status == "started" and ourturn != 0 :
+while (status == "started") and ourturn != 0 :
 
 	if ourturn == 1:
 		if playeriswhite == 1:
@@ -406,17 +431,25 @@ while status == "started" and ourturn != 0 :
 
 	if ourturn == 1 and status == "started" and lastmove != '1234':
 		# Wait for the player's move
-		
-		startzeit=time.time()
+		move = []
+		while len(move) <=1 :
 		# print(str(startzeit-startzeit))
-		move = boardfunctions.waitMove()
-		boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-		movestart = time.time()
-		
-		# Pass the move through
-        
-		#resign by dso place a new figure on the board
-		
+			move = boardfunctions.MywaitMove()
+			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+			if len(move) == 1:
+				if move[0] == 200: #back
+					os._exit()
+			
+			#if move[0] == 201: #tick
+				if move[0] == 202: #UP
+					client.board.offer_draw(gameid)
+				if move[0] == 203: #down
+					client.board.resign_game(gameid)
+					
+				if move[0] == 204: # help
+					print("soundoption")
+			time.sleep(0.2)
+	
 			
 		if (len(move) == 2):
 			fromsq = move[0] * -1
@@ -439,7 +472,7 @@ while status == "started" and ourturn != 0 :
 				fromsq = move[0] * -1
 			if move[1] != (tosq * -1):
 				fromsq = move[1] * -1
-dso field corection
+#dso field corection
 		fromsq = fromsq -1
 		tosq = tosq -1
 		mylastfrom = fromsq
@@ -450,107 +483,90 @@ dso field corection
 		toln = boardfunctions.convertField(tosq)
 		
 		# If the piece is a pawn we should take care of promotion here. You could choose it from
-		# the board screen. But I'll do that later!
+		# the board screen. 	 But I'll do that later!
 		# Send the move
 		lastmove = fromln + toln
 		
-		if lastmove == castled:
-                # If we're castling and this is just the rook move then ignore it
-			lastmove = ""
-			correcterror = tosq
-		if correcterror == tosq:
-			boardfunctions.ledsOff()
-			correcterror = -1
-		else:
-			try:
-				
-				mv = chess.Move.from_uci(lastmove)
-				print("Checked")
-				if (mv in board.legal_moves):
-					
-					print("Castled")
-						if lastmove == "e1g1":
-								castled = "h1f1"
-						if lastmove == "e1c1":
-								castled = "a1d1"
-						if lastmove == "e8g8":
-								castled = "h8f8"
-						if lastmove == "e8c8":
-								castled = "a8d8"
 
-# new dso 21.10.21 fix castled problem
-					if castled =="h1f1" or castled == "a1d1" or castled == h8f8" or castled == "a8d8" :
-						print("move the rook")
-						lrfromcalc = (ord(castled[:1]) - 97) + ((int(castled[1:2]) - 1) * 8)
-						lrtocalc = (ord(castled[1:3]) - 97) + ((int(castled[1:4]) - 1) * 8)
-						
-						boardfunctions.clearBoardData()
-						boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
-						while movedto != lrtocalc and status == "started":
-							move = boardfunctions.waitMove()
-							valid = 0
-				# dso todo prüfen ob der zug richtig abgesetzt wurde
-							#if move[0] == lrtocalc:
-							#	valid = 1
-							if len(move) > 1:
-								if move[1] == lrtocalc:
-									valid = 1
+		try:
+			
+			mv = chess.Move.from_uci(lastmove)
+			print("Checked")
+			if (mv in board.legal_moves):
+				
+				#print("Castled")
+				if lastmove == "e1g1":
+					castled = "h1f1"
+				if lastmove == "e1c1":
+					castled = "a1d1"
+				if lastmove == "e8g8":
+					castled = "h8f8"
+				if lastmove == "e8c8":
+					castled = "a8d8"
+				
 							
-							if valid == 0:
-								boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
-							else:
-								boardfunctions.ledsOff()
+				
+# new dso 21.10.21 fix castled problem
+				if castled =="h1f1" or castled == "a1d1" or castled == "h8f8" or castled == "a8d8" :
+					print("move the rook")
+					lrfromcalc = (ord(castled[:1]) - 97) + ((int(castled[1:2]) - 1) * 8)
+					lrtocalc = (ord(castled[2:3]) - 97) + ((int(castled[3:4]) - 1) * 8)
+					
+					boardfunctions.clearBoardData()
+					boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
+					while movedto != lrtocalc and status == "started":
+						move = boardfunctions.MywaitMove()
+						valid = 1
+			# dso todo prüfen ob der zug richtig abgesetzt wurde
+						#if move[0] == lrtocalc:
+						#	valid = 1
+						#	castled=""
+						
+						#if len(move) > 1:
+						##	tomove = move[1] * -1
+						#	if tomove == lrtocalc:
+						#		print(lrtocalc)
+						#		valid = 1
+						castled=""
+						
+						if valid == 0:
+							boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+						else:
+							boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+						movedto = lrtocalc
+					boardfunctions.ledsOff()
 					boardfunctions.clearSerial()
-					playertime=time.time()
+				playertime=time.time()
+				
+				#check if lichess accept this move
+				ret = client.board.make_move(gameid, fromln + toln)
+				if ret :
 					board.push(mv)
-					#check if lichess accept this move
-					ret = client.board.make_move(gameid, fromln + toln)
-					if ret :
-						ourturn = 0
-						halfturn = halfturn + 1
-#dso todo zugrückführung bei falschen zug										# old place outturn ans halfturn
-				else:
-					#print("not a legal move checking for half turn")
-					if halfturn != 0:
-						#print("Not a legal move!")
-						#print(board.legal_moves)
-						boardfunctions.clearBoardData()
-						boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
-						correcterror = fromsq
-			except:
-				#print("exception checking for half turn")
+					ourturn = 0
+					halfturn = halfturn + 1
+#dso todo zugrückführung bei falschen zug										
+# old place outturn ans halfturn
+			else:
+				#print("not a legal move checking for half turn")
 				if halfturn != 0:
 					#print("Not a legal move!")
 					#print(board.legal_moves)
 					boardfunctions.clearBoardData()
 					boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 					correcterror = fromsq
+		except:
+			#print("exception checking for half turn")
+			if halfturn != 0:
+				#print("Not a legal move!")
+				#print(board.legal_moves)
+				boardfunctions.clearBoardData()
+				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+				correcterror = fromsq
 				
-		#print(board)
 		
-		if playeriswhite == 1:
-			
-			whiteclock = whiteclock - ((movestart - startzeit) * 1000)
-			whiteclock = whiteclock + whiteincrement
-			
-			
-		else:
-			blackclock = blackclock - ((movestart- startzeit) * 1000)
-			blackclock = blackclock + blackincrement
-			
-
-		wtext = ""
-		if whiteclock//60000 == 0:
-			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
-		else:
-			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
-		epaper.writeText(10,wtext)
-		btext = ""
-		if blackclock // 60000 == 0:
-			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
-		else:
-			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
-		epaper.writeText(1, btext)
+		
+		epaper.writeText(10,whitetime)
+		epaper.writeText(1, blacktime)
 	
 		fen = board.fen()
 		sfen = fen[0 : fen.index(" ")]
@@ -562,7 +578,7 @@ dso field corection
 		f = open(fenlog, "w")
 		f.write(sfen)
 		f.close()
-		#boardfunctions.displayScreenBufferPartial()
+		
 		
 		epaper.writeText(12,str(mv))
 		epaper.drawBoard(pieces)
@@ -574,17 +590,17 @@ dso field corection
 	print('Achtung: '+ lastmove)
 	print('Achtung= '+ str(remotemoves)[-4:])
 	print('ourturn sollte 0 sein ' + str(ourturn))
-	if ourturn == 0 and status == "started":
+	print('sound='+sound)
+	if ourturn == 0 and (status == "started" or status=="mate"):
         # Here we wait to get a move from the other player on lichess
 		
 		startzeit = time.time()
 		
-		while status == "started" and str(remotemoves)[-4:] == lastmove : 
+		while (status == "started" or status == "mate") and str(remotemoves)[-4:] == lastmove : 
 			time.sleep(0.5)
 		movestart= time.time()
-		if status == "started":
-			# There's an incoming move to deal with
-			#lichesstime = time.time()
+		if status == "started" or status == "mate":
+			# There's an incoming move to deal with			
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			rr = "   " + str(remotemoves)
 			lrmove = rr[-5:].strip()
@@ -597,24 +613,24 @@ dso field corection
 			boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
 			# Then wait for a piece to be moved TO that position
 			movedto = -1
-			while movedto != lrtocalc and status == "started":
-				move = boardfunctions.waitMove()
+			while movedto != lrtocalc and (status == "started" or status =="mate"):
+				move = boardfunctions.MywaitMove()
 				valid = 0
 # dso todo prüfen ob der zug richtig abgesetzt wurde
-				if move[0] == lrtocalc:
-					valid = 1
+				#if move[0] == lrtocalc:
+				#	valid = 1
 				if len(move) > 1:
 					if move[1] == lrtocalc:
 						valid = 1
+						
 				if len(move) == 3:
 					if move[2] == lrtocalc:
 						valid = 1
 				if valid == 0:
 					boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+					
 				
-				
-				else:
-					movedto = lrtocalc 
+				movedto = lrtocalc 
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			boardfunctions.ledsOff()
 			boardfunctions.clearSerial()
@@ -627,60 +643,46 @@ dso field corection
 				castled = "h8f8"
 			if lrmove == "e8c8":
 				castled = "a8d8"
-			if castled =="h1f1" or castled == "a1d1" or castled == h8f8" or castled == "a8d8" :
+			if castled =="h1f1" or castled == "a1d1" or castled == "h8f8" or castled == "a8d8" :
 				print("move the rook")
 				lrfromcalc = (ord(castled[:1]) - 97) + ((int(castled[1:2]) - 1) * 8)
-				lrtocalc = (ord(castled[1:3]) - 97) + ((int(castled[1:4]) - 1) * 8)
+				lrtocalc = (ord(castled[2:3]) - 97) + ((int(castled[3:4]) - 1) * 8)
 				
 				boardfunctions.clearBoardData()
 				boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
 				while movedto != lrtocalc and status == "started":
 					move = boardfunctions.waitMove()
-					valid = 0
+					valid = 1
+					castled=""
 		# dso todo prüfen ob der zug richtig abgesetzt wurde
-					#if move[0] == lrtocalc:
-					#	valid = 1
-					if len(move) > 1:
-						if move[1] == lrtocalc:
-							valid = 1
-					
+#					
+#					cmove = move[1] * -1
+#					if cmove == lrtocalc:
+#							print(cmove)
+#							valid = 1
+#							castled=""
+				
 					if valid == 0:
 						boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 					else:
-						
-						boardfunctions.ledsOff()
 						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-						boardfunctions.clearSerial()
+					movedto = lrtocalc	
+			#boardfunctions.ledsOff()
+			
+			boardfunctions.clearSerial()
 			 
 			
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			board.push(mv)
-#			boardfunctions.ledsOff()
+			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1
 	
-		#print(board)
-# dso timefix 5.10.21
+		# dso timefix 5.10.21
 		
-		if playeriswhite == 0:
-			whiteclock = whiteclock - ((movestart - startzeit) * 1000)
-			whiteclock = whiteclock + whiteincrement
-		else:
-			blackclock = blackclock - ((movestart - startzeit) * 1000)
-			blackclock = blackclock + blackincrement
-
-		wtext = ""
-		if whiteclock//60000 == 0:
-			wtext = str(whiteclock//1000).replace(".0","") + " secs      "
-		else:
-			wtext = str(whiteclock//60000).replace(".0","") + " mins      "
-		epaper.writeText(10,wtext)
-		btext = ""
-		if blackclock // 60000 == 0:
-			btext = str(blackclock // 1000).replace(".0", "") + " secs      "
-		else:
-			btext = str(blackclock // 60000).replace(".0", "") + " mins      "
-		epaper.writeText(1, btext)
+		
+		epaper.writeText(10,whitetime)
+		epaper.writeText(1, blacktime)
 
 		if starttime < 0:
 			starttime = time.time()
@@ -691,7 +693,6 @@ dso field corection
 		pieces = []
 		for x in range(0,64):
 			pieces.append(str(chess.BaseBoard(sfen).piece_at(x)))
-		#boardfunctions.displayScreenBufferPartial()
 		fenlog = "/home/pi/centaur/fen.log"
 		f = open(fenlog, "w")
 		f.write(sfen)

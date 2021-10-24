@@ -29,12 +29,14 @@ import boardfunctions
 import chess
 import v2conf
 import os
+import ratingconf
 sys.path.append('/home/pi/v2/board')
 import epaper
 
-
+global ratingrange
 
 token = v2conf.lichesstoken
+ratingrange = ratingconf.rating_range
 
 
 pid = -1
@@ -93,83 +95,80 @@ def newGameThread():
 
 #mod by dso 3.10.21
 	gtime = str(sys.argv[2])
-#	print(gtime)
 	ginc = str(sys.argv[3])
-#	print(ginc)
 	grated = str(sys.argv[4])
-#	print(grated)
 	gcolor = str(sys.argv[5])
-#	print(gcolor)
+
+
+
 	epaper.writeText(5, f'time {gtime} , {ginc}')
 	epaper.writeText(6, f'ratedt={grated}')
 	epaper.writeText(7, f'color={gcolor}')
+	epaper.writeText(8, f'ratingrange={ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="white"):
-		client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=None)
+		client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="black"):
-		client.board.seek(10, 5, rated=False, variant='standard', color='black', rating_range=None)
+		client.board.seek(10, 5, rated=False, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="random"):
-		client.board.seek(10, 5, rated=False, variant='standard', color='random', rating_range=None)
+		client.board.seek(10, 5, rated=False, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="True" and gcolor=="white"):
-		client.board.seek(10, 5, rated=True, variant='standard', color='white', rating_range=None)
+		client.board.seek(10, 5, rated=True, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="True" and gcolor=="black"):
-		client.board.seek(10, 5, rated=True, variant='standard', color='black', rating_range=None)
+		client.board.seek(10, 5, rated=True, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="True" and gcolor=="random"):
-		client.board.seek(10, 5, rated=True, variant='standard', color='random', rating_range=None)
+		client.board.seek(10, 5, rated=True, variant='standard', color='random', rating_range=f'{ratingrange}')
 	
 	if (gtime=='15' and ginc=='10' and grated=="False" and gcolor=="white"):
-		client.board.seek(15, 10, rated=False, variant='standard', color='white', rating_range=None)
+		client.board.seek(15, 10, rated=False, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="False" and gcolor=="black"):
-		client.board.seek(15, 10, rated=False, variant='standard', color='black', rating_range=None)
+		client.board.seek(15, 10, rated=False, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="False" and gcolor=="random"):
-		client.board.seek(15, 10, rated=False, variant='standard', color='random', rating_range=None)
+		client.board.seek(15, 10, rated=False, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="white"):
-			client.board.seek(15, 10, rated=True, variant='standard', color='white', rating_range=None)
+			client.board.seek(15, 10, rated=True, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="white"):
-		client.board.seek(15, 10, rated=True, variant='standard', color='black', rating_range=None)
+		client.board.seek(15, 10, rated=True, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="random"):
-		client.board.seek(15, 10, rated=True, variant='standard', color='random', rating_range=None)
+		client.board.seek(15, 10, rated=True, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='0' and grated=="False" and gcolor=="white"):
-		client.board.seek(30, 0, rated=False, variant='standard', color='white', rating_range=None)
+		client.board.seek(30, 0, rated=False, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='0' and grated=="False" and gcolor=="black"):
-		client.board.seek(30, 0, rated=False, variant='standard', color='black', rating_range=None)
+		client.board.seek(30, 0, rated=False, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='0' and grated=="False" and gcolor=="random"):
-		client.board.seek(30, 0, rated=False, variant='standard', color='random', rating_range=None)
+		client.board.seek(30, 0, rated=False, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='0' and grated=="True" and gcolor=="white"):
-		client.board.seek(30, 0, rated=True, variant='standard', color='white', rating_range=None)
+		client.board.seek(30, 0, rated=True, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='0' and grated=="True" and gcolor=="black"):
-		client.board.seek(30, 0, rated=True, variant='standard', color='black', rating_range=None)
+		client.board.seek(30, 0, rated=True, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='0' and grated=="True" and gcolor=="random"):
-		client.board.seek(30, 0, rated=True, variant='standard', color='random', rating_range=None)
+		client.board.seek(30, 0, rated=True, variant='standard', color='random', rating_range=f'{ratingrange}')
 	
 	if (gtime=='30' and ginc=='20' and grated=="False" and gcolor=="white"):
-		client.board.seek(30, 20, rated=False, variant='standard', color='white', rating_range=None)
+		client.board.seek(30, 20, rated=False, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='20' and grated=="False" and gcolor=="black"):
-		client.board.seek(30, 20, rated=False, variant='standard', color='black', rating_range=None)
+		client.board.seek(30, 20, rated=False, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='20' and grated=="False" and gcolor=="random"):
-		client.board.seek(30, 20, rated=False, variant='standard', color='random', rating_range=None)
+		client.board.seek(30, 20, rated=False, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='20' and grated=="True" and gcolor=="white"):
-		client.board.seek(30, 20, rated=True, variant='standard', color='white', rating_range=None)
+		client.board.seek(30, 20, rated=True, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='20' and grated=="True" and gcolor=="black"):
-		client.board.seek(30, 20, rated=True, variant='standard', color='black', rating_range=None)
+		client.board.seek(30, 20, rated=True, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='30' and ginc=='20' and grated=="True" and gcolor=="random"):
-		client.board.seek(30, 20, rated=True, variant='standard', color='random', rating_range=None)
+		client.board.seek(30, 20, rated=True, variant='standard', color='random', rating_range=f'{ratingrange}')
 	
 	if (gtime=='60' and ginc=='20' and grated=="False" and gcolor=="white"):
-		client.board.seek(60, 20, rated=False, variant='standard', color='white', rating_range=None)
+		client.board.seek(60, 20, rated=False, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='60' and ginc=='20' and grated=="False" and gcolor=="black"):
-		client.board.seek(60, 20, rated=False, variant='standard', color='black', rating_range=None)
+		client.board.seek(60, 20, rated=False, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='60' and ginc=='20' and grated=="False" and gcolor=="random"):
-		client.board.seek(60, 20, rated=False, variant='standard', color='random', rating_range=None)
+		client.board.seek(60, 20, rated=False, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='60' and ginc=='20' and grated=="True" and gcolor=="white"):
-		client.board.seek(60, 20, rated=True, variant='standard', color='white', rating_range=None)
+		client.board.seek(60, 20, rated=True, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='60' and ginc=='20' and grated=="True" and gcolor=="black"):
-		client.board.seek(60, 20, rated=True, variant='standard', color='black', rating_range=None)
+		client.board.seek(60, 20, rated=True, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='60' and ginc=='20' and grated=="True" and gcolor=="random"):
-		client.board.seek(60, 20, rated=True, variant='standard', color='random', rating_range=None)
+		client.board.seek(60, 20, rated=True, variant='standard', color='random', rating_range=f'{ratingrange}')
 	
-
-
-# boardfunctions.writeText(7, 'Game ID')
 
 # Wait for a game to start and get the game id!
 gameid = ""
@@ -223,6 +222,7 @@ def stateThread():
 	global blackincrement
 	global resign
 	global winner
+	global cwinner
 	global wtime
 	global btime
 	global whitetime
@@ -231,7 +231,10 @@ def stateThread():
 	global blackrating
 	global message1
 	global sound
-	while running:
+	global wking
+	global bking
+	status =""
+	while running and status != "mate" and status != "draw" and status != "resign" and status != "aborted" and status != "outoftime" and status != "timeout":
 		buttonPress=0
 		gamestate = client.board.stream_game_state(gameid)
 		for state in gamestate:
@@ -286,6 +289,9 @@ def stateThread():
 					remotemoves = state.get('moves')
 				if ('status' in state.keys()):
 					status = state.get('status')
+			if status == "mate":
+				winner = str(state.get('winner'))
+
 			remotemoves = str(remotemoves)
 			status = str(status)
 # dso add events and stop the game
@@ -305,10 +311,10 @@ def stateThread():
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Resign')
-				winner = str(state.get('winner'))
-				epaper.writeText(12, winner +' wins')
+				cwinner = str(state.get('winner'))
+				epaper.writeText(12, cwinner +' wins')
 				epaper.writeText(13,'pls wait restart..')
-				time.sleep(3)
+				time.sleep(15)
 				os._exit(0)
 				#running = False
 			if status == 'aborted':
@@ -318,35 +324,35 @@ def stateThread():
 				winner = 'No Winner'
 				epaper.writeText(12, 'No winner')
 				epaper.writeText(13,'pls wait restart..')
-				time.sleep(3)
+				time.sleep(15)
 				os._exit(0)
 				
 			if status == 'outoftime':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Out of time')
-				winner = str(state.get('winner'))
-				epaper.writeText(12, winner +' wins')
+				cwinner = str(state.get('winner'))
+				epaper.writeText(12, cwinner +' wins')
 				epaper.writeText(13,'pls wait restart..')
-				time.sleep(3)
+				time.sleep(15)
 				os._exit(0)
 			if status == 'timeout':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Out of time')
-				winner = str(state.get('winner'))
-				epaper.writeText(12, winner +' wins')
+				cwinner = str(state.get('winner'))
+				epaper.writeText(12, cwinner +' wins')
 				epaper.writeText(13,'pls wait restart..')
-				time.sleep(3)
+				time.sleep(15)
 				os._exit(0)
 			if status == 'draw':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 				epaper.writeText(11, 'Draw')
-				winner = str(state.get('winner'))
-				epaper.writeText(12, winner +' No Winner')
+				cwinner = str(state.get('winner'))
+				epaper.writeText(12, cwinner +' No Winner')
 				epaper.writeText(13,'pls wait restart..')
-				time.sleep(3)
+				time.sleep(15)
 				os._exit(0)
 				
 						
@@ -368,9 +374,7 @@ def stateThread():
 				
 
 			time.sleep(0.2)
-
-
-#print("Starting thread to track the game on Lichess")
+# dso start lichess message threat
 st = threading.Thread(target=stateThread, args=())
 st.daemon = True
 st.start()
@@ -388,12 +392,10 @@ while playeriswhite == -1:
 if playeriswhite == 0:
 	lastmove = "1234"
 	remotemoves = "1234"
-#    boardfunctions.writeText(8, 'Black')
 
 # ready for white
 ourturn = 1
-#if playeriswhite == 0 or playeriswhite == 1:
-#	ourturn = 0
+
 
 boardfunctions.clearBoardData()
 
@@ -416,6 +418,8 @@ epaper.drawBoard(pieces)
 
 client.board.post_message(gameid, 'I\'m playing with an external board, can\'t chat - I\'m not a bot, sry if it struggle, - have fun' , spectator=False)
 resign = 1
+bking = 0
+wking = 0
 while (status == "started") and ourturn != 0 :
 
 	if ourturn == 1:
@@ -431,16 +435,17 @@ while (status == "started") and ourturn != 0 :
 
 	if ourturn == 1 and status == "started" and lastmove != '1234':
 		# Wait for the player's move
+		epaper.writeText(10,whitetime)
+		epaper.writeText(1, blacktime)
 		move = []
 		while len(move) <=1 :
-		# print(str(startzeit-startzeit))
-			move = boardfunctions.MywaitMove()
+				move = boardfunctions.MywaitMove()
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			if len(move) == 1:
 				if move[0] == 200: #back
 					os._exit()
 			
-			#if move[0] == 201: #tick
+				#if move[0] == 201: #tick
 				if move[0] == 202: #UP
 					client.board.offer_draw(gameid)
 				if move[0] == 203: #down
@@ -495,13 +500,13 @@ while (status == "started") and ourturn != 0 :
 			if (mv in board.legal_moves):
 				
 				#print("Castled")
-				if lastmove == "e1g1":
+				if lastmove == "e1g1" and wking == 0:
 					castled = "h1f1"
-				if lastmove == "e1c1":
+				if lastmove == "e1c1" and wking == 0:
 					castled = "a1d1"
-				if lastmove == "e8g8":
+				if lastmove == "e8g8" and bking == 0:
 					castled = "h8f8"
-				if lastmove == "e8c8":
+				if lastmove == "e8c8" and bking == 0:
 					castled = "a8d8"
 				
 							
@@ -544,6 +549,10 @@ while (status == "started") and ourturn != 0 :
 					board.push(mv)
 					ourturn = 0
 					halfturn = halfturn + 1
+					if fromln == "e1":
+						wking = 1
+					if fromln == "e8":
+						bking = 1
 #dso todo zugrückführung bei falschen zug										
 # old place outturn ans halfturn
 			else:
@@ -565,8 +574,7 @@ while (status == "started") and ourturn != 0 :
 				
 		
 		
-		epaper.writeText(10,whitetime)
-		epaper.writeText(1, blacktime)
+
 	
 		fen = board.fen()
 		sfen = fen[0 : fen.index(" ")]
@@ -595,11 +603,13 @@ while (status == "started") and ourturn != 0 :
         # Here we wait to get a move from the other player on lichess
 		
 		startzeit = time.time()
-		
-		while (status == "started" or status == "mate") and str(remotemoves)[-4:] == lastmove : 
+		epaper.writeText(10,whitetime)
+		epaper.writeText(1, blacktime)
+		while (status == "started" or status == "mate") and str(remotemoves)[-4:] == lastmove and winner != 'white' : 
+#			print(winner)
 			time.sleep(0.5)
 		movestart= time.time()
-		if status == "started" or status == "mate":
+		if status == "started" or status == 'mate' or winner != "white":
 			# There's an incoming move to deal with			
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			rr = "   " + str(remotemoves)
@@ -613,7 +623,7 @@ while (status == "started") and ourturn != 0 :
 			boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
 			# Then wait for a piece to be moved TO that position
 			movedto = -1
-			while movedto != lrtocalc and (status == "started" or status =="mate"):
+			while movedto != lrtocalc and winner != 'white' and (status == "started" or status =="mate"):
 				move = boardfunctions.MywaitMove()
 				valid = 0
 # dso todo prüfen ob der zug richtig abgesetzt wurde
@@ -623,25 +633,26 @@ while (status == "started") and ourturn != 0 :
 					if move[1] == lrtocalc:
 						valid = 1
 						
+						
 				if len(move) == 3:
 					if move[2] == lrtocalc:
 						valid = 1
+
 				if valid == 0:
 					boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
 					
 				
 				movedto = lrtocalc 
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-			boardfunctions.ledsOff()
-			boardfunctions.clearSerial()
+
 # check for caslte
-			if lrmove == "e1g1":
+			if lrmove == "e1g1" and wking == 0:
 				castled = "h1f1"
-			if lrmove == "e1c1":
+			if lrmove == "e1c1" and wking == 0:
 				castled = "a1d1"
-			if lrmove == "e8g8":
+			if lrmove == "e8g8" and bking == 0:
 				castled = "h8f8"
-			if lrmove == "e8c8":
+			if lrmove == "e8c8" and bking == 0:
 				castled = "a8d8"
 			if castled =="h1f1" or castled == "a1d1" or castled == "h8f8" or castled == "a8d8" :
 				print("move the rook")
@@ -651,6 +662,7 @@ while (status == "started") and ourturn != 0 :
 				boardfunctions.clearBoardData()
 				boardfunctions.ledFromTo(lrfromcalc, lrtocalc)
 				while movedto != lrtocalc and status == "started":
+					
 					move = boardfunctions.waitMove()
 					valid = 1
 					castled=""
@@ -667,26 +679,22 @@ while (status == "started") and ourturn != 0 :
 					else:
 						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 					movedto = lrtocalc	
-			#boardfunctions.ledsOff()
-			
+	
 			boardfunctions.clearSerial()
 			 
-			
+			if fromln == "e1":
+				wking = 1
+			if fromln == "e8":
+				bking = 1
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			board.push(mv)
 			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1
+			lastmove="2345"
 	
 		# dso timefix 5.10.21
 		
-		
-		epaper.writeText(10,whitetime)
-		epaper.writeText(1, blacktime)
-
-		if starttime < 0:
-			starttime = time.time()
-# eingerückt		
 		fen = board.fen()
 		sfen = fen[0 : fen.index(" ")]
 		baseboard = chess.BaseBoard(sfen)
@@ -704,7 +712,8 @@ running = False
 epaper.writeText(11, 'Game over')
 epaper.writeText(12, f'Winner: {winner}')
 epaper.writeText(13, 'reason =' + status)
-time.sleep(5)
-epaper.clearScreen()
+time.sleep(10)
+#epaper.clearScreen()
+#boardfunctions.clearSerial()
 time.sleep(2)
-#os._exit(0)
+os._exit(0)

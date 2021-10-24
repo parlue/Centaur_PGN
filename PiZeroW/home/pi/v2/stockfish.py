@@ -1,7 +1,7 @@
 # Play pure stockfish without DGT Centaur Adaptive Play
 #
-import gamemanager
-import epaper
+from DGTCentaurMods.game import gamemanager
+from DGTCentaurMods.display import epaper
 
 import time
 import chess
@@ -25,6 +25,10 @@ if computerarg == "black":
 if computerarg == "random":
 	computeronturn = randint(0,1)
 
+if computeronturn == 0:
+	gamemanager.setGameInfo(str(eloarg) + " ELO", "", "", "Player", "Stockfish UCI")
+else:
+	gamemanager.setGameInfo(str(eloarg) + " ELO", "", "", "Stockfish UCI", "Player")
 
 def keyCallback(key):
 	# This function will receive any keys presses on the keys

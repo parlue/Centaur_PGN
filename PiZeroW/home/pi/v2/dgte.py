@@ -981,7 +981,7 @@ epaper.writeText(0,'Connect remote')
 epaper.writeText(1,'Device Now')
 #time.sleep(3)
 start = time.time()
-
+# rfcomm0
 while exists("/dev/rfcomm0") == False and (time.time() - start < 100):
 	time.sleep(.2)
 

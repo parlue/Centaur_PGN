@@ -17,6 +17,7 @@ import boardfunctions
 import time
 import urllib
 import requests
+import socket
 
 from datetime import date
 from types import SimpleNamespace
@@ -37,10 +38,15 @@ def connectiontest():
 	try:
 		request = requests.get(url, timeout=timeout)
 		boardfunctions.writeText(2, "Internet alive")
+		host_name = socket.gethostname() 
+		host_ip = socket.gethostbyname(host_name) 
+		boardfunctions.writeText(3, "IP= "+ str(host_ip))
+		boardfunctions.writeText(4, "Hostname= " + str(host_name))
+
 	except (requests.ConnectionError, requests.Timeout) as exception:
-		boardfunctions.writeText(2, "No connection")	 
-	boardfunctions.writeText(3, "ciao...")
-	time.sleep(1)
+		boardfunctions.writeText(5, "No connection")	 
+	boardfunctions.writeText(6, "ciao...")
+	time.sleep(6)
 
 
 

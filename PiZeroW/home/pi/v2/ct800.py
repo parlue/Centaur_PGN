@@ -56,7 +56,7 @@ def eventCallback(event):
 		curturn = 1
 		epaper.writeText(0,"White turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci("engines/ct800")
+			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/ct800")
 			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
 			engine.configure(options)
 			limit = chess.engine.Limit(time=5)
@@ -69,7 +69,7 @@ def eventCallback(event):
 		curturn = 0
 		epaper.writeText(0,"Black turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci("engines/ct800")
+			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/ct800")
 			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
 			engine.configure(options)
 			limit = chess.engine.Limit(time=5)

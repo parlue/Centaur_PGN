@@ -1,7 +1,7 @@
 from flask import Flask, render_template, Response
-from DGTCentaurMods.db import models
-from DGTCentaurMods.board import centaur
-from board import LiveBoard
+from import models
+from import centaur
+from boardfunctions import LiveBoard
 from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData

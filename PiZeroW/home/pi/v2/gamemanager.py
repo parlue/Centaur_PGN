@@ -7,17 +7,16 @@
 
 # TODO
 
-import boardfunctions
+import boardfuntions
 import sys
 sys.path.append('/home/pi/v2/board')
 import epaper
-import models
+from DGTCentaurMods.db import models
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, func
 import threading
 import time
 import chess
-import sys
 import inspect
 
 # Some useful constants
@@ -37,7 +36,7 @@ newgame = 0
 keycallbackfunction = None
 movecallbackfunction = None
 eventcallbackfunction = None
-board = chess.Board()
+cboard = chess.Board()
 curturn = 1
 sourcesq = -1
 legalsquares = []
@@ -63,7 +62,7 @@ def keycallback(keypressed):
 def fieldcallback(field):
     # Receives field events. Positive is a field lift, negative is a field place. Numbering 0 = a1, 63 = h8
     # Use this to calculate moves
-    global board
+    global cboard
     global curturn
     global movecallbackfunction
     global sourcesq
@@ -86,7 +85,7 @@ def fieldcallback(field):
         field = field * -1
     field = field - 1
     # Check the piece colour against the current turn
-    pc = board.color_at(field)
+    pc = cboard.color_at(field)
     vpiece = 0
     if curturn == 0 and pc == False:
         vpiece = 1
@@ -96,7 +95,7 @@ def fieldcallback(field):
     squarecol = (field % 8)
     squarecol = 7 - squarecol
     fieldname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
-    legalmoves = board.legal_moves
+    legalmoves = cboard.legal_moves
     lmoves = list(legalmoves)
     if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
         # Generate a list of places this piece can move to
@@ -158,7 +157,7 @@ def fieldcallback(field):
             # Promotion
             # If this is a WPAWN and squarerow is 7
             # or a BPAWN and squarerow is 0
-            pname = str(board.piece_at(sourcesq))
+            pname = str(cboard.piece_at(sourcesq))
             pr = ""
             if (field // 8) == 7 and pname == "P":
                 screenback = epaper.epaperbuffer.copy()
@@ -237,15 +236,15 @@ def fieldcallback(field):
                 mv = computermove
             mv = fromname + toname + pr
             # Make the move and update fen.log
-            board.push(chess.Move.from_uci(mv))
+            cboard.push(chess.Move.from_uci(mv))
             fenlog = "/home/pi/centaur/fen.log"
             f = open(fenlog, "w")
-            f.write(board.fen())
+            f.write(cboard.fen())
             f.close()
             gamemove = models.GameMove(
                 gameid=gamedbid,
                 move=mv,
-                fen=str(board.fen())
+                fen=str(cboard.fen())
             )
             session.add(gamemove)
             session.commit()
@@ -257,9 +256,7 @@ def fieldcallback(field):
                 movecallbackfunction(mv)
             boardfunctions.beep(boardfunctions.SOUND_GENERAL)
             # Check the outcome
-            print("check outcome")
-            outc = board.outcome(claim_draw=True)
-            print(outc)
+            outc = cboard.outcome(claim_draw=True)
             if outc == None or outc == "None" or outc == 0:
                 # Switch the turn
                 if curturn == 0:
@@ -276,7 +273,7 @@ def fieldcallback(field):
                 tosend[len(tosend) - 1] = boardfunctions.checksum(tosend)
                 boardfunctions.ser.write(tosend)
                 # Depending on the outcome we can update the game information for the result
-                resultstr = str(board.result())
+                resultstr = str(cboard.result())
                 tg = session.query(models.Game).filter(models.Game.id == gamedbid).first()
                 tg.result = resultstr
                 session.flush()
@@ -291,7 +288,7 @@ def gameThread(eventCallback, moveCallback, keycallback):
     global kill
     global startstate
     global newgame
-    global board
+    global cboard
     global curturn
     global keycallbackfunction
     global movecallbackfunction
@@ -327,10 +324,10 @@ def gameThread(eventCallback, moveCallback, keycallback):
                         eventCallback(EVENT_WHITE_TURN)
                         newgame = 1
                         curturn = 1
-                        board = chess.Board()
+                        cboard = chess.Board()
                         fenlog = "/home/pi/centaur/fen.log"
                         f = open(fenlog, "w")
-                        f.write(board.fen())
+                        f.write(cboard.fen())
                         f.close()
                         boardfunctions.beep(boardfunctions.SOUND_GENERAL)
                         time.sleep(0.3)
@@ -353,7 +350,7 @@ def gameThread(eventCallback, moveCallback, keycallback):
                         gamemove = models.GameMove(
                             gameid = gamedbid,
                             move = '',
-                            fen = str(board.fen())
+                            fen = str(cboard.fen())
                         )
                         session.add(gamemove)
                         session.commit()

@@ -4,7 +4,7 @@ It was a long way to go before it was possible to expand the DGT Centaur softwar
 made the work on the DGT Centaur a lot easier with his decompilation. 
 
 Features:
-All besed und work with a Pi Wero W with WLAn and Bluetooth
+All based und work with a Pi Zero W with WLAN and Bluetooth
 Setup WIFI
 Bindd Bluettoth
 DGT Board Emulator comaptible with: Rabbit , Picochess, Chess for Andriod
@@ -13,6 +13,7 @@ Lichess Playing stand alone
 Playing UCI Engine like CT800
 PGN Support for all modes
 PGN Analytics
+PGN Support for the original Centaur
 Livebaord via Webinterface
 Some Configuration tools
 

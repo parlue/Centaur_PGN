@@ -2,36 +2,21 @@ This is a merge of two projects about the DGT Centaur
 EdNekebo spend a lot of time to describe the internal interfaces. With my Unix experience I will megre the best of both sides to a really potential project.
 It was a long way to go before it was possible to expand the DGT Centaur software with new functions. Big thanks to Ed Nekebno, who
 made the work on the DGT Centaur a lot easier with his decompilation. 
-In the first step, I have released the option of saving games on a USB stick.
-If other inventors want to take part of this project, feel free to be a part of this.
-Big Thank's also for Topschach Benny starting the first Mods, codes, idea's and Hardwaresupport.
 
-/download vailable releases as a image
-/boot FAT partion for boot and config files, so any User can edit it with windows
-/mnt only partition with write access - dynamic chessfiles and PGN export are there
-/home/pi/v2 location for 80% of the V2 files
-/etc/init.d location for startup parameters
-/etc/networks location for network changes
-/media mounting point of the USB stick
+Features:
+All besed und work with a Pi Wero W with WLAn and Bluetooth
+Setup WIFI
+Bindd Bluettoth
+DGT Board Emulator comaptible with: Rabbit , Picochess, Chess for Andriod
+DGT Board Revelation Emutalor for LED Support
+Lichess Playing stand alone
+Playing UCI Engine like CT800
+PGN Support for all modes
+PGN Analytics
+Livebaord via Webinterface
+Some Configuration tools
 
-Simple roadmap
+Based und BusterOS 10
 
-1. Networksupport for PI Zero - done
-2. Bootmenu - done 
-3. PGN export via Menu - done
-4. Import of a configuration file with lichess API key - done
-5. Lichessplaying - done
-6. Version update - done 99%
-7. PGN export via email 70%
-8. Connection test -done
-9. Bluetooth - open
-10. html server open
 
-inofficial not confirmed next steps (I don't know if I have the time and motivation to do it)
-
-1. FICS playing
-2. ICC playing
-3. Export analizes PGNs
-4. DGT Board emulator for White Pawn integration - 90%
-5. Engine for normal chessplaying - no chessfriend -40%
 

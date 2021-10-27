@@ -14,6 +14,19 @@ from PIL import Image, ImageDraw, ImageFont
 import pathlib
 import socket
 
+SOUND_GENERAL = 1
+SOUND_FACTORY = 2
+SOUND_POWER_OFF = 3
+SOUND_POWER_ON = 4
+SOUND_WRONG = 5
+SOUND_WRONG_MOVE = 6
+BTNBACK = 1
+BTNTICK = 2
+BTNUP = 3
+BTNDOWN = 4
+BTNHELP = 5
+BTNPLAY = 6
+
 # Open the serial port, baudrate is 1000000
 ser = serial.Serial("/dev/ttyS0", baudrate=1000000, timeout=0.2)
 font14 = ImageFont.truetype("/home/pi/v2/Font.ttc", 14)
@@ -931,6 +944,30 @@ def printBoardState():
 			print("| " + str(state[x+y]) + " ", end='')
 		print("|\r")
 	print("+---+---+---+---+---+---+---+---+")
+	
+
+def checksum(barr):
+	csum = 0
+	for c in bytes(barr):
+		csum += c
+	barr_csum = (csum % 128)
+	return barr_csum
+
+def rotateField(field):
+	lrow = (field // 8)
+	lcol = (field % 8)
+	newField = (7 - lrow) * 8 + lcol
+	return newField
+
+def rotateFieldHex(fieldHex):
+	squarerow = (fieldHex // 8)
+	squarecol = (fieldHex % 8)
+	field = (7 - squarerow) * 8 + squarecol
+	return field
+
+def convertField(field):
+	square = chr((ord('a') + (field % 8))) + chr(ord('1') + (field // 8))
+	return square
 
 # This section is the start of a new way of working with the board functions
 import threading

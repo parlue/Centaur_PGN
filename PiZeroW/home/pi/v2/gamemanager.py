@@ -7,11 +7,11 @@
 
 # TODO
 
-import boardfuntions
+import boardfunctions
 import sys
 sys.path.append('/home/pi/v2/board')
 import epaper
-from DGTCentaurMods.db import models
+import models
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, func
 import threading
@@ -137,7 +137,7 @@ def fieldcallback(field):
             legalsquares = []
             legalsquares.append(tsq)
     if place == 1 and field not in legalsquares:
-        boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
+        boardfunctions.beep(SOUND_WRONG_MOVE)
     if place == 1 and field in legalsquares:
         newgame = 0
         if field == sourcesq:
@@ -254,7 +254,7 @@ def fieldcallback(field):
             forcemove = 0
             if movecallbackfunction != None:
                 movecallbackfunction(mv)
-            boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+            boardfunctions.beep(SOUND_GENERAL)
             # Check the outcome
             outc = cboard.outcome(claim_draw=True)
             if outc == None or outc == "None" or outc == 0:
@@ -329,9 +329,9 @@ def gameThread(eventCallback, moveCallback, keycallback):
                         f = open(fenlog, "w")
                         f.write(cboard.fen())
                         f.close()
-                        boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+                        boardfunctions.beep(SOUND_GENERAL)
                         time.sleep(0.3)
-                        boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+                        boardfunctions.beep(SOUND_GENERAL)
                         # Log a new game in the db
                         game = models.Game(
                             source=source,

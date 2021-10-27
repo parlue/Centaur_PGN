@@ -240,7 +240,7 @@ while True:
 		result = doMenu(enginemenu)
 		print(result)
 		if result == 'CT800':
-			ct800menu = {'white': 'White', 'black': 'Black', 'random': 'Random'}
+			ct800menu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 			color = doMenu(ct800menu)
 			print(color)
 			# Current game will launch the screen for the current

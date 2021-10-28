@@ -1,7 +1,0 @@
-lichesstoken = 1dfgdfg
-emailaddress = dhfsh
-smtpserver = fdhsf
-smtpuser = fhgfgh
-smtp_encryption = yes
-smtppassword = 
-subject = sfjghs

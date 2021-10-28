@@ -1,7 +1,6 @@
 This is a merge of two projects about the DGT Centaur
-EdNekebo spend a lot of time to describe the internal interfaces. With my Unix experience I will megre the best of both sides to a really potential project.
-It was a long way to go before it was possible to expand the DGT Centaur software with new functions. Big thanks to Ed Nekebno, who
-made the work on the DGT Centaur a lot easier with his decompilation. 
+
+Big THX to all involved People to add fantastic idea's and code or help to support this project with test devices and many hours beta testing.
 
 Features:
 All based und work with a Pi Zero W with WLAN and Bluetooth

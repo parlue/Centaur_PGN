@@ -1,4 +1,4 @@
-# dso lichess module
+# dso lichess  module based from Version 1 from EdNebeko
 # Run a standalone game on lichess
 # This is version four so we do it directly and with screen control!
 

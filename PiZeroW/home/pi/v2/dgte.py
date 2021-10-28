@@ -1,3 +1,4 @@
+# based on eboard.py EdNebeko
 # Emulate the DGT e-board protocol
 #
 # Pair first

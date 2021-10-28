@@ -2,8 +2,8 @@
 #
 # I am not really a python programmer, but the language choice here
 # made sense!
-#
-#
+# original board.py from ED
+# modified by dso 
 
 import serial
 import sys

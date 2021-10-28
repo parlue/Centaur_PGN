@@ -1,4 +1,10 @@
-This is a merge of two projects about the DGT Centaur
+This is a merge of two projects about the DGT Centaur 
+
+EdNekebo spend a lot of time to describe the internal interfaces. With my Unix experience I will megre the best of both sides to a really potential project.
+It was a long way to go before it was possible to expand the DGT Centaur software with new functions. Big thanks to Ed Nekebno, who made the work on the DGT Centaur a lot easier with his decompilation. 
+I spend alot time to bring it on a new OS and finalize the lichess modul.
+This version will be available as an Image for PI Zwero W and later a small Version for the original Pi Zero Board.
+There are some differents to the original branch. If you miss feature, you can follow Ed's project.
 
 Big THX to all involved People to add fantastic idea's and code or help to support this project with test devices and many hours beta testing.
 

@@ -86,7 +86,7 @@ def fieldcallback(field):
     field = field - 1
     # Check the piece colour against the current turn
     pc = cboard.color_at(field)
-    print(123)
+    print("123")
     vpiece = 0
     if curturn == 0 and pc == False:
         vpiece = 1

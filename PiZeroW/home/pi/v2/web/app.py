@@ -1,9 +1,10 @@
 from flask import Flask, render_template, Response
 import sys
 sys.path.append('/home/pi/v2')
-import models
-import centaur
-from fboard import LiveBoard
+from db import models
+from board import centaur
+import fboard 
+# from fboard import LiveBoard
 from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData
@@ -214,9 +215,9 @@ def generateVideoFrame():
 			if col == 8:
 				col = 0
 				row = row + 1
-		newmoddate = os.stat(str(pathlib.Path(__file__).parent.resolve()) + "/../web/static/epaper.jpg")[8]
+		newmoddate = os.stat(str("web/static/epaper.jpg"))[8]
 		if newmoddate != moddate:
-			sc = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../web/static/epaper.jpg")
+			sc = Image.open(str("web/static/epaper.jpg"))
 			moddate = newmoddate
 		image.paste(sc, (345 + 1216 - 130, 635))
 		image.paste(logo, (345 + 1216 - 130, 0), logo)

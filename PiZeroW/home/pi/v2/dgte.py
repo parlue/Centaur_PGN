@@ -1,7 +1,5 @@
 # Emulate the DGT e-board protocol
 #
-# Ed Nekebno
-#
 # Pair first
 # Connect when the display tells you to! Do not connect before.
 # BACK button exits
@@ -68,15 +66,24 @@ import serial
 import time
 import sys
 from os.path import exists
-import boardfunctions
-sys.path.append('/home/pi/v2/board')
-import epaper
+from board import board
+from display import epaper
+from db import models
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, MetaData, func
 import threading
 import chess
 import os
 from PIL import Image, ImageDraw, ImageFont
 import epd2in9d
 import pathlib
+import select
+import bluetooth
+import subprocess
+
+source = ""
+gamedbid = -1
+session = None
 
 debugcmds = 1
 
@@ -166,22 +173,23 @@ BQUEEN = 0x0c
 PIECE1 = 0x0d  # Magic piece: Draw
 PIECE2 = 0x0e  # Magic piece: White win
 PIECE3 = 0x0f  # Magic piece: Black win
-board = bytearray([EMPTY] * 64)
+cboard = bytearray([EMPTY] * 64)
 boardhistory = []
 turnhistory = []
 litsquares = []
+# board.beep
 startstate = bytearray(b'\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01')
 
 # Initialise epaper display
 epaper.initEpaper()
-epaper.clearScreen()
-if bytearray(boardfunctions.getBoardState()) != startstate:
+
+if bytearray(board.getBoardState()) != startstate:
 	epaper.writeText(0,'Place pieces')
 	epaper.writeText(1,'in startpos')
 	# As the centaur can light up squares - let's use the
 	# squares to help people out
-	while bytearray(boardfunctions.getBoardState()) != startstate:
-		rstate = boardfunctions.getBoardState()
+	while bytearray(board.getBoardState()) != startstate:
+		rstate = board.getBoardState()
 		tosend = bytearray(b'\xb0\x00\x0c\x06\x50\x05\x12\x00\x05')
 		# '\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x37\x36\x35\x34\x33\x32\x31\x30\x0d')
 		for x in range(0, 64):
@@ -192,54 +200,54 @@ if bytearray(boardfunctions.getBoardState()) != startstate:
 				if rstate[x] == 1:
 					tosend.append(x)
 		tosend[2] = len(tosend) + 1
-		tosend.append(boardfunctions.checksum(tosend))
-		boardfunctions.ser.write(tosend)
+		tosend.append(board.checksum(tosend))
+		board.ser.write(tosend)
 		time.sleep(0.5)
-	boardfunctions.ledsOff()
+	board.ledsOff()
 
 # As we can only detect piece presence on the centaur and not pieces, we must have a known start state
 print("Setup board")
-while bytearray(boardfunctions.getBoardState()) != startstate:
+while bytearray(board.getBoardState()) != startstate:
 	time.sleep(0.5)
-board[7] = WROOK
-board[6] = WKNIGHT
-board[5] = WBISHOP
-board[4] = WQUEEN
-board[3] = WKING
-board[2] = WBISHOP
-board[1] = WKNIGHT
-board[0] = WROOK
-board[15] = WPAWN
-board[14] = WPAWN
-board[13] = WPAWN
-board[12] = WPAWN
-board[11] = WPAWN
-board[10] = WPAWN
-board[9] = WPAWN
-board[8] = WPAWN
-board[55] = BPAWN
-board[54] = BPAWN
-board[53] = BPAWN
-board[52] = BPAWN
-board[51] = BPAWN
-board[50] = BPAWN
-board[49] = BPAWN
-board[48] = BPAWN
-board[63] = BROOK
-board[62] = BKNIGHT
-board[61] = BBISHOP
-board[60] = BQUEEN
-board[59] = BKING
-board[58] = BBISHOP
-board[57] = BKNIGHT
-board[56] = BROOK
+cboard[7] = WROOK
+cboard[6] = WKNIGHT
+cboard[5] = WBISHOP
+cboard[4] = WQUEEN
+cboard[3] = WKING
+cboard[2] = WBISHOP
+cboard[1] = WKNIGHT
+cboard[0] = WROOK
+cboard[15] = WPAWN
+cboard[14] = WPAWN
+cboard[13] = WPAWN
+cboard[12] = WPAWN
+cboard[11] = WPAWN
+cboard[10] = WPAWN
+cboard[9] = WPAWN
+cboard[8] = WPAWN
+cboard[55] = BPAWN
+cboard[54] = BPAWN
+cboard[53] = BPAWN
+cboard[52] = BPAWN
+cboard[51] = BPAWN
+cboard[50] = BPAWN
+cboard[49] = BPAWN
+cboard[48] = BPAWN
+cboard[63] = BROOK
+cboard[62] = BKNIGHT
+cboard[61] = BBISHOP
+cboard[60] = BQUEEN
+cboard[59] = BKING
+cboard[58] = BBISHOP
+cboard[57] = BKNIGHT
+cboard[56] = BROOK
 print("board is setup")
 cb = chess.Board()
 buffer1=bytearray([EMPTY] * 64)
-buffer1[:] = board
+buffer1[:] = cboard
 boardhistory.append(buffer1)
 turnhistory.append(1)
-boardfunctions.ledsOff()
+board.ledsOff()
 
 # Here we are emulating power on so push into the pretend eeprom
 EEPROM.append(EE_NOP)
@@ -316,7 +324,7 @@ eepromlastsendpoint = 4
 dodie = 0
 
 def drawCurrentBoard():
-	global board
+	global cboard
 	pieces = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 	for q in range(0,64):
 		squarerow = (q // 8)
@@ -324,7 +332,7 @@ def drawCurrentBoard():
 		squarerow = squarerow
 		squarecol = 7 - squarecol
 		field = (squarerow * 8) + squarecol
-		pieces[field] = board[q]
+		pieces[field] = cboard[q]
 	for x in range(0,64):
 		if pieces[x] == WPAWN:
 			pieces[x]='P'
@@ -365,13 +373,13 @@ def screenUpdate():
 	# Separate thread to display the screen/pieces should improve
 	# responsiveness. Be nice on the epaper and only update the display
 	# if the board state changes
-	global board
+	global cboard
 	global boardtoscreen
 	lastboard = ""
 	while True:
 		time.sleep(1.0)
-		if boardtoscreen == 1 and str(board) != lastboard:
-			lastboard = str(board)
+		if boardtoscreen == 1 and str(cboard) != lastboard:
+			lastboard = str(cboard)
 			drawCurrentBoard()
 		if boardtoscreen == 2:
 			drawCurrentBoard()
@@ -385,7 +393,7 @@ def pieceMoveDetectionThread():
 	global sendupdates
 	global timer
 	global WROOK,WBISHOP,WKNIGHT,WQUEEN,WKING,WPAWN,BROOK,BBISHOP,BKNIGHT,BQUEEN,BKING,BPAWN,EMPTY
-	global board
+	global cboard
 	global boardhistory
 	global turnhistory
 	global curturn
@@ -395,7 +403,9 @@ def pieceMoveDetectionThread():
 	global cb
 	global lastchangepacket
 	global startstate
-	global board
+	global source
+	global gamedbid
+	global session
 	lastlift = 0
 	kinglift = 0
 	lastfield = -1
@@ -407,11 +417,11 @@ def pieceMoveDetectionThread():
 		time.sleep(0.3)
 		if sendupdates == 1:
 			boardtoscreen = 1
-			boardfunctions.ser.read(10000)
+			board.ser.read(10000)
 			tosend = bytearray(b'\x83\x06\x50\x59')
-			boardfunctions.ser.write(tosend)
+			board.ser.write(tosend)
 			expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
-			resp = boardfunctions.ser.read(1000)
+			resp = board.ser.read(1000)
 			resp = bytearray(resp)
 			if (bytearray(resp) != expect):
 				if (resp[0] == 133 and resp[1] == 0):
@@ -433,25 +443,25 @@ def pieceMoveDetectionThread():
 									print("Black turn")
 								if curturn == 1:
 									# white
-									item = board[field]
+									item = cboard[field]
 									if (item == WROOK or item == WBISHOP or item == WKNIGHT or item == WQUEEN or item == WKING or item == WPAWN):
 										if liftedthisturn == 0:
-											lastlift = board[field]
+											lastlift = cboard[field]
 											lastfield = field
 										liftedthisturn = liftedthisturn + 1
 								if curturn == 0:
 									#black
-									item = board[field]
+									item = cboard[field]
 									if (item == BROOK or item == BBISHOP or item == BKNIGHT or item == BQUEEN or item == BKING or item == BPAWN):
 										if liftedthisturn == 0:
-											lastlift = board[field]
+											lastlift = cboard[field]
 											lastfield = field
 										liftedthisturn = liftedthisturn + 1
 								print(item)
 								print(lastlift)
 								print(liftedthisturn)
 								if lastlift != EMPTY and liftedthisturn < 2:
-									board[field] = EMPTY
+									cboard[field] = EMPTY
 									tosend = bytearray(b'')
 									tosend.append(DGT_FIELD_UPDATE | MESSAGE_BIT)
 									tosend.append(0)
@@ -463,7 +473,7 @@ def pieceMoveDetectionThread():
 									time.sleep(0.2)
 									print("SENT UP PACKET")
 									buffer1 = bytearray([EMPTY] * 64)
-									buffer1[:] = board
+									buffer1[:] = cboard
 									boardhistory.append(buffer1)
 									turnhistory.append(curturn)
 									#bt.write(tosend)
@@ -493,7 +503,7 @@ def pieceMoveDetectionThread():
 								# Here we check if this was a valid move to make. If not then indicate it on
 								# the board
 								# We need to convert lastfield and field to square names
-								boardfunctions.ledsOff()
+								board.ledsOff()
 								squarerow = (lastfield // 8)
 								squarecol = (lastfield % 8)
 								fromsq = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
@@ -516,8 +526,8 @@ def pieceMoveDetectionThread():
 										# This is a pawn promotion. So beep and ask what to promote to
 										tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
 										tosend[2] = len(tosend)
-										tosend[len(tosend) - 1] = boardfunctions.checksum(tosend)
-										boardfunctions.ser.write(tosend)
+										tosend[len(tosend) - 1] = board.checksum(tosend)
+										board.ser.write(tosend)
 										boardtoscreen = 0
 										time.sleep(1)
 										epaper.promotionOptions(9)
@@ -525,15 +535,15 @@ def pieceMoveDetectionThread():
 										# Wait for a button press and set last lift according to the choice
 										buttonPress = 0
 										while buttonPress == 0:
-											boardfunctions.ser.read(1000000)
+											board.ser.read(1000000)
 											tosend = bytearray(b'\x83\x06\x50\x59')
-											boardfunctions.ser.write(tosend)
-											resp = boardfunctions.ser.read(10000)
+											board.ser.write(tosend)
+											resp = board.ser.read(10000)
 											resp = bytearray(resp)
 											tosend = bytearray(b'\x94\x06\x50\x6a')
-											boardfunctions.ser.write(tosend)
+											board.ser.write(tosend)
 											expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
-											resp = boardfunctions.ser.read(10000)
+											resp = board.ser.read(10000)
 											resp = bytearray(resp)
 											if (resp.hex() == "b10011065000140a0501000000007d4700"):
 												buttonPress = 1  # BACK
@@ -553,8 +563,8 @@ def pieceMoveDetectionThread():
 									if lastlift == BPAWN and field < 8:
 										tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
 										tosend[2] = len(tosend)
-										tosend[len(tosend) - 1] = boardfunctions.checksum(tosend)
-										boardfunctions.ser.write(tosend)
+										tosend[len(tosend) - 1] = board.checksum(tosend)
+										board.ser.write(tosend)
 										boardtoscreen = 0
 										time.sleep(1)
 										epaper.promotionOptions(9)
@@ -562,15 +572,15 @@ def pieceMoveDetectionThread():
 										# Wait for a button press and set last lift according to the choice
 										buttonPress = 0
 										while buttonPress == 0:
-											boardfunctions.ser.read(1000000)
+											board.ser.read(1000000)
 											tosend = bytearray(b'\x83\x06\x50\x59')
-											boardfunctions.ser.write(tosend)
-											resp = boardfunctions.ser.read(10000)
+											board.ser.write(tosend)
+											resp = board.ser.read(10000)
 											resp = bytearray(resp)
 											tosend = bytearray(b'\x94\x06\x50\x6a')
-											boardfunctions.ser.write(tosend)
+											board.ser.write(tosend)
 											expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
-											resp = boardfunctions.ser.read(10000)
+											resp = board.ser.read(10000)
 											resp = bytearray(resp)
 											if (resp.hex() == "b10011065000140a0501000000007d4700"):
 												buttonPress = 1  # BACK
@@ -601,7 +611,7 @@ def pieceMoveDetectionThread():
 											bt.flush()
 											time.sleep(0.2)
 											buffer1 = bytearray([EMPTY] * 64)
-											buffer1[:] = board
+											buffer1[:] = cboard
 											boardhistory.append(buffer1)
 											turnhistory.append(curturn)
 											EEPROM.append(EMPTY + 64)
@@ -620,12 +630,12 @@ def pieceMoveDetectionThread():
 											bt.flush()
 											time.sleep(0.2)
 											buffer1 = bytearray([EMPTY] * 64)
-											buffer1[:] = board
+											buffer1[:] = cboard
 											boardhistory.append(buffer1)
 											turnhistory.append(curturn)
 											EEPROM.append(EMPTY + 64)
 											EEPROM.append(field + 8)
-									board[field] = lastlift
+									cboard[field] = lastlift
 									tosend = bytearray(b'')
 									tosend.append(DGT_FIELD_UPDATE | MESSAGE_BIT)
 									tosend.append(0)
@@ -638,7 +648,7 @@ def pieceMoveDetectionThread():
 									lastchangepacket = tosend
 									print("SENT DOWN PACKET")
 									buffer1 = bytearray([EMPTY] * 64)
-									buffer1[:] = board
+									buffer1[:] = cboard
 									boardhistory.append(buffer1)
 									turnhistory.append(curturn)
 									#bt.write(tosend)
@@ -646,7 +656,7 @@ def pieceMoveDetectionThread():
 									EEPROM.append(lastlift + 64)
 									EEPROM.append(field)
 									if lastfield != field:
-										boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+										board.beep(board.SOUND_GENERAL)
 									if curturn == 1:
 										# white
 										if lastlift != EMPTY:
@@ -692,6 +702,13 @@ def pieceMoveDetectionThread():
 										if cm in cb.legal_moves:
 											print("Move is allowed")
 											cb.push(cm)
+											gamemove = models.GameMove(
+												gameid=gamedbid,
+												move=mv,
+												fen=str(cb.fen())
+											)
+											session.add(gamemove)
+											session.commit()
 											print(cb.fen())
 										else:
 											# The move is not allowed or the move is the rook move after a king move in castling
@@ -707,8 +724,8 @@ def pieceMoveDetectionThread():
 												squarerow = (field // 8)
 												squarecol = 7 - (field % 8)
 												fromsq = (squarerow * 8) + squarecol
-												boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
-												boardfunctions.ledFromTo(fromsq, tosq)
+												board.beep(board.SOUND_WRONG_MOVE)
+												board.ledFromTo(fromsq, tosq)
 												# Need to maintain some sort of board history
 												# Then every piece up and down from this point until
 												# fromsq is refilled is a history rewind
@@ -718,9 +735,9 @@ def pieceMoveDetectionThread():
 												breakout = 0
 												while breakout == 0:
 													tosend = bytearray(b'\x83\x06\x50\x59')
-													boardfunctions.ser.write(tosend)
+													board.ser.write(tosend)
 													expect = bytearray(b'\x85\x00\x06\x06\x50\x61')
-													resp = boardfunctions.ser.read(1000)
+													resp = board.ser.read(1000)
 													resp = bytearray(resp)
 													if (bytearray(resp) != expect):
 														if (resp[0] == 133 and resp[1] == 0):
@@ -733,7 +750,7 @@ def pieceMoveDetectionThread():
 																# board. It should be a single byte. And send messages to say
 																# it has changed
 																for x in range(0, len(oldboard)):
-																	if oldboard[x] != board[x]:
+																	if oldboard[x] != cboard[x]:
 																		print("Found difference at")
 																		print(x)
 																		print(oldboard[x])
@@ -747,7 +764,7 @@ def pieceMoveDetectionThread():
 																		bt.write(tosend)
 																		EEPROM.append(oldboard[x] + 64)
 																		EEPROM.append(x)
-																board[:] = oldboard
+																cboard[:] = oldboard
 																for x in range(0, len(resp) - 1):
 																	if resp[x] == 65:
 																		squarerow = (fieldHex // 8)
@@ -761,7 +778,7 @@ def pieceMoveDetectionThread():
 													# If the user is resetting the board to the starting position then they
 													# will definitely make an illegal move. Then it will get trapped in this
 													# loop.
-													r = boardfunctions.getBoardState()
+													r = board.getBoardState()
 													if bytearray(r) == startstate:
 														breakout = 1
 													time.sleep(0.05)
@@ -769,7 +786,7 @@ def pieceMoveDetectionThread():
 													curturn = 1
 												else:
 													curturn = 0
-												boardfunctions.ledsOff()
+												board.ledsOff()
 												time.sleep(0.2)
 
 									kinglift = 0
@@ -794,7 +811,7 @@ def pieceMoveDetectionThread():
 
 			timer = timer + 1
 			if timer > 5:
-				r = boardfunctions.getBoardState()
+				r = board.getBoardState()
 				if bytearray(r) == startstate and startstateflag == 0:
 					print("start state detected")
 					fenlog = "/home/pi/centaur/fen.log"
@@ -804,46 +821,46 @@ def pieceMoveDetectionThread():
 					tosend = bytearray(
 						b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x50\x08\x00\x08\x59\x08\x00\x08\x50\x08\x00\x08\x00');
 					tosend[2] = len(tosend)
-					tosend[len(tosend) - 1] = boardfunctions.checksum(tosend)
-					boardfunctions.ser.write(tosend)
+					tosend[len(tosend) - 1] = board.checksum(tosend)
+					board.ser.write(tosend)
 					boardhistory = []
 					turnhistory = []
 					startstateflag = 1
-					board = bytearray([EMPTY] * 64)
-					board[7] = WROOK
-					board[6] = WKNIGHT
-					board[5] = WBISHOP
-					board[4] = WQUEEN
-					board[3] = WKING
-					board[2] = WBISHOP
-					board[1] = WKNIGHT
-					board[0] = WROOK
-					board[15] = WPAWN
-					board[14] = WPAWN
-					board[13] = WPAWN
-					board[12] = WPAWN
-					board[11] = WPAWN
-					board[10] = WPAWN
-					board[9] = WPAWN
-					board[8] = WPAWN
-					board[55] = BPAWN
-					board[54] = BPAWN
-					board[53] = BPAWN
-					board[52] = BPAWN
-					board[51] = BPAWN
-					board[50] = BPAWN
-					board[49] = BPAWN
-					board[48] = BPAWN
-					board[63] = BROOK
-					board[62] = BKNIGHT
-					board[61] = BBISHOP
-					board[60] = BQUEEN
-					board[59] = BKING
-					board[58] = BBISHOP
-					board[57] = BKNIGHT
-					board[56] = BROOK
+					cboard = bytearray([EMPTY] * 64)
+					cboard[7] = WROOK
+					cboard[6] = WKNIGHT
+					cboard[5] = WBISHOP
+					cboard[4] = WQUEEN
+					cboard[3] = WKING
+					cboard[2] = WBISHOP
+					cboard[1] = WKNIGHT
+					cboard[0] = WROOK
+					cboard[15] = WPAWN
+					cboard[14] = WPAWN
+					cboard[13] = WPAWN
+					cboard[12] = WPAWN
+					cboard[11] = WPAWN
+					cboard[10] = WPAWN
+					cboard[9] = WPAWN
+					cboard[8] = WPAWN
+					cboard[55] = BPAWN
+					cboard[54] = BPAWN
+					cboard[53] = BPAWN
+					cboard[52] = BPAWN
+					cboard[51] = BPAWN
+					cboard[50] = BPAWN
+					cboard[49] = BPAWN
+					cboard[48] = BPAWN
+					cboard[63] = BROOK
+					cboard[62] = BKNIGHT
+					cboard[61] = BBISHOP
+					cboard[60] = BQUEEN
+					cboard[59] = BKING
+					cboard[58] = BBISHOP
+					cboard[57] = BKNIGHT
+					cboard[56] = BROOK
 					buffer1 = bytearray([EMPTY] * 64)
-					buffer1[:] = board
+					buffer1[:] = cboard
 					boardhistory.append(buffer1)
 					turnhistory.append(1)
 					for x in range(0,64):
@@ -852,7 +869,7 @@ def pieceMoveDetectionThread():
 						tosend.append(0)
 						tosend.append(5)
 						tosend.append(x)
-						tosend.append(board[x])
+						tosend.append(cboard[x])
 						bt.write(tosend)
 						bt.flush()
 					EEPROM.append(WROOK + 64)
@@ -921,7 +938,7 @@ def pieceMoveDetectionThread():
 					EEPROM.append(56)
 					EEPROM.append(EE_BEGINPOS)
 					cb = chess.Board()
-					boardfunctions.ledsOff()
+					board.ledsOff()
 					curturn = 1
 					lastcurturn = 0
 					lastlift = 0
@@ -930,7 +947,24 @@ def pieceMoveDetectionThread():
 					startstateflag = 1
 					castlemode = 0
 					liftedthisturn = 0
-					boardfunctions.clearSerial()
+					board.clearSerial()
+					# Log a new game in the db
+					game = models.Game(
+						source=source
+					)
+					print(game)
+					session.add(game)
+					session.commit()
+					# Get the max game id as that is this game id and fill it into gamedbid
+					gamedbid = session.query(func.max(models.Game.id)).scalar()
+					# Now make an entry in GameMove for this start state
+					gamemove = models.GameMove(
+						gameid=gamedbid,
+						move='',
+						fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+					)
+					session.add(gamemove)
+					session.commit()
 					epaper.writeText(10, "White turn")
 				else:
 					if bytearray(r) != startstate:
@@ -938,15 +972,15 @@ def pieceMoveDetectionThread():
 				timer = 0
 		try:
 			tosend = bytearray(b'\x94\x06\x50\x6a')
-			boardfunctions.ser.write(tosend)
-			resp = boardfunctions.ser.read(1000)
+			board.ser.write(tosend)
+			resp = board.ser.read(1000)
 			resp = bytearray(resp)
 			if (resp.hex() == "b10011065000140a0501000000007d4700"):
 				# The back button has been pressed. Use this to exit eboard mode by setting a flag
 				# for the main thread
 				print("exit")
 				dodie = 1
-				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+				board.beep(board.SOUND_GENERAL)
 			if (resp.hex() == "b10010065000140a0504000000002a68"):
 				# The play button has been pressed. This button resends the last update move as
 				# the WP app occassionally misses it
@@ -963,29 +997,63 @@ def pieceMoveDetectionThread():
 				print(tosend.hex())
 				bt.write(tosend)
 				bt.flush()
-				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+				board.beep(board.SOUND_GENERAL)
 			if (resp.hex() == "b10010065000140a050200000000611d"):
 				# The down button will scroll back one in the history to allow aligning the start described
 				# in epaper with the actual board in case of takeback errors
 				oldboard = boardhistory.pop()
 				curturn = turnhistory.pop()
-				board[:] = oldboard
-				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+				cboard[:] = oldboard
+				board.beep(board.SOUND_GENERAL)
 		except:
 			pass
 
-print("pls connect")
-#epaper.writeText(0,'Connect remote')
+def pairThread():
+	# Emulate bluetooth pairing by providing pairing in a separate thread too
+	while True:
+		print('running pair thread')
+		p = subprocess.Popen(['/usr/bin/bt-agent --capability=NoInputNoOutput -p /etc/bluetooth/pin.conf'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+		poll_obj = select.poll()
+		poll_obj.register(p.stdout, select.POLLIN)
+		running = 1
+		spamyes = 0
+		spamtime = 0;
+		while running == 1:
+			poll_result = poll_obj.poll(0)
+			if spamyes == 1:
+				if time.time() - spamtime < 3:
+					print("spamming yes!")
+					p.stdin.write(b'yes\n')
+					time.sleep(1)
+				else:
+					p.terminate()
+					running = 0
+			if poll_result and spamyes == 0:
+				line = p.stdout.readline()
+				if b'Device:' in line:
+					print("detected device")
+					p.stdin.write(b'yes\n')
+					spamyes = 1
+					spamtime = time.time()
+			r = p.poll()
+			if r is not None:
+				running = 0
+		time.sleep(0.1)
+
 drawCurrentBoard()
 epaper.writeText(0,'Connect remote')
 epaper.writeText(1,'Device Now')
-#time.sleep(3)
-start = time.time()
-# rfcomm0
-while exists("/dev/rfcomm0") == False and (time.time() - start < 100):
-	time.sleep(.2)
 
-if (time.time() - start >= 100):
+pairThread = threading.Thread(target=pairThread, args=())
+pairThread.daemon = True
+pairThread.start()
+
+start = time.time()
+
+while exists("/dev/rfcomm0") == False and (time.time() - start < 60):
+	time.sleep(.01)
+
+if (time.time() - start >= 30):
 	epaper.writeText(0,"TIMEOUT")
 	epaper.writeText(1,"             ")
 	time.sleep(2)
@@ -1000,7 +1068,29 @@ epaper.writeText(1,'         ')
 print("start")
 
 cb = chess.Board()
-boardfunctions.ledsOff()
+board.ledsOff()
+
+source = "eboard.py"
+Session = sessionmaker(bind=models.engine)
+session = Session()
+
+# Log a new game in the db
+game = models.Game(
+	source=source
+)
+print(game)
+session.add(game)
+session.commit()
+# Get the max game id as that is this game id and fill it into gamedbid
+gamedbid = session.query(func.max(models.Game.id)).scalar()
+# Now make an entry in GameMove for this start state
+gamemove = models.GameMove(
+	gameid = gamedbid,
+	move = '',
+	fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+)
+session.add(gamemove)
+session.commit()
 
 scrUpd = threading.Thread(target=screenUpdate, args=())
 scrUpd.daemon = True
@@ -1018,7 +1108,7 @@ pMove.start()
 
 # Clear any remaining data sent from the board
 try:
-	boardfunctions.clearBoardData()
+	board.clearBoardData()
 except:
 	pass
 
@@ -1031,6 +1121,8 @@ lastfield = -1
 lastcurturn = 0
 boardhistory = []
 turnhistory = []
+serialcount = 0
+reversed = 0
 
 time.sleep(0.2)
 
@@ -1041,9 +1133,9 @@ while True and dodie == 0:
 			handled = 0
 			if data[0] == DGT_SEND_RESET or data[0] == DGT_STARTBOOTLOADER:
 				# Puts the board in IDLE mode
-				#boardfunctions.clearBoardData()
-				#boardfunctions.writeText(0, 'Init')
-				#boardfunctions.writeText(1, '         ')
+				#board.clearBoardData()
+				#board.writeText(0, 'Init')
+				#board.writeText(1, '         ')
 				if debugcmds == 1:
 					print("DGT_SEND_RESET")
 				sendupdates = 0
@@ -1059,7 +1151,7 @@ while True and dodie == 0:
 					print("DGT_RETURN_BUSADRES")
 				tosend = bytearray(b'\x00\x00\x05\x08\x01')
 				tosend[0] = DGT_BUSADRES | MESSAGE_BIT
-				#tosend.append(boardfunctions.checksum(tosend))
+				#tosend.append(board.checksum(tosend))
 				bt.write(tosend)
 				bt.flush()
 				sentbus = 1
@@ -1140,7 +1232,7 @@ while True and dodie == 0:
 					tosend.append(6)
 					tosend.append(8)
 					tosend.append(1)
-					tosend.append(boardfunctions.checksum(tosend))
+					tosend.append(board.checksum(tosend))
 					time.sleep(0.05)
 					bt.write(tosend)
 					bt.flush()
@@ -1159,7 +1251,7 @@ while True and dodie == 0:
 				tosend.append(6)
 				tosend.append(8)
 				tosend.append(1)
-				tosend.append(boardfunctions.checksum(tosend))
+				tosend.append(board.checksum(tosend))
 				time.sleep(0.05)
 				bt.write(tosend)
 				bt.flush()
@@ -1179,7 +1271,7 @@ while True and dodie == 0:
 				tosend.append(1)
 				tosend.append(1)
 				tosend.append(2)
-				tosend.append(boardfunctions.checksum(tosend))
+				tosend.append(board.checksum(tosend))
 				bt.write(tosend)
 				bt.flush()
 				handled = 1
@@ -1209,7 +1301,7 @@ while True and dodie == 0:
 				tosend.append(1)
 				if offset == -1:
 					#print("Sending but no data")
-					tosend.append(boardfunctions.checksum(tosend))
+					tosend.append(board.checksum(tosend))
 					#print(tosend.hex())
 					bt.write(tosend)
 					bt.flush()
@@ -1219,7 +1311,7 @@ while True and dodie == 0:
 					for i in range(offset, len(EEPROM)-1):
 						tosend.append(EEPROM[i])
 						tosend[2] = len(tosend) + 1
-						tosend.append(boardfunctions.checksum(tosend))
+						tosend.append(board.checksum(tosend))
 						#print(tosend.hex())
 						bt.write(tosend)
 						bt.flush()
@@ -1239,7 +1331,7 @@ while True and dodie == 0:
 				for i in range(eepromlastsendpoint, len(EEPROM)):
 					tosend.append(EEPROM[i])
 				tosend[2] = len(tosend) + 1
-				tosend.append(boardfunctions.checksum(tosend))
+				tosend.append(board.checksum(tosend))
 				#print(tosend.hex())
 				bt.write(tosend)
 				bt.flush()
@@ -1345,7 +1437,7 @@ while True and dodie == 0:
 				tosend.append(6)
 				tosend.append(8)
 				tosend.append(1)
-				tosend.append(boardfunctions.checksum(tosend))
+				tosend.append(board.checksum(tosend))
 				time.sleep(0.05)
 				bt.write(tosend)
 				bt.flush()
@@ -1356,7 +1448,7 @@ while True and dodie == 0:
 				lastcurturn = 0
 				boardhistory = []
 				turnhistory = []
-				boardfunctions.ledsOff()
+				board.ledsOff()
 				sendupdates = 1
 				handled = 1
 			if data[0] == DGT_RETURN_SERIALNR:
@@ -1378,6 +1470,19 @@ while True and dodie == 0:
 				bt.flush()
 				bt.write(tosend)
 				bt.flush()
+				# If something is just repeatedly asking for the serial then start sending updates anyway
+				serialcount = serialcount + 1
+				if serialcount > 5:
+					sendupdates = 1
+					# Also send a version
+					tosend = bytearray(b'')
+					tosend.append(DGT_VERSION | MESSAGE_BIT)
+					tosend.append(0)
+					tosend.append(5)
+					tosend.append(1)
+					tosend.append(2)
+					bt.write(tosend)
+					bt.flush()
 				handled = 1
 			if data[0] == DGT_RETURN_LONG_SERIALNR:
 				# Return our long serial number
@@ -1426,7 +1531,7 @@ while True and dodie == 0:
 				tosend.append(0)
 				tosend.append(67)
 				for x in range(0,64):
-					tosend.append(board[x])
+					tosend.append(cboard[x])
 				bt.write(tosend)
 				bt.flush()
 				handled = 1
@@ -1441,47 +1546,63 @@ while True and dodie == 0:
 				if dd[1] == 0:
 					# Off
 					#print("off")
-					squarerow = 7 - (dd[2] // 8)
-					squarecol = 7 - (dd[2] % 8)
-					froms = (squarerow * 8) + squarecol
-					squarerow = 7 - (dd[3] // 8)
-					squarecol = 7 - (dd[3] % 8)
-					tos = (squarerow * 8) + squarecol
+					tos = 0
+					froms = 0
+					if reversed == 1:
+						squarerow = 7 - (dd[2] // 8)
+						squarecol = 7 - (dd[2] % 8)
+						froms = (squarerow * 8) + squarecol
+						squarerow = 7 - (dd[3] // 8)
+						squarecol = 7 - (dd[3] % 8)
+						tos = (squarerow * 8) + squarecol
+					else:
+						froms = dd[2]
+						tos = dd[3]
 					litsquares = list(filter(lambda a: a != froms, litsquares))
 					litsquares = list(filter(lambda a: a != tos, litsquares))
-					if dd[2] == 0 and dd[3] == 63:
+					if (dd[2] == 0 and dd[3] >= 63) or (dd[2] == 64):
 						# This seems to be some code to turn the lights off
 						litsquares = []
-						boardfunctions.ledsOff()
+						board.ledsOff()
+						# The 0 63 in particular seems to define reversed mode in chess for android
+						if (dd[2] == 0 and dd[3] == 63):
+							reversed = 1
 					#print(len(litsquares))
 					if len(litsquares) > 0:
-						tosend = bytearray(b'\xb0\x00\x0b\x06\x50\x05\x08\x00\x05')
+						board.ledsOff()
+						tosend = bytearray(b'\xb0\x00\x0b\x06\x50\x05\x05\x00\x05')
 						# '\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x37\x36\x35\x34\x33\x32\x31\x30\x0d')
 						for x in range(0, len(litsquares)):
 							tosend.append(litsquares[x])
 						tosend[2] = len(tosend) + 1
-						tosend.append(boardfunctions.checksum(tosend))
-						boardfunctions.ser.write(tosend)
+						tosend.append(board.checksum(tosend))
+						board.ser.write(tosend)
 					else:
-						boardfunctions.ledsOff()
+						board.ledsOff()
 				if dd[1] == 1:
 					# On
 					#print("on")
-					squarerow = 7 - (dd[2] // 8)
-					squarecol = 7 - (dd[2] % 8)
-					froms = (squarerow * 8) + squarecol
-					squarerow = 7 - (dd[3] // 8)
-					squarecol = 7 - (dd[3] % 8)
-					tos = (squarerow * 8) + squarecol
+					tos = 0
+					froms = 0
+					if reversed == 1:
+						squarerow = 7 - (dd[2] // 8)
+						squarecol = 7 - (dd[2] % 8)
+						froms = (squarerow * 8) + squarecol
+						squarerow = 7 - (dd[3] // 8)
+						squarecol = 7 - (dd[3] % 8)
+						tos = (squarerow * 8) + squarecol
+					else:
+						froms = dd[2]
+						tos = dd[3]
 					litsquares.append(froms)
 					litsquares.append(tos)
 					tosend = bytearray(b'\xb0\x00\x0b\x06\x50\x05\x08\x00\x05')
 					# '\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x37\x36\x35\x34\x33\x32\x31\x30\x0d')
-					for x in range(0, len(litsquares) - 1):
+					for x in range(0, len(litsquares)):
 						tosend.append(litsquares[x])
 					tosend[2] = len(tosend) + 1
-					tosend.append(boardfunctions.checksum(tosend))
-					boardfunctions.ser.write(tosend)
+					tosend.append(board.checksum(tosend))
+					board.ser.write(tosend)
 				handled = 1
 			if data[0] == DGT_CLOCK_MESSAGE:
 				# For now don't display the clock, maybe later. But the other device acts as it
@@ -1504,17 +1625,17 @@ while True and dodie == 0:
 				tosend.append(0)
 				tosend.append(5)
 				tosend.append(0)
-				tosend.append(board[0])
+				tosend.append(cboard[0])
 				bt.write(tosend)
 				bt.flush()
-				#boardfunctions.writeText(0, 'PLAY   ')
-				#boardfunctions.writeText(1, '         ')
+				#board.writeText(0, 'PLAY   ')
+				#board.writeText(1, '         ')
 				# Here let's actually loop through reading the board states
 				sendupdates = 1
 				handled = 1
 			if data[0] == DGT_SEND_UPDATE_NICE:
-				#boardfunctions.writeText(0, 'PLAY   ')
-				#boardfunctions.writeText(1, '         ')
+				#board.writeText(0, 'PLAY   ')
+				#board.writeText(1, '         ')
 				if debugcmds == 1:
 					print("DGT_SEND_UPDATE_NICE")
 				sendupdates = 1
@@ -1531,13 +1652,13 @@ while True and dodie == 0:
 				tosend.append(0)
 				tosend.append(7)
 				tosend.append(0)
-				tosend.append(0)
+				tosend.append(36)
 				tosend.append(0)
 				bt.write(tosend)
 				bt.flush()
 				handled = 1
 			if data[0] == DGT_SEND_BATTERY_STATUS:
-				# Ideally in the future we'll put a function in boardfunctions to get the
+				# Ideally in the future we'll put a function in board to get the
 				# battery status from the centaur. But for now, fake it!
 				if debugcmds == 1:
 					print("DGT_SEND_BATTERY_STATUS")
@@ -1566,4 +1687,3 @@ bt.close()
 # Annoyingly this is needed to force a drop of the connection
 os.system('sudo systemctl restart rfcomm')
 epaper.writeText(0,'Disconnected')
-

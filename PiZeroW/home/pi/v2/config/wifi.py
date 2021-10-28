@@ -1,13 +1,13 @@
 # Connect to a Wifi Network
 #
 
-from board import boardfunctions
+from DGTCentaurMods.board import board
 import os
 import time
 import sys
 import re
 
-boardfunctions.initScreen()
+board.initScreen()
 time.sleep(2)
 
 command = """iwlist wlan0 scan | grep -i 'essid:"' | cut -c28-500"""
@@ -25,20 +25,20 @@ for i in range(0,len(result)):
 	networks[result[i]] = result[i]
 
 print(networks)
-answer = boardfunctions.doMenu(networks,1)
+answer = board.doMenu(networks,1)
 
 print(answer)
 
 if answer == "BACK":
 	sys.exit()
-#boardfunctions.initScreen()
+
+#board.initScreen()
 #time.sleep(2)
-boardfunctions.epd.init()
+board.epd.init()
 
 # If the answer is not "BACK" then answer contains our SSID
 # Now we need to get the password
-
-password = boardfunctions.getText("Wifi Password")
+password = board.getText("Wifi Password")
 
 if password == "":
 	sys.exit()
@@ -50,13 +50,16 @@ result = list(res)
 section = ""
 for i in range(0,len(result)):
 	section = section + result[i]
+print(section)
 if section.find("ssid") != -1:
 	wpas = open('/etc/wpa_supplicant/wpa_supplicant.conf','r')
 	curconf = wpas.read()
 	wpas.close()
+	print(curconf)
 	if curconf.find(answer) != -1:
 		# SSID is already in file
 		newtext = re.sub('network={[^\}]+?ssid=\"' + answer + '\"[^\}]+?\}\n','',curconf,re.DOTALL)
+		print(newtext)
 		wpas = open('/etc/wpa_supplicant/wpa_supplicant.conf','w')
 		wpas.write(newtext)
 		wpas.close()
@@ -64,4 +67,5 @@ if section.find("ssid") != -1:
 	wpas = open('/etc/wpa_supplicant/wpa_supplicant.conf','a')
 	wpas.write(section)
 	wpas.close()
-	os.system("sudo /sbin/shutdown -r now")
+	os.system("sudo wpa_cli -i wlan0 reconfigure")
+

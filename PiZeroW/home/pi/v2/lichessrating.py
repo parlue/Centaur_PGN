@@ -1,7 +1,7 @@
 # Add lichess rating
 #
 
-import boardfunctions
+from board import boardfunctions
 import os
 import time
 import sys

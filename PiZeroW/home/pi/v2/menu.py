@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 # Bootup menu
 
-import boardfunctions
+from board import boardfunctions , network
 import os
 import sys
 import time
 import centaurv2
-import epd2in9d
-sys.path.append("/home/pi/v2/board")
-import epaper , network
+from display import epd2in9d , epaper
+
 sys.path.append("/home/pi/centaur/PIL")
 from PIL import Image , ImageDraw , ImageFont
 # import lichessV4

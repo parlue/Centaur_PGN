@@ -567,14 +567,7 @@ def MywaitMove():
 								placed = -1
 							else:
 								moves.append(newsquare+1)
-							#print(placed)
-			#print('lifted= ' + str(lifted))
-			#print('placed= ' + str(placed))
-#			tosend = bytearray(b'\x94\x06\x50\x6a')
-#			ser.write(tosend)
-#			expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
-#			resp = ser.read(10000)
-#			resp = bytearray(resp)
+
 		except :
 			pass
 		try:

@@ -13,7 +13,7 @@ import chess
 import chess.pgn
 import pathlib
 import os
-import boardfunctions
+from board import boardfunctions
 import time
 import urllib
 import requests
@@ -39,7 +39,9 @@ def connectiontest():
 		request = requests.get(url, timeout=timeout)
 		boardfunctions.writeText(2, "Internet alive")
 		host_name = socket.gethostname() 
-		host_ip = socket.gethostbyname(host_name) 
+#		host_ip = socket.gethostbyname(host_name) 
+		host_ip = ([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1], [[(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l][0][0])
+		
 		boardfunctions.writeText(3, "IP= "+ str(host_ip))
 		boardfunctions.writeText(4, "Hostname= " + str(host_name))
 

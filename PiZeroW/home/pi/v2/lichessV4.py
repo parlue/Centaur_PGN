@@ -25,13 +25,13 @@ import berserk
 import ssl
 import time
 import threading
-import boardfunctions
+from board import boardfunctions
 import chess
 import v2conf
 import os
 import ratingconf
-sys.path.append('/home/pi/v2/board')
-import epaper
+#sys.path.append('/home/pi/v2/board')
+from display import epaper
 
 global ratingrange
 
@@ -64,7 +64,7 @@ client = berserk.Client(session=session)
 remotemoves = ""
 #changed dso
 status = ""
-board = chess.Board()
+cboard = chess.Board()
 
 # First start up the screen
 # boardfunctions.initScreen()
@@ -408,7 +408,7 @@ sound = "off"
 epaper.clearScreen()
 epaper.writeText(0,blackplayer + " " + blackrating)
 epaper.writeText(9,whiteplayer + " " + whiterating)
-fen = board.fen()
+fen = cboard.fen()
 sfen = fen[0 : fen.index(" ")]
 baseboard = chess.BaseBoard(sfen)
 pieces = []
@@ -497,7 +497,7 @@ while (status == "started") and ourturn != 0 :
 			
 			mv = chess.Move.from_uci(lastmove)
 			print("Checked")
-			if (mv in board.legal_moves):
+			if (mv in cboard.legal_moves):
 				
 				#print("Castled")
 				if lastmove == "e1g1" and wking == 0:
@@ -546,7 +546,7 @@ while (status == "started") and ourturn != 0 :
 				#check if lichess accept this move
 				ret = client.board.make_move(gameid, fromln + toln)
 				if ret :
-					board.push(mv)
+					cboard.push(mv)
 					ourturn = 0
 					halfturn = halfturn + 1
 					if fromln == "e1":
@@ -576,7 +576,7 @@ while (status == "started") and ourturn != 0 :
 		
 
 	
-		fen = board.fen()
+		fen = cboard.fen()
 		sfen = fen[0 : fen.index(" ")]
 		baseboard = chess.BaseBoard(sfen)
 		pieces = []
@@ -687,7 +687,7 @@ while (status == "started") and ourturn != 0 :
 			if fromln == "e8":
 				bking = 1
 			mv = chess.Move.from_uci(rr[-5:].strip())
-			board.push(mv)
+			cboard.push(mv)
 			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1
@@ -695,7 +695,7 @@ while (status == "started") and ourturn != 0 :
 	
 		# dso timefix 5.10.21
 		
-		fen = board.fen()
+		fen = cboard.fen()
 		sfen = fen[0 : fen.index(" ")]
 		baseboard = chess.BaseBoard(sfen)
 		pieces = []

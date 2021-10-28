@@ -37,6 +37,6 @@ class GameMove(Base):
     def __repr__(self):
         return "<GameMove(id='%s', move_at='%s', move='%s', fen='%s')>" % (str(self.id), str(self.move_at), self.move, self.fen)
 
-dbloc = str(pathlib.Path(__file__).parent.resolve()) + "/centaur.db"
+dbloc = str("/home/pi/v2/db/centaur.db")
 engine = create_engine("sqlite:///" + dbloc)
 Base.metadata.create_all(bind=engine)

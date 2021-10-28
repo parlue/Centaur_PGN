@@ -18,7 +18,7 @@ def set_lichess_api(key):
         configfile.close()
 
 def rel_path():
-    return str(pathlib.Path(__file__).parent.resolve()) + "/.."
+    return str("/home/pi/v2")
 
 def shell_run(rcmd):
     cmd = shlex.split(rcmd)
@@ -34,9 +34,9 @@ def shell_run(rcmd):
         print(response_stdout)
         return response_stdout
 
-config_file = rel_path() + "/config/centaur.ini"
+config_file = "/home/pi/v2/config/centaur.ini"
 config = configparser.ConfigParser()
 config.read(config_file)
 
 # Import configs
-lichess_api = config["lichess"]["api_token"]
+#lichess_api = config["lichess"]["api_token"]

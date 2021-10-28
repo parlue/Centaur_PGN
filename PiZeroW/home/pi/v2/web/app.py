@@ -1,7 +1,9 @@
 from flask import Flask, render_template, Response
-from import models
-from import centaur
-from boardfunctions import LiveBoard
+import sys
+sys.path.append('/home/pi/v2')
+import models
+import centaur
+from fboard import LiveBoard
 from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData
@@ -42,15 +44,15 @@ def fen():
 def pgn():
 	return render_template('pgn.html')
 
-@app.route("/configure")
-def configure():
+#@app.route("/configure")
+#def configure():
 	# Get the lichessapikey
-	return render_template('configure.html', lichesskey=centaur.get_lichess_api())
+#	return render_template('configure.html', lichesskey=centaur.get_lichess_api())
 
-@app.route("/lichesskey/<key>")
-def lichesskey(key):
-	centaur.set_lichess_api(key)
-	return "ok"
+#@app.route("/lichesskey/<key>")
+#def lichesskey(key):#
+#	centaur.set_lichess_api(key)
+#	return "ok"
 
 @app.route("/analyse/<gameid>")
 def analyse(gameid):
@@ -126,21 +128,21 @@ def makePGN(gameid):
 	session.close()
 	return pgn_string
 
-pb = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/pb.png").convert("RGBA")
-pw = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/pw.png").convert("RGBA")
-rb = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/rb.png").convert("RGBA")
-bb = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/bb.png").convert("RGBA")
-nb = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/nb.png").convert("RGBA")
-qb = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/qb.png").convert("RGBA")
-kb = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/kb.png").convert("RGBA")
-rw = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/rw.png").convert("RGBA")
-bw = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/bw.png").convert("RGBA")
-nw = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/nw.png").convert("RGBA")
-qw = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/qw.png").convert("RGBA")
-kw = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/kw.png").convert("RGBA")
-logo = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../web/static/logo_mods_web.png")
-sc = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../web/static/epaper.jpg")
-moddate = os.stat(str(pathlib.Path(__file__).parent.resolve()) + "/../web/static/epaper.jpg")[8]
+pb = Image.open(str("/home/pi/v2/resources/pb.png")).convert("RGBA")
+pw = Image.open(str("/home/pi/v2/resources/pw.png")).convert("RGBA")
+rb = Image.open(str("/home/pi/v2/resources/rb.png")).convert("RGBA")
+bb = Image.open(str("/home/pi/v2/resources/bb.png")).convert("RGBA")
+nb = Image.open(str("/home/pi/v2/resources/nb.png")).convert("RGBA")
+qb = Image.open(str("/home/pi/v2/resources/qb.png")).convert("RGBA")
+kb = Image.open(str("/home/pi/v2/resources/kb.png")).convert("RGBA")
+rw = Image.open(str("/home/pi/v2/resources/rw.png")).convert("RGBA")
+bw = Image.open(str("/home/pi/v2/resources/bw.png")).convert("RGBA")
+nw = Image.open(str("/home/pi/v2/resources/nw.png")).convert("RGBA")
+qw = Image.open(str("/home/pi/v2/resources/qw.png")).convert("RGBA")
+kw = Image.open(str("/home/pi/v2/resources/kw.png")).convert("RGBA")
+logo = Image.open(str("/home/pi/v2/web/static/logo_mods_web.png"))
+sc = Image.open(str("home/pi/v2/web/static/epaper.jpg"))
+moddate = os.stat("/home/pi/v2/web/static/epaper.jpg")[8]
 def generateVideoFrame():
 	global pb, pw, rb, bb, nb, qb, kb, rw, bw, nw, qw, kw, logo, sc, moddate
 	while True:

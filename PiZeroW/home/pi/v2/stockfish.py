@@ -1,8 +1,7 @@
 # Play pure stockfish without DGT Centaur Adaptive Play
 #
 import gamemanager
-sys.path.append('/home/pi/v2/board')
-import epaper
+from display import epaper
 import time
 import chess
 import chess.engine

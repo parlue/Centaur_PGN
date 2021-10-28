@@ -8,7 +8,7 @@
 import serial
 import sys
 import os
-import epd2in9d
+from display import epd2in9d
 import time
 from PIL import Image, ImageDraw, ImageFont
 import pathlib

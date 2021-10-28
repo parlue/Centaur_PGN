@@ -1,7 +1,7 @@
 # Connect to a Wifi Network
 #
 
-from DGTCentaurMods.board import board
+from board import board
 import os
 import time
 import sys

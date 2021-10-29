@@ -239,6 +239,8 @@ while True:
 		result = doMenu(enginemenu)
 		print(result)
 		if result == 'CT800':
+			cEngine = 'CT800'
+			PathEngine = '/home/pi/v2/engines/ct800'
 			ct800menu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 			color = doMenu(ct800menu)
 			print(color)
@@ -254,7 +256,9 @@ while True:
 					epaper.epd.init()
 					boardfunctions.unPauseEvents()
 			#
-	if result == "stockfish":
+	if result == 'stockfish':
+		cEngine = 'Stockfish14'
+		PathEngine = "/home/pi/centaur/engines/stockfish_pi"
 		sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 		color = doMenu(sfmenu)
 		print(color)
@@ -266,7 +270,7 @@ while True:
 				epaper.clearScreen()
 				epaper.writeText(0, "Loading...")
 				boardfunctions.pauseEvents()
-				os.system("/usr/bin/python3.6 stockfish.py " + color + " " + elo)
+				os.system("/usr/bin/python3.6 universaluci.py " + cEngine + " " + PathEngine + " " + color + " " + elo)
 				epaper.epd.init()
 				boardfunctions.unPauseEvents()
 			#

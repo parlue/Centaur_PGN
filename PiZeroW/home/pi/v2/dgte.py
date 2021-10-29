@@ -437,7 +437,7 @@ def pieceMoveDetectionThread():
 								squarerow = 7 - squarerow
 								squarecol = 7 - squarecol
 								field = (squarerow * 8) + squarecol
-								print("UP: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
+								#print("UP: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
 								if curturn == 1:
 									print("White turn")
 								else:
@@ -458,9 +458,9 @@ def pieceMoveDetectionThread():
 											lastlift = cboard[field]
 											lastfield = field
 										liftedthisturn = liftedthisturn + 1
-								print(item)
-								print(lastlift)
-								print(liftedthisturn)
+								#print(item)
+								#print(lastlift)
+								#print(liftedthisturn)
 								if lastlift != EMPTY and liftedthisturn < 2:
 									cboard[field] = EMPTY
 									tosend = bytearray(b'')
@@ -472,7 +472,7 @@ def pieceMoveDetectionThread():
 									bt.write(tosend)
 									bt.flush()
 									time.sleep(0.2)
-									print("SENT UP PACKET")
+									#print("SENT UP PACKET")
 									buffer1 = bytearray([EMPTY] * 64)
 									buffer1[:] = cboard
 									boardhistory.append(buffer1)
@@ -499,7 +499,7 @@ def pieceMoveDetectionThread():
 								squarerow = 7 - squarerow
 								squarecol = 7 - squarecol
 								field = (squarerow * 8) + squarecol
-								print("DOWN: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
+								#print("DOWN: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
 
 								# Here we check if this was a valid move to make. If not then indicate it on
 								# the board
@@ -517,9 +517,9 @@ def pieceMoveDetectionThread():
 									print("White turn")
 								else:
 									print("Black turn")
-								print(lastlift)
+								#print(lastlift)
 								liftedthisturn = liftedthisturn - 1
-								print(liftedthisturn)
+								#print(liftedthisturn)
 								# Promotion
 								promoted = 0
 								if liftedthisturn == 0:
@@ -647,7 +647,7 @@ def pieceMoveDetectionThread():
 									bt.flush()
 									time.sleep(0.2)
 									lastchangepacket = tosend
-									print("SENT DOWN PACKET")
+									#print("SENT DOWN PACKET")
 									buffer1 = bytearray([EMPTY] * 64)
 									buffer1[:] = cboard
 									boardhistory.append(buffer1)
@@ -677,17 +677,17 @@ def pieceMoveDetectionThread():
 									if kinglift == 1:
 										if lastfield == 3 or lastfield == 59:
 											if field == 1 or field == 5 or field == 61 or field == 57:
-												print("Castle attempt detected")
+												#print("Castle attempt detected")
 												if curturn == 0:
 													curturn = 1
 													liftedthisturn = 0
 												else:
 													curturn = 0
 													liftedthisturn = 0
-									print(mv)
+									#print(mv)
 									if fromsq != tosq:
 										if promoted == 1:
-											print("promotion")
+											#print("promotion")
 											if lastlift == WQUEEN or lastlift == BQUEEN:
 												mv = mv + "q"
 											if lastlift == WROOK or lastlift == BROOK:
@@ -697,11 +697,11 @@ def pieceMoveDetectionThread():
 											if lastlift == WKNIGHT or lastlift == BKNIGHT:
 												mv = mv + "n"
 											promoted = 0
-											print(mv)
+											#print(mv)
 										cm = chess.Move.from_uci(mv)
 										legal = 1
 										if cm in cb.legal_moves:
-											print("Move is allowed")
+											#print("Move is allowed")
 											cb.push(cm)
 											gamemove = models.GameMove(
 												gameid=gamedbid,
@@ -710,7 +710,7 @@ def pieceMoveDetectionThread():
 											)
 											session.add(gamemove)
 											session.commit()
-											print(cb.fen())
+											#print(cb.fen())
 										else:
 											# The move is not allowed or the move is the rook move after a king move in castling
 											if (lastlift == WROOK or lastlift == BROOK) and (
@@ -718,7 +718,7 @@ def pieceMoveDetectionThread():
 												pass
 											else:
 												# Action the illegal move
-												print("Move not allowed")
+												#print("Move not allowed")
 												squarerow = (lastfield // 8)
 												squarecol = 7 - (lastfield % 8)
 												tosq = (squarerow * 8) + squarecol
@@ -743,7 +743,7 @@ def pieceMoveDetectionThread():
 													if (bytearray(resp) != expect):
 														if (resp[0] == 133 and resp[1] == 0):
 															# A piece has been raised or placed
-															print("event")
+															#print("event")
 															if boardhistory:
 																oldboard = boardhistory.pop()
 																turnhistory.pop
@@ -752,9 +752,9 @@ def pieceMoveDetectionThread():
 																# it has changed
 																for x in range(0, len(oldboard)):
 																	if oldboard[x] != cboard[x]:
-																		print("Found difference at")
-																		print(x)
-																		print(oldboard[x])
+																		#print("Found difference at")
+																		#print(x)
+																		#print(oldboard[x])
 																		tosend = bytearray(b'')
 																		tosend.append(DGT_FIELD_UPDATE | MESSAGE_BIT)
 																		tosend.append(0)
@@ -814,7 +814,7 @@ def pieceMoveDetectionThread():
 			if timer > 5:
 				r = board.getBoardState()
 				if bytearray(r) == startstate and startstateflag == 0:
-					print("start state detected")
+					#print("start state detected")
 					fenlog = "/home/pi/centaur/fen.log"
 					f = open(fenlog, "w")
 					f.write("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
@@ -953,7 +953,7 @@ def pieceMoveDetectionThread():
 					game = models.Game(
 						source=source
 					)
-					print(game)
+					#print(game)
 					session.add(game)
 					session.commit()
 					# Get the max game id as that is this game id and fill it into gamedbid
@@ -979,13 +979,13 @@ def pieceMoveDetectionThread():
 			if (resp.hex() == "b10011065000140a0501000000007d4700"):
 				# The back button has been pressed. Use this to exit eboard mode by setting a flag
 				# for the main thread
-				print("exit")
+				#print("exit")
 				dodie = 1
 				board.beep(board.SOUND_GENERAL)
 			if (resp.hex() == "b10010065000140a0504000000002a68"):
 				# The play button has been pressed. This button resends the last update move as
 				# the WP app occassionally misses it
-				print("Resending last packet")
+				#print("Resending last packet")
 				#t = lastchangepacket[4]
 				#print(t)
 				#dpacket = lastchangepacket
@@ -995,7 +995,7 @@ def pieceMoveDetectionThread():
 				#time.sleep(0.2)
 				#lastchangepacket[4] = t
 				tosend = lastchangepacket
-				print(tosend.hex())
+				#print(tosend.hex())
 				bt.write(tosend)
 				bt.flush()
 				board.beep(board.SOUND_GENERAL)
@@ -1023,7 +1023,7 @@ def pairThread():
 			poll_result = poll_obj.poll(0)
 			if spamyes == 1:
 				if time.time() - spamtime < 3:
-					print("spamming yes!")
+					#print("spamming yes!")
 					p.stdin.write(b'yes\n')
 					time.sleep(1)
 				else:
@@ -1079,7 +1079,7 @@ session = Session()
 game = models.Game(
 	source=source
 )
-print(game)
+#print(game)
 session.add(game)
 session.commit()
 # Get the max game id as that is this game id and fill it into gamedbid
@@ -1138,7 +1138,7 @@ while True and dodie == 0:
 				#board.writeText(0, 'Init')
 				#board.writeText(1, '         ')
 				if debugcmds == 1:
-					print("DGT_SEND_RESET")
+					#print("DGT_SEND_RESET")
 				sendupdates = 0
 				handled = 1
 			if data[0] == DGT_TO_BUSMODE:
@@ -1219,7 +1219,7 @@ while True and dodie == 0:
 				#print("bus pinged")
 				dump = bt.read(3)
 				if debugcmds == 1:
-					print("DGT_BUS_PING " + dump.hex())
+					#print("DGT_BUS_PING " + dump.hex())
 				#print(dump.hex())
 				if ignore_next_bus_ping == 1 and dump[0] == 0 and dump[1] == 0:
 					ignore_next_bus_ping = 0

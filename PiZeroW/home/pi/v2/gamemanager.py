@@ -75,7 +75,7 @@ def fieldcallback(field):
     global source
     global gamedbid
     global session
-    print("hallo234")
+    #print("hallo234")
     lift = 0
     place = 0
     if field >= 0:
@@ -84,17 +84,17 @@ def fieldcallback(field):
         place = 1
         field = field * -1
     field = field - 1
-    print("u00ß00")
-    print(field)
+    #print("u00ß00")
+    #print(field)
     # Check the piece colour against the current turn
     pc = cboard.color_at(field)
-    print("123")
+    #print("123")
     vpiece = 0
     if curturn == 0 and pc == False:
         vpiece = 1
     if curturn == 1 and pc == True:
         vpiece = 1
-    print("jjjj")
+    #print("jjjj")
     squarerow = (field // 8)
     squarecol = (field % 8)
     squarecol = 7 - squarecol
@@ -103,7 +103,7 @@ def fieldcallback(field):
     lmoves = list(legalmoves)
     if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
         # Generate a list of places this piece can move to
-        print("legal")
+        #print("legal")
         lifted = 1
         legalsquares = []
         legalsquares.append(field)
@@ -309,7 +309,7 @@ def gameThread(eventCallback, moveCallback, keycallback):
     global gameinfo_round
     global gameinfo_white
     global gameinfo_black
-    print("hier")
+    #print("hier")
     keycallbackfunction = keycallback
     movecallbackfunction = moveCallback
     eventcallbackfunction = eventCallback
@@ -329,10 +329,10 @@ def gameThread(eventCallback, moveCallback, keycallback):
                     #board.beep(board.SOUND_GENERAL)
                     board.pauseEvents()
                     cs = board.getBoardState()
-                    print(cs)
+                    #print(cs)
                     board.unPauseEvents()
                     if bytearray(cs) == startstate:
-                        print("start")
+                        #print("start")
                         eventCallback(EVENT_NEW_GAME)
                         eventCallback(EVENT_WHITE_TURN)
                         newgame = 1
@@ -368,7 +368,7 @@ def gameThread(eventCallback, moveCallback, keycallback):
                         )
                         session.add(gamemove)
                         session.commit()
-                        print("game")
+                        #print("game")
                     t = 0
                 except:
                     pass

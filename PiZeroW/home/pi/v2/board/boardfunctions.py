@@ -7,6 +7,7 @@
 
 import serial
 import sys
+sys.path.append("/home/pi/v2")
 import os
 from display import epd2in9d
 import time

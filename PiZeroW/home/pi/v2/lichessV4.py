@@ -439,7 +439,7 @@ while (status == "started") and ourturn != 0 :
 		epaper.writeText(1, blacktime)
 		move = []
 		while len(move) <=1 :
-				move = boardfunctions.MywaitMove()
+			move = boardfunctions.MywaitMove()
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			if len(move) == 1:
 				if move[0] == 200: #back

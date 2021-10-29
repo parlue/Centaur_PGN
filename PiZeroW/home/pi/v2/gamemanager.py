@@ -84,6 +84,8 @@ def fieldcallback(field):
         place = 1
         field = field * -1
     field = field - 1
+    print("u00ß00")
+    print(field)
     # Check the piece colour against the current turn
     pc = cboard.color_at(field)
     print("123")
@@ -101,6 +103,7 @@ def fieldcallback(field):
     lmoves = list(legalmoves)
     if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
         # Generate a list of places this piece can move to
+        print("legal")
         lifted = 1
         legalsquares = []
         legalsquares.append(field)
@@ -139,7 +142,7 @@ def fieldcallback(field):
             legalsquares = []
             legalsquares.append(tsq)
     if place == 1 and field not in legalsquares:
-        board.beep(SOUND_WRONG_MOVE)
+        board.beep(board.SOUND_WRONG_MOVE)
     if place == 1 and field in legalsquares:
         newgame = 0
         #
@@ -238,7 +241,7 @@ def fieldcallback(field):
             if forcemove == 1:
                 mv = computermove
             mv = fromname + toname + pr
-			print(mv)
+            #print(mv)
             # Make the move and update fen.log
             cboard.push(chess.Move.from_uci(mv))
             fenlog = "/home/pi/centaur/fen.log"
@@ -258,7 +261,7 @@ def fieldcallback(field):
             forcemove = 0
             if movecallbackfunction != None:
                 movecallbackfunction(mv)
-            board.beep(SOUND_GENERAL)
+            board.beep(board.SOUND_GENERAL)
             # Check the outcome
             outc = cboard.outcome(claim_draw=True)
             if outc == None or outc == "None" or outc == 0:

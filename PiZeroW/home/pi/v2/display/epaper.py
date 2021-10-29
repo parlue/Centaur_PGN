@@ -3,7 +3,9 @@
 # This method uses a thread to monitor for changes to an image
 # Then any alterations to the image will show on the epaper
 # You can either use the image functions in this file or modify epaper.epaperbuffer directly.
-import epd2in9d
+import sys
+sys.path.append("/home/pi/v2")
+from display import epd2in9d
 import time
 from PIL import Image, ImageDraw, ImageFont
 import pathlib

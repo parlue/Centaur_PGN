@@ -9,6 +9,7 @@ import urllib
 import pickle
 import sys
 sys.path.append("/home/pi/centaur/")
+sys.path.append("/home/pi/v2")
 import chess
 import chess.pgn
 import pathlib

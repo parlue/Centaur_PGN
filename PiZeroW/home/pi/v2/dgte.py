@@ -66,17 +66,17 @@
 import serial
 import time
 import sys
+sys.path.append("/home/pi/v2")
 from os.path import exists
 from board import board
-from display import epaper
+from display import epaper , epd2in9d
 from db import models
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, func
 import threading
 import chess
 import os
-from PIL import Image, ImageDraw, ImageFont
-import epd2in9d
+from PIL import Image, ImageDraw, ImageFont 
 import pathlib
 import select
 import bluetooth
@@ -1013,9 +1013,9 @@ def pairThread():
 	# Emulate bluetooth pairing by providing pairing in a separate thread too
 	while True:
 		print('running pair thread')
-		p = subprocess.Popen(['/usr/bin/bt-agent --capability=NoInputNoOutput -p /etc/bluetooth/pin.conf'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-		poll_obj = select.poll()
-		poll_obj.register(p.stdout, select.POLLIN)
+		#p = subprocess.Popen(['/usr/bin/bt-agent --capability=NoInputNoOutput -p /etc/bluetooth/pin.conf'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+		#poll_obj = select.poll()
+		#poll_obj.register(p.stdout, select.POLLIN)
 		running = 1
 		spamyes = 0
 		spamtime = 0;
@@ -1054,7 +1054,7 @@ start = time.time()
 while exists("/dev/rfcomm0") == False and (time.time() - start < 60):
 	time.sleep(.01)
 
-if (time.time() - start >= 30):
+if (time.time() - start >= 60):
 	epaper.writeText(0,"TIMEOUT")
 	epaper.writeText(1,"             ")
 	time.sleep(2)

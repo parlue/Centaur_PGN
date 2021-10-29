@@ -1,11 +1,13 @@
 # Play pure stockfish without DGT Centaur Adaptive Play
 #
+import sys
+sys.path.append("/home/pi/v2")
 import gamemanager
 from display import epaper
 import time
 import chess
 import chess.engine
-import sys
+
 from random import randint
 
 curturn = 1

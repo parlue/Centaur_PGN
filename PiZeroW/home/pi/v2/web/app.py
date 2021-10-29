@@ -1,10 +1,11 @@
 from flask import Flask, render_template, Response
 import sys
 sys.path.append('/home/pi/v2')
-from db import models
+sys.path.append('/home/pi/v2/web')
+import models
 from board import centaur
-import fboard 
-# from fboard import LiveBoard
+from web import fboard 
+#from fboard import LiveBoard
 from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData
@@ -142,7 +143,7 @@ nw = Image.open(str("/home/pi/v2/resources/nw.png")).convert("RGBA")
 qw = Image.open(str("/home/pi/v2/resources/qw.png")).convert("RGBA")
 kw = Image.open(str("/home/pi/v2/resources/kw.png")).convert("RGBA")
 logo = Image.open(str("/home/pi/v2/web/static/logo_mods_web.png"))
-sc = Image.open(str("home/pi/v2/web/static/epaper.jpg"))
+sc = Image.open(str("/home/pi/v2/web/static/epaper.jpg"))
 moddate = os.stat("/home/pi/v2/web/static/epaper.jpg")[8]
 def generateVideoFrame():
 	global pb, pw, rb, bb, nb, qb, kb, rw, bw, nw, qw, kw, logo, sc, moddate
@@ -233,3 +234,4 @@ def generateVideoFrame():
 @app.route('/video')
 def video_feed():
 	return Response(generateVideoFrame(),mimetype='multipart/x-mixed-replace; boundary=frame')
+

@@ -256,7 +256,7 @@ while True:
 					epaper.clearScreen()
 					epaper.writeText(0, "Loading...")
 					boardfunctions.pauseEvents()
-					os.system("/usr/bin/python3.6 ct800.py " + color + " " + elo)
+					os.system("/usr/bin/python3.6 universaluci.py " + cEngine + " " + PathEngine + " " + color + " " + elo)
 					epaper.epd.init()
 					boardfunctions.unPauseEvents()
 			#

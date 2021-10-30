@@ -450,6 +450,12 @@ while (status == "started") and ourturn != 0 :
 					client.board.offer_draw(gameid)
 				if move[0] == 203: #down
 					client.board.resign_game(gameid)
+					epaper.writeText(11, 'Resign')
+					#cwinner = str(state.get('winner'))
+					epaper.writeText(12, 'you lost')
+					epaper.writeText(13,'pls wait restart..')
+					time.sleep(10)
+					sys.exit()
 					
 				if move[0] == 204: # help
 					print("soundoption")

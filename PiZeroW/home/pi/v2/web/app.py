@@ -2,9 +2,10 @@ from flask import Flask, render_template, Response
 import sys
 sys.path.append('/home/pi/v2')
 sys.path.append('/home/pi/v2/web')
+sys.path.append('/home/pi/v2/board')
 import models
-from board import centaur
-from web import fboard 
+import centaur
+import fboard 
 #from fboard import LiveBoard
 from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy.orm import sessionmaker

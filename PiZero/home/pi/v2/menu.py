@@ -132,12 +132,11 @@ while True:
 	
 	if result == "Centaur":
 		epaper.clearScreen()
-        
-		boardfunctions.writeText(1, "load game...")
+        boardfunctions.writeText(1, "load game...")
 		boardfunctions.pauseEvents()
-		boardfunctions.clearScreen()
+		time.sleep(3)
 		os.chdir("/home/pi/centaur")
-		os.system("/home/pi/centaur/centaur")
+		os.system("sudo /home/pi/centaur/centaur")
 		#sys.exit()
 
 	if result == "lichessapi":
@@ -175,6 +174,7 @@ while True:
 		boardfunctions.writeText(3, 'aplication')
 		boardfunctions.writeText(4, '...')
 		boardfunctions.writeText(5, 'load centaur')
+		boardfunctions.pauseEvents()
 		time.sleep(2)
 		os.chdir("/home/pi/centaur")
 		os.system("/home/pi/centaur/centaur")

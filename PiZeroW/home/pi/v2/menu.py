@@ -137,9 +137,11 @@ while True:
         
 		boardfunctions.writeText(1, "load game...")
 		boardfunctions.pauseEvents()
-		boardfunctions.clearScreen()
+#		boardfunctions.clearScreen()
+		time.sleep(4)
 		os.chdir("/home/pi/centaur")
-		os.system("/home/pi/centaur/centaur")
+		os.system("/home/pi/centaur/centi.sh")
+		
 		#sys.exit()
 
 	if result == "lichessapi":
@@ -219,9 +221,11 @@ while True:
 		boardfunctions.writeText(3, 'aplication')
 		boardfunctions.writeText(4, '...')
 		boardfunctions.writeText(5, 'load centaur')
+		boardfunctions.pauseEvents()
 		time.sleep(2)
+		
 		os.chdir("/home/pi/centaur")
-		os.system("/home/pi/centaur/centaur")
+		os.system("/home/pi/centaur/centi.sh")
 		
 	
 	if result == "Reboot":
@@ -258,7 +262,7 @@ while True:
 			#
 	if result == 'stockfish':
 		cEngine = 'Stockfish14'
-		PathEngine = "/home/pi/centaur/engines/stockfish_pi"
+		PathEngine = "/home/pi/centaur/engines/stockfish_14"
 		sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 		color = doMenu(sfmenu)
 		print(color)

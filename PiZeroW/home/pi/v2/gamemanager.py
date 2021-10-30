@@ -413,7 +413,14 @@ def subscribeGame(eventCallback, moveCallback, keyCallback):
     global source
     global gamedbid
     global session
+    
     source = inspect.getsourcefile(sys._getframe(1))
+    if source == "universaluci.py":
+        source = "Engineplay"
+    if source == "dgte.py":
+        source = "DGT-Board"
+    if source == "lichessV4.py":
+        source = "Lichess"
     Session = sessionmaker(bind=models.engine)
     session = Session()
 

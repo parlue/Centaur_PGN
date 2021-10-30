@@ -18,9 +18,9 @@ kill = 0
 # Expect the first argument to be 'white' 'black' or 'random' for what the player is playing
 
 
-enginename = str(sys.args[1])
+enginename = str(sys.argv[1])
 #path of engine as argument 1
-newengine = str(sys.arg[2])
+newengine = str(sys.argv[2])
 
 
 computerarg = sys.argv[3]
@@ -77,7 +77,7 @@ def eventCallback(event):
 		curturn = 0
 		epaper.writeText(0,"Black turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci(newengine))
+			engine = chess.engine.SimpleEngine.popen_uci(newengine)
 			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
 			engine.configure(options)
 			limit = chess.engine.Limit(time=5)

@@ -82,11 +82,14 @@ import select
 import bluetooth
 import subprocess
 
+global sernr
+sernr=0
+
 source = ""
 gamedbid = -1
 session = None
 
-debugcmds = 1
+debugcmds = 0
 
 # https://github.com/well69/picochess-1/blob/master/test/dgtbrd-ruud.h
 DGT_SEND_RESET = 0x40 # Puts the board into IDLE mode, cancelling any UPDATE mode
@@ -1011,6 +1014,7 @@ def pieceMoveDetectionThread():
 
 def pairThread():
 	# Emulate bluetooth pairing by providing pairing in a separate thread too
+	'''	
 	while True:
 		print('running pair thread')
 		#p = subprocess.Popen(['/usr/bin/bt-agent --capability=NoInputNoOutput -p /etc/bluetooth/pin.conf'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
@@ -1040,7 +1044,7 @@ def pairThread():
 			if r is not None:
 				running = 0
 		time.sleep(0.1)
-
+	'''
 drawCurrentBoard()
 epaper.writeText(0,'Connect remote')
 epaper.writeText(1,'Device Now')
@@ -1071,7 +1075,7 @@ print("start")
 cb = chess.Board()
 board.ledsOff()
 
-source = "eboard.py"
+source = "DGTMode"
 Session = sessionmaker(bind=models.engine)
 session = Session()
 
@@ -1138,7 +1142,7 @@ while True and dodie == 0:
 				#board.writeText(0, 'Init')
 				#board.writeText(1, '         ')
 				if debugcmds == 1:
-					#print("DGT_SEND_RESET")
+					print("DGT_SEND_RESET")
 				sendupdates = 0
 				handled = 1
 			if data[0] == DGT_TO_BUSMODE:
@@ -1219,7 +1223,7 @@ while True and dodie == 0:
 				#print("bus pinged")
 				dump = bt.read(3)
 				if debugcmds == 1:
-					#print("DGT_BUS_PING " + dump.hex())
+					print("DGT_BUS_PING " + dump.hex())
 				#print(dump.hex())
 				if ignore_next_bus_ping == 1 and dump[0] == 0 and dump[1] == 0:
 					ignore_next_bus_ping = 0
@@ -1280,12 +1284,14 @@ while True and dodie == 0:
 				# Don't handle this for now but we still need to clear the extra bytes
 				# with ourbus  address and checksum
 				dump = bt.read(3)
+				print(dump)
 				if debugcmds == 1:
 					print("DGT_BUS_SEND_CLK " + dump.hex())
 				handled = 1
 			if data[0] == DGT_BUS_SEND_FROM_START:
 				#print("Sending EEPROM data from start")
 				dump = bt.read(3)
+				print(dump+"tag")
 				if debugcmds == 1:
 					print("DGT_BUS_SEND_FROM_START " + dump.hex())
 				# find the last occurrence of EE_START in the EEPROM
@@ -1471,6 +1477,7 @@ while True and dodie == 0:
 				bt.flush()
 				bt.write(tosend)
 				bt.flush()
+				#sernr= 1
 				# If something is just repeatedly asking for the serial then start sending updates anyway
 				serialcount = serialcount + 1
 				if serialcount > 5:
@@ -1495,7 +1502,7 @@ while True and dodie == 0:
 				tosend.append(13)
 				tosend.append(ord('3'))
 				tosend.append(ord('.'))
-				tosend.append(ord('3'))
+				tosend.append(ord('2'))
 				tosend.append(ord('6'))
 				tosend.append(ord('0'))
 				tosend.append(ord('1'))
@@ -1614,6 +1621,7 @@ while True and dodie == 0:
 				sz = sz[0]
 				d = bt.read(sz)
 				handled = 1
+				
 			if data[0] == DGT_SEND_UPDATE or data[0] == DGT_SEND_UPDATE_BRD:
 				# Send an update
 				if debugcmds == 1:

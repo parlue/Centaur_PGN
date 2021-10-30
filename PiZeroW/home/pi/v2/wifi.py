@@ -1,7 +1,7 @@
 # Connect to a Wifi Network
 #
 import sys
-sys.ptah.append("/home/pi/v2")
+sys.path.append("/home/pi/v2")
 from board import boardfunctions
 import os
 import time

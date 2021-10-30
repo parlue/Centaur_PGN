@@ -7,6 +7,8 @@ import sys
 import time
 import centaurv2
 from display import epd2in9d , epaper
+import psutil
+
 
 sys.path.append("/home/pi/centaur/PIL")
 from PIL import Image , ImageDraw , ImageFont
@@ -113,7 +115,7 @@ boardfunctions.clearSerial()
 epaper.initEpaper()
 # Subscribe to board events. First parameter is the function for key presses. The second is the function for
 # field activity
-boardfunctions.subscribeEvents(keyPressed, fieldActivity)
+boardfunctions.subscribeEvents(keyPressed)
 
 
 while True:
@@ -291,6 +293,8 @@ while True:
 				boardfunctions.clearScreen()
 				os.chdir("/home/pi/v2")
 				os.system("/usr/bin/python3.6 /home/pi/v2/lichessV4.py current")
+				#boardfunctions.clearSerial()
+				#time.sleep(2)
 				sys.exit()
 
 			livemenu = {'Rated': ' Rated', 'Unrated': ' Unrated'}
@@ -323,5 +327,7 @@ while True:
 			boardfunctions.clearScreen()
 			os.chdir("/home/pi/v2")
 			os.system(f"/usr/bin/python3.6 /home/pi/v2/lichessV4.py New {gtime} {gincrement} {rated} {color}")
+			#boardfunctions.clearSerial()
+			#time.sleep(2)
 			
 			#sys.exit()

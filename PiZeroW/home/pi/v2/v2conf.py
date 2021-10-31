@@ -1,1 +1,1 @@
-lichesstoken = "Your token here"
+lichesstoken = "Your Key here"

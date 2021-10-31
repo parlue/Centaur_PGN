@@ -553,6 +553,13 @@ while (status == "started") and ourturn != 0 :
 				ret = client.board.make_move(gameid, fromln + toln)
 				if ret :
 					cboard.push(mv)
+					if cboard.is_check():
+						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+						epaper.writeText(13, '   CHECK!')
+					else:
+						epaper.writeText(13, '         ')
+						
 					ourturn = 0
 					halfturn = halfturn + 1
 					if fromln == "e1":
@@ -694,6 +701,12 @@ while (status == "started") and ourturn != 0 :
 				bking = 1
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			cboard.push(mv)
+			if cboard.is_check():
+				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+				boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+				epaper.writeText(13, '   CHECK!')
+			else:
+				epaper.writeText(13, '         ')
 			boardfunctions.ledsOff()
 			newgame = 0
 			ourturn = 1

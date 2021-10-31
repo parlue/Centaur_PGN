@@ -718,6 +718,7 @@ running = False
 epaper.writeText(11, 'Game over')
 epaper.writeText(12, f'Winner: {winner}')
 epaper.writeText(13, 'reason =' + status)
+boardfunctions.ledsOff()
 time.sleep(10)
 #epaper.clearScreen()
 #boardfunctions.clearSerial()

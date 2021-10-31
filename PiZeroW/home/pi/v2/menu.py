@@ -114,7 +114,7 @@ boardfunctions.beep(boardfunctions.SOUND_POWER_ON)
 boardfunctions.clearSerial()
 epaper.initEpaper()
 # Subscribe to board events. First parameter is the function for key presses. The second is the function for
-# field activity
+# field activity 
 boardfunctions.subscribeEvents(keyPressed, fieldActivity)
 
 

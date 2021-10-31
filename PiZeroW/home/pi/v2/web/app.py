@@ -54,12 +54,12 @@ def upload_file():
 	uploaded_file = request.files['file']
 	if uploaded_file.filename != '':
 		file_ext = os.path.splitext(uploaded_file.filename)[1]
-		if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+		if file_ext not in app.config['UPLOAD_EXTENSIONS']:
 			abort(400)
-		uploaded_file.save(uploaded_file.filename)
+		uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'],uploaded_file.filename))
 		os.system('/home/pi/update/update.sh')
-		os.system("sudo /sbin/shutdown -r now &")
-	return redirect(url_for('/rebbot'))
+#		os.system("sudo /sbin/shutdown -r now &")
+	return render_template('reboot.html')
 @app.route('/reboot')
 def reboot():
 	return render_template('reboot.html')

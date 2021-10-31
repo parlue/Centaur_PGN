@@ -62,17 +62,17 @@ def fieldActivity(id):
 	global quickselect
 	global curmenu
 	global selection
-	if quickselect == 1 and (id < -23 and id > -32):
-		boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-		menuitem = (id * -1) - 23
-		c = 1
-		r = ""
-		for k, v in curmenu.items():
-			if (c == menuitem):
-				selection = k
-				menuitem = 1
-				return
-			c = c + 1
+	#if quickselect == 1 and (id < -23 and id > -32):
+	#	boardfunctions.beep(boardfunctions.SOUND_GENERAL)
+	#	menuitem = (id * -1) - 23
+	#	c = 1
+	#	r = ""
+	#	for k, v in curmenu.items():
+	#		if (c == menuitem):
+	#			selection = k
+	#			menuitem = 1
+	#			return
+	#		c = c + 1
 
 # Power on sound
 def doMenu(menu):
@@ -115,7 +115,7 @@ boardfunctions.clearSerial()
 epaper.initEpaper()
 # Subscribe to board events. First parameter is the function for key presses. The second is the function for
 # field activity
-boardfunctions.subscribeEvents(keyPressed)
+boardfunctions.subscribeEvents(keyPressed, fieldActivity)
 
 
 while True:

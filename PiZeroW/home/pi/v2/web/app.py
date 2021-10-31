@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request, redirect, url_for
 import sys
 sys.path.append('/home/pi/v2')
 sys.path.append('/home/pi/v2/web')
@@ -20,6 +20,8 @@ import chess.pgn
 import json
 
 app = Flask(__name__)
+app.config['UPLOAD_EXTENSIONS'] = ['.tgz']
+app.config['UPLOAD_PATH'] = '/home/pi/update/'
 
 @app.route("/")
 def index():
@@ -42,6 +44,26 @@ def fen():
 	else:
 		fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 	return fen
+
+@app.route("/update")
+def update():
+
+	return render_template('update.html')
+@app.route("/update" , methods=["POST"])
+def upload_file():
+	uploaded_file = request.files['file']
+	if uploaded_file.filename != '':
+		file_ext = os.path.splitext(uploaded_file.filename)[1]
+		if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+			abort(400)
+		uploaded_file.save(uploaded_file.filename)
+		os.system('/home/pi/update/update.sh')
+		os.system("sudo /sbin/shutdown -r now &")
+	return redirect(url_for('/rebbot'))
+@app.route('/reboot')
+def reboot():
+	return render_template('reboot.html')
+
 
 @app.route("/pgn")
 def pgn():

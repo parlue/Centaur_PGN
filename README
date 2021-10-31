@@ -6,22 +6,29 @@ I spend alot time to bring it on a new OS , add idea's , troubleshhooting and fi
 This version will be available as an Image for PI Zwero W and later a small Version for the original Pi Zero Board.
 There are some differents to the original branch. If you miss feature, you can follow Ed's project.
 
-Big THX to all involved People to add fantastic idea's and code or help to support this project with test devices and many hours beta testing.
-
-Features:
-All based und work with a Pi Zero W with WLAN and Bluetooth
-Setup WIFI
-Bind Bluettoth
-DGT Board Emulator comaptible with: Rabbit , Picochess, Chess for Andriod
-DGT Board RevelationII Emutalor for LED Support
-Lichess Playing stand alone
-Playing UCI Engine like CT800
-PGN Support for all modes
-PGN Analytics
-PGN Support for the original Centaur
-Livebaord via Webinterface
-Some Configuration tools
-
+History and motivation:
+A few months ago I got the ambition work on the Centaur. The result was the first mod that had written a PGN file on a USB stick. The mod went very well and has given many users a long-awaited feature.
+After the mod had run its course, I also got in touch with other coders who wanted to get more out of the Centaur. At that time I also had the idea to fake the actual Centaur with a proxy engine in such a way that it can no longer carry out its adaptive game. But then there was a new project what everything changed. I got n contact with Ed NeKebno who had figured out how to control the board / fields. That was a new situation. The epaper display can be bought and there is documentation about it. Reading the board was kind of awesome. 
+The communication is unfortunately not as fast as the Centi does internally, but it works. I have to say a very big thank you to EdNekobo who turned one idea after the other into code day and night. I would never have had that time and I would never have thought that it would come to such a version thanks to him.
+With the new option, there were three paths:
+1. Emulation of a DGT board, best RevelationII (LEDS)
+2. Lichess standalone emulation
+3. Playing without adaptive mode
+This features make the Centaur very universal. Whether with Picochess, chess for Android or with the Rabbit plug-in. You can use anything. Even Arena and Fritz can be controlled with it.
+But there are also restrictions. The DGT Board has figure recognition and the Centaur only says that something is on a field. It was therefore necessary to always carry the figure stand with you by pychess. I also can't put any figures anywhere and get started. But if you play from the basic position, everything works out wonderfully. Only WhitePawn is not working properly. What is now also possible is controlling the LEDs in RevII mode.
+The lichess module was already a challange. There was some code, but it didn't work properly. This is where I've invested my time to make it playable. Today I love playing with the Lichess module. But there are small restrictions here today. In principle you can play 90-100% without any other display. Sometimes the Lichess Beserk API is slow, so that Lichess needs 1-2 seconds to confirm a move, sometimes it goes very quickly. I  recommend playing games for at least 10 minutes or longer.
+At the moment the following is not possible: You have to convert pawns via the web. If there is a draw by the opponent, it still has to be confirmed "currently" via the web. This also applies to claiming a victory if the opponent breaks off. This feature does not exist in the official API; often these cases do not occur, but then it is good to keep an eye on the web. I think you can live with that for the time being and it leaves room for improvement. Offering a draw or giving up, however, can be controlled with the Centaur's buttons. UP offers a drow, down is a resign, I in the moment you have the right to move.  The clocks are only updated after every move. I wanted to avoid writing on the display every second. So take a look at the web or mobile phone 😉
+At the moment everything is running via BT and WLAN, which makes a ZeroW conversion necessary. These are currently difficult to get and soldering an angle bar makes access to the mod a little more difficult. Of course, this is not for someone who wants to take advantage of their remaining guarantee. You lose this when you open the device. I want to say that very clear.
+A second version for the original PiZero and the exposed USB port may come in the next 14 days. The Lichess module is already running via tethering. The USB connection for the DGT emulator is still open ... other construction site.
+In general, I got the OK from Rasmus to include the CT800 on the image. 
+Everything is rounded off by exchanging the supplied engine. Version 9 will be replaced by a V14. The code of the V14 had been modified by Ed, so it now writes information into a database while playing. With this, the Centaur writes its own PGNs directly, which are displayed in the web interface on Port 8080. The database stores all the games ever played on the board, regardless of the mode. In addition, the trains are also displayed in the live board. Like the CT800, StockFish can also be played without an adaptive game via Elo settings in UCI mode.
+There is no change inside the original Centaur software. This was never touched.
+So what can you expect from the centaurV2?
+WLAN and BT capability
+Playing autonomous lichess with tokens
+DGT Board Emulator with REVII functions that are connected to Rabbit and Co via BT
+I will provide Images from this Version. 
+link comes soon
 Based und BusterOS 10
 
 

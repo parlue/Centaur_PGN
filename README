@@ -13,7 +13,7 @@ The communication is unfortunately not as fast as the Centi does internally, but
 With the new option, there were three paths:
 1. Emulation of a DGT board, best RevelationII (LEDS)
 2. Lichess standalone emulation
-3. Playing without adaptive mode
+3. Playing UCI engine without adaptive mode
 This features make the Centaur very universal. Whether with Picochess, chess for Android or with the Rabbit plug-in. You can use anything. Even Arena and Fritz can be controlled with it.
 But there are also restrictions. The DGT Board has figure recognition and the Centaur only says that something is on a field. It was therefore necessary to always carry the figure stand with you by pychess. I also can't put any figures anywhere and get started. But if you play from the basic position, everything works out wonderfully. Only WhitePawn is not working properly. What is now also possible is controlling the LEDs in RevII mode.
 The lichess module was already a challange. There was some code, but it didn't work properly. This is where I've invested my time to make it playable. Today I love playing with the Lichess module. But there are small restrictions here today. In principle you can play 90-100% without any other display. Sometimes the Lichess Beserk API is slow, so that Lichess needs 1-2 seconds to confirm a move, sometimes it goes very quickly. I  recommend playing games for at least 10 minutes or longer.

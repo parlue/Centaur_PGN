@@ -36,6 +36,7 @@ from display import epaper
 global ratingrange
 
 token = v2conf.lichesstoken
+	
 ratingrange = ratingconf.rating_range
 
 
@@ -43,11 +44,13 @@ pid = -1
 boardfunctions.clearSerial()
 epaper.initEpaper()
 
-if str(token) == "":
+#check if token is available
+if str(token) == "Your Key here" or str(token) =="" :
 	epaper.writeText(1, "No lichesstoken")
 	epaper.writeText(2, "try later")
 	time.sleep(3)
 	sys.exit()
+
 
 if (len(sys.argv) == 1):
 #	print("python3 lichess.py [current|New1]")
@@ -102,9 +105,9 @@ def newGameThread():
 
 
 	epaper.writeText(5, f'time {gtime} , {ginc}')
-	epaper.writeText(6, f'ratedt={grated}')
+	epaper.writeText(6, f'rated={grated}')
 	epaper.writeText(7, f'color={gcolor}')
-	epaper.writeText(8, f'ratingrange={ratingrange}')
+	epaper.writeText(8, f'range={ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="white"):
 		client.board.seek(10, 5, rated=False, variant='standard', color='white', rating_range=f'{ratingrange}')
 	if (gtime=='10' and ginc=='5' and grated=="False" and gcolor=="black"):
@@ -658,7 +661,7 @@ while (status == "started") and ourturn != 0 :
 				movedto = lrtocalc 
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 
-# check for caslte
+# check for castled
 			if lrmove == "e1g1" and wking == 0:
 				castled = "h1f1"
 			if lrmove == "e1c1" and wking == 0:

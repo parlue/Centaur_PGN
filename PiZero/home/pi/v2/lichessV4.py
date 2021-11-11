@@ -293,6 +293,7 @@ def stateThread():
 				winner = str(state.get('winner'))
 
 			remotemoves = str(remotemoves)
+			print("direkt aus dem fred "+remotemoves)
 			status = str(status)
 # dso add events and stop the game
 			if ('text' in state.keys()):
@@ -357,6 +358,7 @@ def stateThread():
 				
 						
 			if (remotemoves == "None"):
+				print("direkt aus dem fred 2 "+remotemoves)
 				remotemoves = ""
 			if ('black' in state.keys()):
 				if ('name' in state.get('white')):

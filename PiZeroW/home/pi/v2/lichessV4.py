@@ -34,11 +34,14 @@ import ratingconf
 from display import epaper
 
 global ratingrange
+global checkmate
+
+
 
 token = v2conf.lichesstoken
 	
 ratingrange = ratingconf.rating_range
-
+checkmate = 0
 
 pid = -1
 boardfunctions.clearSerial()
@@ -91,6 +94,7 @@ epaper.writeText(3, player)
 
 running = True
 
+
 	
 def newGameThread():
 	time.sleep(5)
@@ -129,7 +133,7 @@ def newGameThread():
 		client.board.seek(15, 10, rated=False, variant='standard', color='random', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="white"):
 			client.board.seek(15, 10, rated=True, variant='standard', color='white', rating_range=f'{ratingrange}')
-	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="white"):
+	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="black"):
 		client.board.seek(15, 10, rated=True, variant='standard', color='black', rating_range=f'{ratingrange}')
 	if (gtime=='15' and ginc=='10' and grated=="True" and gcolor=="random"):
 		client.board.seek(15, 10, rated=True, variant='standard', color='random', rating_range=f'{ratingrange}')
@@ -197,7 +201,6 @@ epaper.writeText(9, gameid)
 playeriswhite = -1
 whiteplayer = ""
 blackplayer = ""
-
 whiteclock = 0
 blackclock = 0
 whiteincrement = 0
@@ -211,9 +214,33 @@ f.close()
 # Lichess doesn't start the clocks until white moves
 starttime = -1
 
+#def timethreat():
+#	global wzeit
+#	global bzeit
+#	while running and status != "mate" and status != "draw" and status != "resign" and status != "aborted" and status != "outoftime" and status != "timeout":
+#	now = time()
+	
+	# if black started	
+#	if = time() - now == 1 :
+#		blsec = blacktimesec -1
+#		if blsec < 0 :
+#			blsec = 59
+#			blmin = blmin -1
+	# whine startet	
+	
+		
+#		blacktimemin
+#		blacktimesec
+	# if white startet	
+#		whitetimemin
+#		whitetimesec
+#	time.sleep(0.25)
+	
+	
+
 # This thread keeps track of the moves made on lichess
 def stateThread():
-	global remotemoves
+	
 	global status
 	global playeriswhite
 	global player
@@ -230,12 +257,17 @@ def stateThread():
 	global btime
 	global whitetime
 	global blacktime
+	global clockwsec
+	global clockbecsec
+	global clockwmin
+	global clockbmin
 	global whiterating
 	global blackrating
 	global message1
 	global sound
 	global wking
 	global bking
+	global remotemoves
 	status =""
 	while running and status != "mate" and status != "draw" and status != "resign" and status != "aborted" and status != "outoftime" and status != "timeout":
 		buttonPress=0
@@ -283,6 +315,10 @@ def stateThread():
 				if blacktimesec[:2]=="tz" or blacktimesec[1:3]=="st":
 					blacktimesec = "0"
 				blacktime = str(blacktimemin)+"min "+str(blacktimesec)+ "sec"
+				#clockwsec = int(whitetimesec)
+				#clockwmin = int(whitetimemin)
+				#clockbsec = int(blacktimemin)
+				#clockbmin = int(blacktimemin)
 #mod by dso 4.1021
 			if ('state' in state.keys()):
 				remotemoves = state.get('state').get('moves')
@@ -318,6 +354,7 @@ def stateThread():
 				epaper.writeText(12, cwinner +' wins')
 				epaper.writeText(13,'pls wait restart..')
 				time.sleep(15)
+				boardfunctions.ledsOff()
 				os._exit(0)
 				#running = False
 			if status == 'aborted':
@@ -328,6 +365,7 @@ def stateThread():
 				epaper.writeText(12, 'No winner')
 				epaper.writeText(13,'pls wait restart..')
 				time.sleep(15)
+				boardfunctions.ledsOff()
 				os._exit(0)
 				
 			if status == 'outoftime':
@@ -338,6 +376,7 @@ def stateThread():
 				epaper.writeText(12, cwinner +' wins')
 				epaper.writeText(13,'pls wait restart..')
 				time.sleep(15)
+				boardfunctions.ledsOff()
 				os._exit(0)
 			if status == 'timeout':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
@@ -347,6 +386,7 @@ def stateThread():
 				epaper.writeText(12, cwinner +' wins')
 				epaper.writeText(13,'pls wait restart..')
 				time.sleep(15)
+				boardfunctions.ledsOff()
 				os._exit(0)
 			if status == 'draw':
 				boardfunctions.beep(boardfunctions.SOUND_WRONG_MOVE)
@@ -356,6 +396,7 @@ def stateThread():
 				epaper.writeText(12, cwinner +' No Winner')
 				epaper.writeText(13,'pls wait restart..')
 				time.sleep(15)
+				boardfunctions.ledsOff()
 				os._exit(0)
 				
 						
@@ -382,6 +423,7 @@ st = threading.Thread(target=stateThread, args=())
 st.daemon = True
 st.start()
 #print("Started")
+time.sleep(1)
 
 boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 boardmoves = ""
@@ -394,7 +436,7 @@ while playeriswhite == -1:
 
 if playeriswhite == 0:
 	lastmove = "1234"
-	remotemoves = "1234"
+	
 
 # ready for white
 ourturn = 1
@@ -500,11 +542,26 @@ while (status == "started") and ourturn != 0 :
 		# the board screen. 	 But I'll do that later!
 		# Send the move
 		lastmove = fromln + toln
+		liftrow = fromln[1:2]
+		setrow = toln[1:2]
+		liftcol = str(fromln[:1])
+		liftcoli = ord(liftcol)-96
+		if int(liftrow) >  1:
+			liftrowi = (int(liftrow)-1)*8
+		else:
+			liftrowi = 0
 		
+			
+		location = int(liftcoli) + int(liftrowi)-1
 
 		try:
 			
 			mv = chess.Move.from_uci(lastmove)
+			print(mv)
+			figure = cboard.piece_at(location)
+			print(figure)
+			if (setrow == 8 and liftrow ==7 and figure == "P") or (setrow == 1 and liftrow ==2 and figure == "P"):
+					mv = mv +"q"
 			print("Checked")
 			if (mv in cboard.legal_moves):
 				
@@ -560,8 +617,13 @@ while (status == "started") and ourturn != 0 :
 						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 						boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 						epaper.writeText(13, '   CHECK!')
+						if cboard.is_checkmate():
+							paper.writeText(13, '    MATE!')
+							checkmate = 1
+						
 					else:
 						epaper.writeText(13, '         ')
+					
 						
 					ourturn = 0
 					halfturn = halfturn + 1
@@ -608,6 +670,8 @@ while (status == "started") and ourturn != 0 :
 		epaper.drawBoard(pieces)
 	if playeriswhite == 0 and newgame == 1 : 
 		ourturn = 0
+		if remotemoves == "":
+			remotemoves = "1234"
 		if str(remotemoves)!= '1234':
 			lastmove = '3456'
 	print (playeriswhite)
@@ -615,17 +679,17 @@ while (status == "started") and ourturn != 0 :
 	print('Achtung= '+ str(remotemoves)[-4:])
 	print('ourturn sollte 0 sein ' + str(ourturn))
 	print('sound='+sound)
-	if ourturn == 0 and (status == "started" or status=="mate"):
+	if ourturn == 0 and (status == "started" or status=="mate") and checkmate == 0:
         # Here we wait to get a move from the other player on lichess
 		
 		startzeit = time.time()
 		epaper.writeText(10,whitetime)
 		epaper.writeText(1, blacktime)
-		while (status == "started" or status == "mate") and str(remotemoves)[-4:] == lastmove and winner != 'white' : 
+		while (status == "started" or status == "mate") and str(remotemoves)[-4:] == lastmove and winner != 'white' and checkmate == 0: 
 #			print(winner)
 			time.sleep(0.5)
 		movestart= time.time()
-		if status == "started" or status == 'mate' or winner != "white":
+		if status == "started" or status == 'mate' or winner != "white" or status != "resign" and checkmate == 0:
 			# There's an incoming move to deal with			
 			boardfunctions.beep(boardfunctions.SOUND_GENERAL)
 			rr = "   " + str(remotemoves)
@@ -698,9 +762,9 @@ while (status == "started") and ourturn != 0 :
 	
 			boardfunctions.clearSerial()
 			 
-			if fromln == "e1":
+			if lrfrom == "e1":
 				wking = 1
-			if fromln == "e8":
+			if lrfrom == "e8":
 				bking = 1
 			mv = chess.Move.from_uci(rr[-5:].strip())
 			cboard.push(mv)

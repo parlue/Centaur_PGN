@@ -24,6 +24,7 @@ epapermode = 0
 lastepaperbytes = bytearray(b'')
 first = 1
 event_refresh = threading.Event()
+screeninverted = 0
 
 def epaperUpdate():
     # This is used as a thread to update the e-paper if the image has changed
@@ -35,6 +36,7 @@ def epaperUpdate():
     global lastepaperbytes
     global first
     global event_refresh
+    global screeninverted
     print("started epaper update thread")
     epd.display(epd.getbuffer(epaperbuffer))
     time.sleep(6)
@@ -47,8 +49,9 @@ def epaperUpdate():
         if lastepaperbytes != tepaperbytes and epaperprocesschange == 1:
             filename = "/home/pi/v2/web/static/epaper.jpg"
             epaperbuffer.save(filename)
-            im = im.transpose(Image.FLIP_TOP_BOTTOM)
-            im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            if screeninverted == 0:
+                im = im.transpose(Image.FLIP_TOP_BOTTOM)
+                im = im.transpose(Image.FLIP_LEFT_RIGHT)
             if epapermode == 0 or first == 1:
                 epd.DisplayPartial(epd.getbuffer(im))
                 first = 0
@@ -92,6 +95,9 @@ def initEpaper(mode = 0):
     epaperbuffer = Image.new('1', (128, 296), 255)
     print("init epaper")
     epd.init()
+    time.sleep(1)
+    epd.Clear(0xff)
+    time.sleep(2)
     epaperUpd = threading.Thread(target=epaperUpdate, args=())
     epaperUpd.daemon = True
     epaperUpd.start()
@@ -158,12 +164,12 @@ def clearScreen():
     draw.rectangle([(0, 0), (128, 296)], fill=255, outline=255)
     first = 1
 
-def drawBoard(pieces):
+def drawBoard(pieces, startrow=2):
     global epaperbuffer
     chessfont = Image.open("/home/pi/centaur/fonts/ChessFontSmall.bmp")
     for x in range(0,64):
         pos = (x - 63) * -1
-        row = 50 + (16 * (pos // 8))
+        row = ((startrow * 20) + 8) + (16 * (pos // 8))
         col = (x % 8) * 16
         px = 0
         r = x // 8
@@ -200,7 +206,7 @@ def drawBoard(pieces):
         piece = chessfont.crop((px, py, px+16, py+16))
         epaperbuffer.paste(piece,(col, row))
 
-def drawFen(fen):
+def drawFen(fen, startrow=2):
     # As drawboard but draws a fen
     curfen = fen
     curfen = curfen.replace("/", "")
@@ -216,7 +222,16 @@ def drawFen(fen):
     for a in range(8,0,-1):
         for b in range(0,8):
             nfen = nfen + curfen[((a-1)*8)+b]
-    drawBoard(nfen)
+    drawBoard(nfen, startrow)
+
+def resignDrawMenu(row):
+    # Draws draw or resign options to the screen buffer
+    global epaperbuffer
+    offset = row * 20
+    draw = ImageDraw.Draw(epaperbuffer)
+    draw.text((0, offset + 0), "    DRW    RESI", font=font18, fill=0)
+    draw.polygon([(2, offset + 18), (18, offset + 18), (10, offset + 3)], fill=0)
+    draw.polygon([(35+25, offset + 3), (51+25, offset + 3), (43+25, offset + 18)], fill=0)
 
 def promotionOptions(row):
     # Draws the promotion options to the screen buffer

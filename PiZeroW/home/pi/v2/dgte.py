@@ -1,5 +1,6 @@
-# based on eboard.py EdNebeko
 # Emulate the DGT e-board protocol
+#
+# Ed Nekebno
 #
 # Pair first
 # Connect when the display tells you to! Do not connect before.
@@ -81,15 +82,13 @@ import pathlib
 import select
 import bluetooth
 import subprocess
-
-global sernr
-sernr=0
+import psutil
 
 source = ""
 gamedbid = -1
 session = None
 
-debugcmds = 0
+debugcmds = 1
 
 # https://github.com/well69/picochess-1/blob/master/test/dgtbrd-ruud.h
 DGT_SEND_RESET = 0x40 # Puts the board into IDLE mode, cancelling any UPDATE mode
@@ -181,7 +180,6 @@ cboard = bytearray([EMPTY] * 64)
 boardhistory = []
 turnhistory = []
 litsquares = []
-# board.beep
 startstate = bytearray(b'\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01')
 
 # Initialise epaper display
@@ -389,6 +387,35 @@ def screenUpdate():
 			drawCurrentBoard()
 			boardtoscreen = 1
 
+clockfirst = 1
+lclock = 0
+rclock = 0
+clockturn = 1 # 1 for left, 2 for right
+clockpaused = 1 # If the clock is paused
+showclock = 0
+
+def clockToggle():
+	# This simulates somebody pressing the buttons on the clock to start it running for the other player
+	global clockfirst
+	global clockturn
+	global clockpaused
+	print("clock toggled")
+	if clockfirst == 1:
+		print("first")
+		clockturn = 2
+		clockpaused = 0
+		clockfirst = 0
+	else:
+		print("not first")
+		print(clockturn)
+		if clockturn == 1:
+			clockturn = 2
+			clockpaused = 0
+		else:
+			clockturn = 1
+			clockpaused = 0
+		print(clockturn)
+
 def pieceMoveDetectionThread():
 	# Separate thread to take care of detecting piece movement
 	# for the board, so that it isn't waiting on the bluetooth
@@ -410,6 +437,7 @@ def pieceMoveDetectionThread():
 	global source
 	global gamedbid
 	global session
+	global clockpaused
 	lastlift = 0
 	kinglift = 0
 	lastfield = -1
@@ -440,7 +468,7 @@ def pieceMoveDetectionThread():
 								squarerow = 7 - squarerow
 								squarecol = 7 - squarecol
 								field = (squarerow * 8) + squarecol
-								#print("UP: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
+								print("UP: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
 								if curturn == 1:
 									print("White turn")
 								else:
@@ -461,9 +489,9 @@ def pieceMoveDetectionThread():
 											lastlift = cboard[field]
 											lastfield = field
 										liftedthisturn = liftedthisturn + 1
-								#print(item)
-								#print(lastlift)
-								#print(liftedthisturn)
+								print(item)
+								print(lastlift)
+								print(liftedthisturn)
 								if lastlift != EMPTY and liftedthisturn < 2:
 									cboard[field] = EMPTY
 									tosend = bytearray(b'')
@@ -475,7 +503,7 @@ def pieceMoveDetectionThread():
 									bt.write(tosend)
 									bt.flush()
 									time.sleep(0.2)
-									#print("SENT UP PACKET")
+									print("SENT UP PACKET")
 									buffer1 = bytearray([EMPTY] * 64)
 									buffer1[:] = cboard
 									boardhistory.append(buffer1)
@@ -502,7 +530,7 @@ def pieceMoveDetectionThread():
 								squarerow = 7 - squarerow
 								squarecol = 7 - squarecol
 								field = (squarerow * 8) + squarecol
-								#print("DOWN: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
+								print("DOWN: " + chr(ord("a") + (7-squarecol)) + chr(ord("1") + squarerow))
 
 								# Here we check if this was a valid move to make. If not then indicate it on
 								# the board
@@ -520,9 +548,9 @@ def pieceMoveDetectionThread():
 									print("White turn")
 								else:
 									print("Black turn")
-								#print(lastlift)
+								print(lastlift)
 								liftedthisturn = liftedthisturn - 1
-								#print(liftedthisturn)
+								print(liftedthisturn)
 								# Promotion
 								promoted = 0
 								if liftedthisturn == 0:
@@ -650,7 +678,7 @@ def pieceMoveDetectionThread():
 									bt.flush()
 									time.sleep(0.2)
 									lastchangepacket = tosend
-									#print("SENT DOWN PACKET")
+									print("SENT DOWN PACKET")
 									buffer1 = bytearray([EMPTY] * 64)
 									buffer1[:] = cboard
 									boardhistory.append(buffer1)
@@ -661,6 +689,7 @@ def pieceMoveDetectionThread():
 									EEPROM.append(field)
 									if lastfield != field:
 										board.beep(board.SOUND_GENERAL)
+										board.led(field)
 									if curturn == 1:
 										# white
 										if lastlift != EMPTY:
@@ -680,17 +709,17 @@ def pieceMoveDetectionThread():
 									if kinglift == 1:
 										if lastfield == 3 or lastfield == 59:
 											if field == 1 or field == 5 or field == 61 or field == 57:
-												#print("Castle attempt detected")
+												print("Castle attempt detected")
 												if curturn == 0:
 													curturn = 1
 													liftedthisturn = 0
 												else:
 													curturn = 0
 													liftedthisturn = 0
-									#print(mv)
+									print(mv)
 									if fromsq != tosq:
 										if promoted == 1:
-											#print("promotion")
+											print("promotion")
 											if lastlift == WQUEEN or lastlift == BQUEEN:
 												mv = mv + "q"
 											if lastlift == WROOK or lastlift == BROOK:
@@ -700,11 +729,12 @@ def pieceMoveDetectionThread():
 											if lastlift == WKNIGHT or lastlift == BKNIGHT:
 												mv = mv + "n"
 											promoted = 0
-											#print(mv)
+											print(mv)
 										cm = chess.Move.from_uci(mv)
 										legal = 1
 										if cm in cb.legal_moves:
-											#print("Move is allowed")
+											print("Move is allowed")
+											#clockToggle()
 											cb.push(cm)
 											gamemove = models.GameMove(
 												gameid=gamedbid,
@@ -713,7 +743,7 @@ def pieceMoveDetectionThread():
 											)
 											session.add(gamemove)
 											session.commit()
-											#print(cb.fen())
+											print(cb.fen())
 										else:
 											# The move is not allowed or the move is the rook move after a king move in castling
 											if (lastlift == WROOK or lastlift == BROOK) and (
@@ -721,7 +751,7 @@ def pieceMoveDetectionThread():
 												pass
 											else:
 												# Action the illegal move
-												#print("Move not allowed")
+												print("Move not allowed")
 												squarerow = (lastfield // 8)
 												squarecol = 7 - (lastfield % 8)
 												tosq = (squarerow * 8) + squarecol
@@ -746,7 +776,7 @@ def pieceMoveDetectionThread():
 													if (bytearray(resp) != expect):
 														if (resp[0] == 133 and resp[1] == 0):
 															# A piece has been raised or placed
-															#print("event")
+															print("event")
 															if boardhistory:
 																oldboard = boardhistory.pop()
 																turnhistory.pop
@@ -755,9 +785,9 @@ def pieceMoveDetectionThread():
 																# it has changed
 																for x in range(0, len(oldboard)):
 																	if oldboard[x] != cboard[x]:
-																		#print("Found difference at")
-																		#print(x)
-																		#print(oldboard[x])
+																		print("Found difference at")
+																		print(x)
+																		print(oldboard[x])
 																		tosend = bytearray(b'')
 																		tosend.append(DGT_FIELD_UPDATE | MESSAGE_BIT)
 																		tosend.append(0)
@@ -817,7 +847,8 @@ def pieceMoveDetectionThread():
 			if timer > 5:
 				r = board.getBoardState()
 				if bytearray(r) == startstate and startstateflag == 0:
-					#print("start state detected")
+					print("start state detected")
+					clockpaused = 1
 					fenlog = "/home/pi/centaur/fen.log"
 					f = open(fenlog, "w")
 					f.write("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
@@ -956,7 +987,7 @@ def pieceMoveDetectionThread():
 					game = models.Game(
 						source=source
 					)
-					#print(game)
+					print(game)
 					session.add(game)
 					session.commit()
 					# Get the max game id as that is this game id and fill it into gamedbid
@@ -980,46 +1011,143 @@ def pieceMoveDetectionThread():
 			resp = board.ser.read(1000)
 			resp = bytearray(resp)
 			if (resp.hex() == "b10011065000140a0501000000007d4700"):
-				# The back button has been pressed. Use this to exit eboard mode by setting a flag
-				# for the main thread
-				#print("exit")
-				dodie = 1
+				# BACK
+				tosend = bytearray(b'')
+				tosend.append(DGT_BWTIME | MESSAGE_BIT)
+				tosend.append(0)
+				tosend.append(10)
+				ack0 = 0x10
+				ack1 = 0x88
+				ack2 = 0x0
+				ack3 = 0x31
+				tosend.append(round(((ack2 & 0x80) / 8) + ((ack3 & 0x80) / 4) + 0x0a))  # 4  0
+				tosend.append(ack0 & 0x7f)  # 5  1
+				tosend.append(ack1 & 0x7f)  # 6  2
+				tosend.append(round(((ack0 & 0x80) / 8) + ((ack1 & 0x80) / 4) + 0x0a))  # 7  3
+				tosend.append(ack2 & 0x7f)  # 8  4
+				tosend.append(ack3 & 0x7f)  # 9  5
+				tosend.append(0)  # 10
+				print(tosend.hex())
+				bt.write(tosend)
+				bt.flush()
 				board.beep(board.SOUND_GENERAL)
-			if (resp.hex() == "b10010065000140a0504000000002a68"):
-				# The play button has been pressed. This button resends the last update move as
-				# the WP app occassionally misses it
-				#print("Resending last packet")
-				#t = lastchangepacket[4]
-				#print(t)
-				#dpacket = lastchangepacket
-				#dpacket[4] = 0
-				#print(dpacket.hex())
-				#bt.write(dpacket)
-				#time.sleep(0.2)
-				#lastchangepacket[4] = t
-				tosend = lastchangepacket
-				#print(tosend.hex())
+			if (resp.hex() == "b10011065000140a0510000000007d175f"):
+				# TICK
+				tosend = bytearray(b'')
+				tosend.append(DGT_BWTIME | MESSAGE_BIT)
+				tosend.append(0)
+				tosend.append(10)
+				ack0 = 0x10
+				ack1 = 0x88
+				ack2 = 0x0
+				ack3 = 0x35
+				tosend.append(round(((ack2 & 0x80) / 8) + ((ack3 & 0x80) / 4) + 0x0a))  # 4  0
+				tosend.append(ack0 & 0x7f)  # 5  1
+				tosend.append(ack1 & 0x7f)  # 6  2
+				tosend.append(round(((ack0 & 0x80) / 8) + ((ack1 & 0x80) / 4) + 0x0a))  # 7  3
+				tosend.append(ack2 & 0x7f)  # 8  4
+				tosend.append(ack3 & 0x7f)  # 9  5
+				tosend.append(0)  # 10
+				print(tosend.hex())
+				bt.write(tosend)
+				bt.flush()
+				board.beep(board.SOUND_GENERAL)
+			if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
+				# UP = MINUS
+				tosend = bytearray(b'')
+				tosend.append(DGT_BWTIME | MESSAGE_BIT)
+				tosend.append(0)
+				tosend.append(10)
+				ack0 = 0x10
+				ack1 = 0x88
+				ack2 = 0x0
+				ack3 = 0x34
+				tosend.append(round(((ack2 & 0x80) / 8) + ((ack3 & 0x80) / 4) + 0x0a))  # 4  0
+				tosend.append(ack0 & 0x7f)  # 5  1
+				tosend.append(ack1 & 0x7f)  # 6  2
+				tosend.append(round(((ack0 & 0x80) / 8) + ((ack1 & 0x80) / 4) + 0x0a))  # 7  3
+				tosend.append(ack2 & 0x7f)  # 8  4
+				tosend.append(ack3 & 0x7f)  # 9  5
+				tosend.append(0)  # 10
+				print(tosend.hex())
 				bt.write(tosend)
 				bt.flush()
 				board.beep(board.SOUND_GENERAL)
 			if (resp.hex() == "b10010065000140a050200000000611d"):
-				# The down button will scroll back one in the history to allow aligning the start described
-				# in epaper with the actual board in case of takeback errors
-				oldboard = boardhistory.pop()
-				curturn = turnhistory.pop()
-				cboard[:] = oldboard
+				# DOWN = PLUS
+				tosend = bytearray(b'')
+				tosend.append(DGT_BWTIME | MESSAGE_BIT)
+				tosend.append(0)
+				tosend.append(10)
+				ack0 = 0x10
+				ack1 = 0x88
+				ack2 = 0x0
+				ack3 = 0x32
+				tosend.append(round(((ack2 & 0x80) / 8) + ((ack3 & 0x80) / 4) + 0x0a))  # 4  0
+				tosend.append(ack0 & 0x7f)  # 5  1
+				tosend.append(ack1 & 0x7f)  # 6  2
+				tosend.append(round(((ack0 & 0x80) / 8) + ((ack1 & 0x80) / 4) + 0x0a))  # 7  3
+				tosend.append(ack2 & 0x7f)  # 8  4
+				tosend.append(ack3 & 0x7f)  # 9  5
+				tosend.append(0)  # 10
+				print(tosend.hex())
+				bt.write(tosend)
+				bt.flush()
 				board.beep(board.SOUND_GENERAL)
+			if (resp.hex() == "b10010065000140a0540000000006d67"):
+				# HELP button - quits
+				dodie = 1
+				board.beep(board.SOUND_GENERAL)
+			if (resp.hex() == "b10010065000140a0504000000002a68"):
+				# PLAY = RUN
+				tosend = bytearray(b'')
+				tosend.append(DGT_BWTIME | MESSAGE_BIT)
+				tosend.append(0)
+				tosend.append(10)
+				ack0 = 0x10
+				ack1 = 0x88
+				ack2 = 0x0
+				ack3 = 0x33
+				tosend.append(round(((ack2 & 0x80) / 8) + ((ack3 & 0x80) / 4) + 0x0a))  # 4  0
+				tosend.append(ack0 & 0x7f)  # 5  1
+				tosend.append(ack1 & 0x7f)  # 6  2
+				tosend.append(round(((ack0 & 0x80) / 8) + ((ack1 & 0x80) / 4) + 0x0a))  # 7  3
+				tosend.append(ack2 & 0x7f)  # 8  4
+				tosend.append(ack3 & 0x7f)  # 9  5
+				tosend.append(0)  # 10
+				print(tosend.hex())
+				bt.write(tosend)
+				bt.flush()
+				board.beep(board.SOUND_GENERAL)
+				clockpaused = 0
 		except:
 			pass
 
 def pairThread():
+	'''
 	# Emulate bluetooth pairing by providing pairing in a separate thread too
-	'''	
+	# First kill any running bt-agent, it may have been started from the menu
+	for p in psutil.process_iter(attrs=['pid', 'name']):
+		if "bt-agent" in p.info["name"]:
+			p.kill()
+			time.sleep(3)
 	while True:
 		print('running pair thread')
-		#p = subprocess.Popen(['/usr/bin/bt-agent --capability=NoInputNoOutput -p /etc/bluetooth/pin.conf'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-		#poll_obj = select.poll()
-		#poll_obj.register(p.stdout, select.POLLIN)
+		# In case something has gone wrong we actually call bluetoothctl first to make it discoverable and pairable.
+		p = subprocess.Popen(['/usr/bin/bluetoothctl'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True, shell=True)
+		poll_obj = select.poll()
+		poll_obj.register(p.stdout, select.POLLIN)
+		p.stdin.write("power on\n")
+		p.stdin.flush()
+		p.stdin.write("discoverable on\n")
+		p.stdin.flush()
+		p.stdin.write("pairable on\n")
+		p.stdin.flush()
+		time.sleep(4)
+		p.terminate()
+		p = subprocess.Popen(['/usr/bin/bt-agent --capability=NoInputNoOutput -p /etc/bluetooth/pin.conf'],stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+		poll_obj = select.poll()
+		poll_obj.register(p.stdout, select.POLLIN)
 		running = 1
 		spamyes = 0
 		spamtime = 0;
@@ -1027,7 +1155,7 @@ def pairThread():
 			poll_result = poll_obj.poll(0)
 			if spamyes == 1:
 				if time.time() - spamtime < 3:
-					#print("spamming yes!")
+					print("spamming yes!")
 					p.stdin.write(b'yes\n')
 					time.sleep(1)
 				else:
@@ -1055,10 +1183,10 @@ pairThread.start()
 
 start = time.time()
 
-while exists("/dev/rfcomm0") == False and (time.time() - start < 60):
+while exists("/dev/rfcomm0") == False and (time.time() - start < 90):
 	time.sleep(.01)
 
-if (time.time() - start >= 60):
+if (time.time() - start >= 90):
 	epaper.writeText(0,"TIMEOUT")
 	epaper.writeText(1,"             ")
 	time.sleep(2)
@@ -1075,7 +1203,7 @@ print("start")
 cb = chess.Board()
 board.ledsOff()
 
-source = "DGTMode"
+source = "E-Board"
 Session = sessionmaker(bind=models.engine)
 session = Session()
 
@@ -1083,7 +1211,7 @@ session = Session()
 game = models.Game(
 	source=source
 )
-#print(game)
+print(game)
 session.add(game)
 session.commit()
 # Get the max game id as that is this game id and fill it into gamedbid
@@ -1130,6 +1258,99 @@ serialcount = 0
 reversed = 0
 
 time.sleep(0.2)
+
+def sendClockData():
+	# Sends a BWTIME message.
+	global bt
+	global lclock
+	global rclock
+	global clockturn
+	global clockpaused
+	print("sending clock")
+	tosend = bytearray(b'')
+	tosend.append(DGT_BWTIME | MESSAGE_BIT)
+	tosend.append(0)
+	tosend.append(10)
+	tclock = lclock
+	lh = tclock // 3600
+	tclock = tclock % 3600
+	lm = tclock // 60
+	lmp1 = lm // 10
+	lmp2 = lm % 10
+	lm = (lmp1 << 4) + lmp2
+	tclock = tclock % 60
+	ls = tclock
+	lsp1 = ls // 10
+	lsp2 = ls % 10
+	ls = (lsp1 << 4) + lsp2
+	tosend.append(lh) # l h
+	tosend.append(lm) # l m
+	tosend.append(ls) # l s
+	tclock = rclock
+	rh = tclock // 3600
+	tclock = tclock % 3600
+	rm = tclock // 60
+	rmp1 = rm // 10
+	rmp2 = rm % 10
+	rm = (rmp1 << 4) + rmp2
+	tclock = tclock % 60
+	rs = tclock
+	rsp1 = rs // 10
+	rsp2 = rs % 10
+	rs = (rsp1 << 4) + rsp2
+	tosend.append(rh) # r h
+	tosend.append(rm) # r m
+	tosend.append(rs) # r s
+	flags = 1
+	if clockpaused == 0:
+		flags = flags | 0x01
+	if clockturn == 2:
+		flags = flags | 0x02
+	if clockturn == 1:
+		flags = flags | 0x08
+	if clockturn == 2:
+		flags = flags | 0x10
+	tosend.append(flags) # flags
+	print(tosend.hex())
+	bt.write(tosend)
+	bt.flush()
+
+def clockRun():
+	# Decrement the clock
+	global lclock
+	global rclock
+	global clockturn
+	global clockpaused
+	while True:
+		if clockturn == 1:
+			if lclock > 0:
+				if clockpaused == 0:
+					lclock = lclock - 1
+				lmin = lclock // 60
+				lsec = lclock % 60
+				rmin = rclock // 60
+				rsec = rclock % 60
+				timestr = "{:02d}".format(lmin) + ":" + "{:02d}".format(lsec) + "       " + "{:02d}".format(rmin) + ":" + "{:02d}".format(rsec)
+				if showclock == 1:
+					epaper.writeText(12,timestr)
+		if clockturn == 2:
+			if rclock > 0:
+				if clockpaused == 0:
+					rclock = rclock - 1
+				lmin = lclock // 60
+				lsec = lclock % 60
+				rmin = rclock // 60
+				rsec = rclock % 60
+				timestr = "{:02d}".format(lmin) + ":" + "{:02d}".format(lsec) + "       " + "{:02d}".format(
+					rmin) + ":" + "{:02d}".format(rsec)
+				if showclock == 1:
+					epaper.writeText(12, timestr)
+		sendClockData()
+		time.sleep(1)
+
+clkThread = threading.Thread(target=clockRun, args=())
+clkThread.daemon = True
+clkThread.start()
 
 while True and dodie == 0:
 	try:
@@ -1284,14 +1505,12 @@ while True and dodie == 0:
 				# Don't handle this for now but we still need to clear the extra bytes
 				# with ourbus  address and checksum
 				dump = bt.read(3)
-				print(dump)
 				if debugcmds == 1:
 					print("DGT_BUS_SEND_CLK " + dump.hex())
 				handled = 1
 			if data[0] == DGT_BUS_SEND_FROM_START:
 				#print("Sending EEPROM data from start")
 				dump = bt.read(3)
-				print(dump+"tag")
 				if debugcmds == 1:
 					print("DGT_BUS_SEND_FROM_START " + dump.hex())
 				# find the last occurrence of EE_START in the EEPROM
@@ -1467,17 +1686,16 @@ while True and dodie == 0:
 				tosend.append(0)
 				tosend.append(8)
 				tosend.append(ord('1'))
-				tosend.append(ord('8'))
-				tosend.append(ord('1'))
+				tosend.append(ord('2'))
+				tosend.append(ord('3'))
+				tosend.append(ord('4'))
 				tosend.append(ord('5'))
-				tosend.append(ord('0'))
 				bt.write(tosend)
 				bt.flush()
 				bt.write(tosend)
 				bt.flush()
 				bt.write(tosend)
 				bt.flush()
-				#sernr= 1
 				# If something is just repeatedly asking for the serial then start sending updates anyway
 				serialcount = serialcount + 1
 				if serialcount > 5:
@@ -1506,10 +1724,10 @@ while True and dodie == 0:
 				tosend.append(ord('6'))
 				tosend.append(ord('0'))
 				tosend.append(ord('1'))
-				tosend.append(ord('8'))
-				tosend.append(ord('1'))
+				tosend.append(ord('2'))
+				tosend.append(ord('3'))
+				tosend.append(ord('4'))
 				tosend.append(ord('5'))
-				tosend.append(ord('0'))
 				bt.write(tosend)
 				bt.flush()
 				bt.write(tosend)
@@ -1612,16 +1830,6 @@ while True and dodie == 0:
 					tosend.append(board.checksum(tosend))
 					board.ser.write(tosend)
 				handled = 1
-			if data[0] == DGT_CLOCK_MESSAGE:
-				# For now don't display the clock, maybe later. But the other device acts as it
-				# Just drop the data
-				if debugcmds == 1:
-					print("DGT_CLOCK_MESSAGE")
-				sz = bt.read(1)
-				sz = sz[0]
-				d = bt.read(sz)
-				handled = 1
-				
 			if data[0] == DGT_SEND_UPDATE or data[0] == DGT_SEND_UPDATE_BRD:
 				# Send an update
 				if debugcmds == 1:
@@ -1649,22 +1857,178 @@ while True and dodie == 0:
 					print("DGT_SEND_UPDATE_NICE")
 				sendupdates = 1
 				handled = 1
+			if data[0] == DGT_CLOCK_MESSAGE:
+				# For now don't display the clock, maybe later. But the other device acts as it
+				# Just drop the data
+				if debugcmds == 1:
+					print("DGT_CLOCK_MESSAGE")
+				sz = bt.read(1)
+				sz = sz[0]
+				d = bt.read(sz)
+				print("****** " + d.hex())
+				clkhandled = 0
+				if d.hex() == "030300":
+					# Clears the message and shows normal clock times
+					# It is responded to with clock data. For now fake it
+					#sendClockData()
+					tosend = bytearray(b'')
+					tosend.append(DGT_BWTIME | MESSAGE_BIT)
+					tosend.append(0)
+					tosend.append(10)
+					ack0 = 0x10
+					ack1 = 0x81
+					ack2 = 0x0
+					ack3 = 0
+					tosend.append(round(((ack2 & 0x80)/8) + ((ack3 & 0x80)/4) + 0x0a)) # 4  0
+					tosend.append(ack0 & 0x7f) # 5  1
+					tosend.append(ack1 & 0x7f) # 6  2
+					tosend.append(round(((ack0 & 0x80)/8) + ((ack1 & 0x80)/4) + 0x0a)) # 7  3
+					tosend.append(ack2 & 0x7f) # 8  4
+					tosend.append(ack3 & 0x7f) # 9  5
+					tosend.append(0) # 10
+					print(tosend.hex())
+					bt.write(tosend)
+					bt.flush()
+					clkhandled = 1
+				if d.hex() == "030900":
+					# This is requesting the clock version
+					tosend = bytearray(b'')
+					tosend.append(DGT_BWTIME | MESSAGE_BIT)
+					tosend.append(0)
+					tosend.append(10)
+					ack0 = 0x10
+					ack1 = 0x09
+					ack2 = 0x12
+					ack3 = 0
+					tosend.append(round(((ack2 & 0x80)/8) + ((ack3 & 0x80)/4) + 0x0a)) # 4  0
+					tosend.append(ack0 & 0x7f) # 5  1
+					tosend.append(ack1 & 0x7f) # 6  2
+					tosend.append(round(((ack0 & 0x80)/8) + ((ack1 & 0x80)/4) + 0x0a)) # 7  3
+					tosend.append(ack2 & 0x7f) # 8  4
+					tosend.append(ack3 & 0x7f) # 9  5
+					tosend.append(0) # 10
+					print(tosend.hex())
+					bt.write(tosend)
+					bt.flush()
+					clkhandled = 1
+				if d.hex()[0:4] == "030a":
+					# This is asking to set the clock setnrun
+					print("setting the clock")
+					# clockturn clockpaused showclock
+					lh = d[2]
+					lm = d[3]
+					ls = d[4]
+					rh = d[5]
+					rm = d[6]
+					rs = d[7]
+					ctl = d[8]
+					print(lh)
+					print(lm)
+					print(ls)
+					print(rh)
+					print(rm)
+					print(rs)
+					lclock = (int(str(lh)) * 3600) + (int(str(lm)) * 60) + (int(str(ls)))
+					rclock = (int(str(rh)) * 3600) + (int(str(rm)) * 60) + (int(str(rs)))
+					print("Set the clocks")
+					print(lclock)
+					print(rclock)
+					showclock = 1
+					clockturn = 1
+					print("left turn")
+					if ctl & 0x02 > 0:
+						clockturn = 2
+						print("right turn")
+					if ctl & 0x04 > 0:
+						clockpaused = 1
+						print("paused")
+					else:
+						clockpaused = 0
+						print("running")
+					tosend = bytearray(b'')
+					tosend.append(DGT_BWTIME | MESSAGE_BIT)
+					tosend.append(0)
+					tosend.append(10)
+					ack0 = 0x10
+					ack1 = 0x0a
+					ack2 = 0x00
+					ack3 = 0x00
+					tosend.append(round(((ack2 & 0x80)/8) + ((ack3 & 0x80)/4) + 0x0a)) # 4  0
+					tosend.append(ack0 & 0x7f) # 5  1
+					tosend.append(ack1 & 0x7f) # 6  2
+					tosend.append(round(((ack0 & 0x80)/8) + ((ack1 & 0x80)/4) + 0x0a)) # 7  3
+					tosend.append(ack2 & 0x7f) # 8  4
+					tosend.append(ack3 & 0x7f) # 9  5
+					tosend.append(0) # 10
+					print(tosend.hex())
+					bt.write(tosend)
+					bt.flush()
+					clkhandled = 1
+				if d.hex()[0:4] == "030c":
+					# This is the ASCII message for the DGT3000
+					asciimessage = ""
+					for qi in range(2,11):
+						asciimessage = asciimessage + chr(d[qi])
+					epaper.writeText(13,asciimessage + "               ")
+					#if d[12] > 0:
+					#	board.beep(board.SOUND_GENERAL)
+					tosend = bytearray(b'')
+					tosend.append(DGT_BWTIME | MESSAGE_BIT)
+					tosend.append(0)
+					tosend.append(10)
+					ack0 = 0x10
+					ack1 = 0x0c
+					ack2 = 0x00
+					ack3 = 0
+					tosend.append(round(((ack2 & 0x80)/8) + ((ack3 & 0x80)/4) + 0x0a)) # 4  0
+					tosend.append(ack0 & 0x7f) # 5  1
+					tosend.append(ack1 & 0x7f) # 6  2
+					tosend.append(round(((ack0 & 0x80)/8) + ((ack1 & 0x80)/4) + 0x0a)) # 7  3
+					tosend.append(ack2 & 0x7f) # 8  4
+					tosend.append(ack3 & 0x7f) # 9  5
+					tosend.append(0) # 10
+					print(tosend.hex())
+					bt.write(tosend)
+					bt.flush()
+					clkhandled = 1
+				if d.hex()[0:4] == "030d":
+					# This is the ASCII message for the revelation
+					asciimessage = ""
+					for qi in range(2,13):
+						asciimessage = asciimessage + chr(d[qi])
+					print("|||" + asciimessage + "||||")
+					if "RevII" not in asciimessage and "PicoChs" not in asciimessage:
+						epaper.writeText(13,asciimessage + "               ")
+					#if d[13] > 0:
+						#board.beep(board.SOUND_GENERAL)
+					tosend = bytearray(b'')
+					tosend.append(DGT_BWTIME | MESSAGE_BIT)
+					tosend.append(0)
+					tosend.append(10)
+					ack0 = 0x10
+					ack1 = 0x81
+					ack2 = 0x00
+					ack3 = 0
+					tosend.append(round(((ack2 & 0x80)/8) + ((ack3 & 0x80)/4) + 0x0a)) # 4  0
+					tosend.append(ack0 & 0x7f) # 5  1
+					tosend.append(ack1 & 0x7f) # 6  2
+					tosend.append(round(((ack0 & 0x80)/8) + ((ack1 & 0x80)/4) + 0x0a)) # 7  3
+					tosend.append(ack2 & 0x7f) # 8  4
+					tosend.append(ack3 & 0x7f) # 9  5
+					tosend.append(0) # 10
+					print(tosend.hex())
+					bt.write(tosend)
+					bt.flush()
+					clkhandled = 1
+				if clkhandled == 0:
+					print("Unhandled clock message")
+					print(d.hex())
+				handled = 1
 			if data[0] == DGT_SEND_CLK:
 				# RabbitPlugin doesn't work without this so let's fake this for now
 				if debugcmds == 1:
 					print("DGT_SEND_CLK")
-				tosend = bytearray(DGT_BWTIME | MESSAGE_BIT)
-				tosend.append(0)
-				tosend.append(10)
-				tosend.append(7)
-				tosend.append(0)
-				tosend.append(0)
-				tosend.append(7)
-				tosend.append(0)
-				tosend.append(36)
-				tosend.append(0)
-				bt.write(tosend)
-				bt.flush()
+				sendClockData()
 				handled = 1
 			if data[0] == DGT_SEND_BATTERY_STATUS:
 				# Ideally in the future we'll put a function in board to get the

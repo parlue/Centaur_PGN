@@ -10,20 +10,13 @@ import chess.engine
 import sys
 import pathlib
 from random import randint
-
+import configparser
 curturn = 1
 computeronturn = 0
 kill = 0
 
 # Expect the first argument to be 'white' 'black' or 'random' for what the player is playing
-
-
-enginename = str(sys.argv[1])
-#path of engine as argument 1
-newengine = str(sys.argv[2])
-
-
-computerarg = sys.argv[3]
+computerarg = sys.argv[1]
 if computerarg == "white":
 	computeronturn = 0
 if computerarg == "black":
@@ -31,13 +24,28 @@ if computerarg == "black":
 if computerarg == "random":
 	computeronturn = randint(0,1)
 
-# Pass an ELO between 1000 and 2400
-eloarg = int(sys.argv[4])
+# Arg2 is going to contain the name of our engine choice. We use this for database logging and to spawn the engine
+enginename = sys.argv[2]
+
+ucioptionsdesc = "Default"
+ucioptions = {}
+if len(sys.argv) > 3:
+	# This also has an options string...but what is actually passed in 3 is the desc which is the section name
+	ucioptionsdesc = sys.argv[3]
+	# These options we should derive form the uci file
+	ucifile = "/home/pi/v2/engines/" + enginename + ".uci"
+	config = configparser.ConfigParser()
+	config.optionxform = str
+	config.read(ucifile)
+	print(config.items(ucioptionsdesc))
+	for item in config.items(ucioptionsdesc):
+		ucioptions[item[0]] = item[1]
+	print(ucioptions)
 
 if computeronturn == 0:
-	gamemanager.setGameInfo(str(eloarg) + " ELO", "", "", "Player", "{enginename}")
+	gamemanager.setGameInfo(ucioptionsdesc, "", "", "Player", enginename)
 else:
-	gamemanager.setGameInfo(str(eloarg) + " ELO", "", "", "{enginename}", "Player")
+	gamemanager.setGameInfo(ucioptionsdesc, "", "", enginename, "Player")
 
 def keyCallback(key):
 	# This function will receive any keys presses on the keys
@@ -58,34 +66,42 @@ def eventCallback(event):
 	if event == gamemanager.EVENT_NEW_GAME:
 		epaper.writeText(0,"New Game")
 		epaper.writeText(1,"               ")
+		epaper.writeText(13,"Play "+ enginename)
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
 	if event == gamemanager.EVENT_WHITE_TURN:
 		curturn = 1
 		epaper.writeText(0,"White turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci(newengine)
-			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
-			engine.configure(options)
+			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
+			if ucioptions != {}:
+				options = (ucioptions)
+				engine.configure(options)
 			limit = chess.engine.Limit(time=5)
 			mv = engine.play(gamemanager.cboard, limit, info=chess.engine.INFO_ALL)
 			mv = mv.move
 			epaper.writeText(12, "Engine: " + str(mv))
 			engine.quit()
+			
 			gamemanager.computerMove(str(mv))
 	if event == gamemanager.EVENT_BLACK_TURN:
 		curturn = 0
 		epaper.writeText(0,"Black turn")
 		if curturn == computeronturn:
-			engine = chess.engine.SimpleEngine.popen_uci(newengine)
-			options = ({"UCI_LimitStrength": True, "UCI_Elo": eloarg})
-			engine.configure(options)
+			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
+			if ucioptions != {}:
+				options = (ucioptions)
+				print("preload")
+				engine.configure(options)
+				print("options load")
 			limit = chess.engine.Limit(time=5)
 			mv = engine.play(gamemanager.cboard, limit, info=chess.engine.INFO_ALL)
 			mv = mv.move
 			epaper.writeText(12,"Engine: " + str(mv))
 			engine.quit()
 			gamemanager.computerMove(str(mv))
+	if event == gamemanager.EVENT_RESIGN_GAME:
+		gamemanager.resignGame(computeronturn + 1)
 
 	if type(event) == str:
 		# Termination.CHECKMATE

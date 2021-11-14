@@ -34,7 +34,7 @@ BTNPLAY = 6
 
 # Various setup
 ser = serial.Serial("/dev/ttyS0", baudrate=1000000, timeout=0.2)
-font18 = ImageFont.truetype(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/Font.ttc", 18)
+font18 = ImageFont.truetype("/home/pi/v2/resources/Font.ttc", 18)
 
 #
 # Screen functions - deprecated, use epaper.py if possible
@@ -124,7 +124,7 @@ def writeText(row, txt):
     image = image.transpose(Image.FLIP_TOP_BOTTOM)
     image = image.transpose(Image.FLIP_LEFT_RIGHT)
     epd.DisplayPartial(epd.getbuffer(image))
-    time.sleep(0.1)
+    time.sleep(0.5)
 
 def writeTextToBuffer(row, txt):
     # Writes some text on the screen at the given row
@@ -199,8 +199,8 @@ def doMenu(items, fast = 0):
             draw.polygon([(2, (selected * 20) + 2), (2, (selected * 20) + 18),
                           (18, (selected * 20) + 10)], fill=0)
             # Draw an image representing internet connectivity
-            wifion = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/wifiontiny.bmp")
-            wifioff = Image.open(str(pathlib.Path(__file__).parent.resolve()) + "/../resources/wifiofftiny.bmp")
+            wifion = Image.open("/home/pi/v2/resources/wifiontiny.bmp")
+            wifioff = Image.open("/home/pi/v2/resources/wifiofftiny.bmp")
             if connected == True:
                 wifidispicon = wifion.resize((20,16))
                 image.paste(wifidispicon, (105, 5))
@@ -339,6 +339,8 @@ def clearBoardData():
 
 def beep(beeptype):
     # Ask the centaur to make a beep sound
+ #   if centaur.get_sound() == "off":
+ #       return
     if (beeptype == SOUND_GENERAL):
         ser.write(bytearray(b'\xb1\x00\x08\x06\x50\x4c\x08\x63'))
     if (beeptype == SOUND_FACTORY):
@@ -504,8 +506,9 @@ def getText(title):
     # First we need a clear board
     res = getBoardState()
     if bytearray(res) != clearstate:
-        writeText(0,'Remove board')
+        writeTextToBuffer(0,'Remove board')
         writeText(1,'pieces')
+        time.sleep(10)
         while bytearray(res) != clearstate:
             time.sleep(0.5)
             res = getBoardState()
@@ -592,30 +595,30 @@ def getText(title):
         time.sleep(0.2)
 
 def getBoardState(field=None):
-	# Query the board and return a representation of it
-	# Consider this function experimental
-	# lowerlimit/upperlimit may need adjusting
-	# Get the board data
-	tosend = bytearray(b'\xf0\x00\x07\x06\x50\x7f\x4c')
-	ser.write(tosend)
-	resp = ser.read(10000)
-	resp = resp = resp[6:(64 * 2) + 6]
-	boarddata = [None] * 64
-	for x in range(0, 127, 2):
-		tval = (resp[x] * 256) + resp[x+1];
-		boarddata[(int)(x/2)] = tval
-	# Any square lower than 400 is empty
-	# Any square higher than upper limit is also empty
-	upperlimit = 32000
-	lowerlimit = 300
-	for x in range(0,64):
-		if ((boarddata[x] < lowerlimit) or (boarddata[x] > upperlimit)):
-			boarddata[x] = 0
-		else:
-			boarddata[x] = 1
-	if field:
-		return boarddata[field]
-	return boarddata
+    # Query the board and return a representation of it
+    # Consider this function experimental
+    # lowerlimit/upperlimit may need adjusting
+    # Get the board data
+    tosend = bytearray(b'\xf0\x00\x07\x06\x50\x7f\x4c')
+    ser.write(tosend)
+    resp = ser.read(10000)
+    resp = resp = resp[6:(64 * 2) + 6]
+    boarddata = [None] * 64
+    for x in range(0, 127, 2):
+        tval = (resp[x] * 256) + resp[x+1];
+        boarddata[(int)(x/2)] = tval
+    # Any square lower than 400 is empty
+    # Any square higher than upper limit is also empty
+    upperlimit = 32000
+    lowerlimit = 300
+    for x in range(0,64):
+        if ((boarddata[x] < lowerlimit) or (boarddata[x] > upperlimit)):
+            boarddata[x] = 0
+        else:
+            boarddata[x] = 1
+    if field:
+        return boarddata[field]
+    return boarddata
 
 def printBoardState():
     # Helper to display board state

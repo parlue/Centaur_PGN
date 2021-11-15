@@ -8,11 +8,11 @@ import time
 import centaurv2
 from display import epd2in9d , epaper
 import psutil
-
-
 sys.path.append("/home/pi/centaur/PIL")
 from PIL import Image , ImageDraw , ImageFont
-# import lichessV4
+import configparser
+
+#change dso do not accept figure moves outsite startpos
 
 menuitem = 1
 curmenu = None
@@ -62,18 +62,26 @@ def fieldActivity(id):
 	global quickselect
 	global curmenu
 	global selection
-	#if quickselect == 1 and (id < -23 and id > -32):
-	#	boardfunctions.beep(boardfunctions.SOUND_GENERAL)
-	#	menuitem = (id * -1) - 23
-	#	c = 1
-	#	r = ""
-	#	for k, v in curmenu.items():
-	#		if (c == menuitem):
-	#			selection = k
-	#			menuitem = 1
-	#			return
-	#		c = c + 1
-
+#	print ("hallo")
+	
+#	if quickselect == 1 and (id < -15 and id > -24):
+#		menuitem = (id * -1) - 16
+#	if quickselect == 1 and (id < -23 and id > -32):
+#		menuitem = (id * -1) - 24
+#	if quickselect == 1 and (id < -31 and id > -40):
+#		menuitem = (id * -1) - 32
+#	if quickselect == 1 and (id < -39 and id > -48):
+#		menuitem = (id * -1) - 40
+#	print(menuitem)
+#	c = 1
+#	r = ""
+#	for k, v in curmenu.items():
+#		if (c == menuitem):
+#			selection = k
+#			menuitem = 1
+#			return
+#		c = c + 1
+	#quickselect= 0
 # Power on sound
 def doMenu(menu):
 	# Draws a menu and waits for the response in the global variable 'selection'
@@ -90,9 +98,10 @@ def doMenu(menu):
 	boardfunctions.pauseEvents()
 	res = boardfunctions.getBoardState()
 	boardfunctions.unPauseEvents()
-	if res[32] == 0 and res[33] == 0 and res[34] == 0 and res[35] == 0 and res[36]==0 and res[37] == 0 and res[38] == 0 and res[39] == 0:
-		# If the 4th rank is empty then enable quick select mode. Then we can choose a menu option by placing and releasing a piece
-		quickselect = 1
+	
+#
+#	if res[17] == 0 and res[18] == 0 and res[19] == 0 and res[20] == 0 and res[21] == 0 and res[22] == 0 and res[23] == 0 and res[24] == 0 and res[25]==0 and res[26]==0 and res[27]==0 and res[28]==0 and res[29]== 0 and res[30]== 0 and res[31]== 0 and res[32]== 0 and res[33]== 0 and res[34]== 0 and res[35]== 0 and res[36]== 0 and res[37]== 0 and res[38]== 0 and res[39]== 0 and res[40]== 0 and res[41]== 0 and res[42]== 0 and res[43]== 0 and res[44]== 0 and res[45]== 0 and res[46]== 0 and res[47]== 0:	
+#	quickselect = 1
 	row = 1
 	for k, v in menu.items():
 		epaper.writeText(row,"    " + str(v))
@@ -124,12 +133,8 @@ while True:
 		'Lichess': ' Lichess',
 		'DGT': ' DGT Board',
 		'ENGINE': ' Play Engine',
-		#'BT': 'BT paring',
-		'wifi': ' Wifi Setup',
-		'Connection': ' WiFi check',
-		'lichessapi': ' Lichesskey',
-		'lichessrating': ' Lichessrating',
-		#'Update': 'Systemupdate',
+#		'MESS': ' Mess Emu',
+		'SETUP': ' Setup',
 		'Reboot': ' Reboot',
 		'Shutdown': ' Shutdown'}
 	result = doMenu(menu)
@@ -145,33 +150,23 @@ while True:
 		os.system("/home/pi/centaur/centi.sh")
 		
 		#sys.exit()
-
-	if result == "lichessapi":
-		epaper.clearScreen()
-		boardfunctions.pauseEvents()
-		os.chdir("/home/pi/v2/")
-		os.system("/usr/bin/python3.6 lichessapi.py")
-		boardfunctions.unPauseEvents()
+	if result == "SETUP":
+		setupmenu = {'wifi': ' Wifi setup' , 'Connection': ' Wifi check' , 'lichessapi': ' Lichesskey', 'lichessrating': 'Lichessrating'}
+		result = doMenu(setupmenu)
+		if result == "lichessapi":
+			epaper.clearScreen()
+			boardfunctions.pauseEvents()
+			os.chdir("/home/pi/v2/")
+			os.system("/usr/bin/python3.6 lichessapi.py")
+			boardfunctions.unPauseEvents()
 		
-	if result == "lichessrating":
-		epaper.clearScreen()
-		boardfunctions.pauseEvents()
-		os.chdir("/home/pi/v2/")
-		os.system("/usr/bin/python3.6 lichessrating.py")
-		boardfunctions.unPauseEvents()
-		
-		
-	if result == "DGT":
-		epaper.clearScreen()
-		boardfunctions.pauseEvents()
-		os.chdir("/home/pi/v2/")
-		os.system("/usr/bin/python3.6 dgte.py")
-		boardfunctions.unPauseEvents()
-	
-	if result == "BT":
-		os.chdir("/home/pi/v2/")
-		os.system("/usr/bin/python3.6 bt.py &")
-	if result == "wifi":
+		if result == "lichessrating":
+			epaper.clearScreen()
+			boardfunctions.pauseEvents()
+			os.chdir("/home/pi/v2/")
+			os.system("/usr/bin/python3.6 lichessrating.py")
+			boardfunctions.unPauseEvents()
+		if result == "wifi":
 			wifimenu = {'wpa2': ' WPA2-PSK', 'wps': ' WPS Setup' }
 			#' Recover wifi'}
 			result = doMenu(wifimenu)
@@ -211,12 +206,18 @@ while True:
 				if (result == 'recover'):
 					print() # placeholer
 					# TODO: Build funtion in network.py to force restore wifi.
+		if result == "Connection":
+			centaurv2.connectiontest()
+							
+	
+	if result == "DGT":
+		epaper.clearScreen()
+		boardfunctions.pauseEvents()
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 dgte.py")
+		boardfunctions.unPauseEvents()
 
-	if result == "Connection":
-		centaurv2.connectiontest()
-		
 	if result == "Shutdown":
-		
 		boardfunctions.clearScreen()
 		boardfunctions.writeText(1, "Please shutdown")
 		boardfunctions.writeText(2, 'from the centaur')
@@ -225,7 +226,6 @@ while True:
 		boardfunctions.writeText(5, 'load centaur')
 		boardfunctions.pauseEvents()
 		time.sleep(2)
-		
 		os.chdir("/home/pi/centaur")
 		os.system("/home/pi/centaur/centi.sh")
 		
@@ -240,45 +240,91 @@ while True:
 		boardfunctions.pauseEvents()
 		os.system("/sbin/shutdown -r now &")
 		sys.exit()
-	if result == "ENGINE":
-		enginemenu = {'CT800': ' CT800', 'stockfish': ' Stockfish'}
+	
+	if result == "MESS":
+		enginemenu = {'KING': ' The King'}
 		result = doMenu(enginemenu)
 		print(result)
-		if result == 'CT800':
-			cEngine = 'CT800'
-			PathEngine = '/home/pi/v2/engines/ct800'
-			ct800menu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
-			color = doMenu(ct800menu)
-			print(color)
-			# Current game will launch the screen for the current
-			if (color != "BACK"):
-				ratingmenu = {'1000': ' 1000 ELO', '1100': ' 1100 ELO', '1200': ' 1200 ELO', ' 1400': ' 1400 ELO', '1500': ' 1500 ELO', '1600': ' 1600 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO'}
-				elo = doMenu(ratingmenu)
-				if elo != "BACK":
-					epaper.clearScreen()
-					epaper.writeText(0, "Loading...")
-					boardfunctions.pauseEvents()
-					os.system("/usr/bin/python3.6 universaluci.py " + cEngine + " " + PathEngine + " " + color + " " + elo)
-					epaper.epd.init()
-					boardfunctions.unPauseEvents()
-			#
-	if result == 'stockfish':
-		cEngine = 'Stockfish14'
-		PathEngine = "/home/pi/centaur/engines/stockfish_14"
-		sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
-		color = doMenu(sfmenu)
+		cEngine = "The_King"
+		
+		#PathEngine = "hallo"
+		#'/home/pi/v2/engines/ct800'
+		ctmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
+		color = doMenu(cmenu)
 		print(color)
 		# Current game will launch the screen for the current
 		if (color != "BACK"):
-			ratingmenu = {'2850': ' Pure', '1350': ' 1350 ELO', '1500': ' 1500 ELO', '1700': ' 1700 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO', '2600': ' 2600 ELO'}
+			ratingmenu = {'1000': ' 1000 ELO', '1100': ' 1100 ELO', '1200': ' 1200 ELO', ' 1400': ' 1400 ELO', '1500': ' 1500 ELO', '1600': ' 1600 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO'}
 			elo = doMenu(ratingmenu)
 			if elo != "BACK":
 				epaper.clearScreen()
 				epaper.writeText(0, "Loading...")
 				boardfunctions.pauseEvents()
-				os.system("/usr/bin/python3.6 universaluci.py " + cEngine + " " + PathEngine + " " + color + " " + elo)
+				os.system("/usr/bin/python3.6 universalmessuci.py " + cEngine + " " + PathEngine + " " + color + " " + elo)
 				epaper.epd.init()
 				boardfunctions.unPauseEvents()
+
+	
+# // here check	
+	if result == "ENGINE":
+		enginemenu = {'stockfish': 'Stockfish'}
+		# Pick up the engines from the engines folder and build the menu
+		enginepath = str("/home/pi/v2/engines/")
+		enginefiles = os.listdir(enginepath)
+		for f in enginefiles:
+			fn = str(f)
+			if '.uci' not in fn:
+				# If this file is not .uci then assume it is an engine
+				enginemenu[fn] = fn
+		result = doMenu(enginemenu)
+		print(result)
+		if result == "stockfish":
+			sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
+			color = doMenu(sfmenu)
+			print(color)
+			# Current game will launch the screen for the current
+			if (color != "BACK"):
+				ratingmenu = {'2850': ' Pure', '1350': '  1350 ELO', '1500': ' 1500 ELO', '1700': ' 1700 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO', '2600': ' 2600 ELO'}
+				elo = doMenu(ratingmenu)
+				if elo != "BACK":
+					epaper.clearScreen()
+					epaper.writeText(0, "Loading...")
+					boardfunctions.pauseEvents()
+					os.system("/usr/bin/python3.6 /home/pi/v2/stockfish.py " + color + " " + elo)
+					boardfunctions.unPauseEvents()
+		else:
+			if result != "BACK":
+				# There are two options here. Either a file exists in the engines folder as enginename.uci which will give us menu options, or one doesn't and we run it as default
+				enginefile = enginepath + result
+				ucifile = enginepath + result + ".uci"
+				cmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
+				color = doMenu(cmenu)
+				# Current game will launch the screen for the current
+				if (color != "BACK"):
+					if os.path.exists(ucifile):
+						# Read the uci file and build a menu
+						config = configparser.ConfigParser()
+						config.read(ucifile)
+						print(config.sections())
+						smenu = {}
+						for sect in config.sections():
+							smenu[sect] = sect
+						sec = doMenu(smenu)
+						if sec != "BACK":
+							epaper.clearScreen()
+							epaper.writeText(0, "Loading...")
+							boardfunctions.pauseEvents()
+							print("/home/pi/v2/universaluci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
+							os.system("/usr/bin/python3.6 /home/pi/v2/universaluci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
+							boardfunctions.unPauseEvents()
+					else:
+						# With no uci file we just call the engine
+						epaper.clearScreen()
+						epaper.writeText(0, "Loading...")
+						boardfunctions.pauseEvents()
+						print("/home/pi/v2/universaluci.py " + color + " \"" + result + "\"")
+						os.system("/usr/bin/python3.6 /home/pi/v2/universaluci.py " + color + " \"" + result + "\"")
+						boardfunctions.unPauseEvents()
 			#
 	
 	if result == "Lichess":

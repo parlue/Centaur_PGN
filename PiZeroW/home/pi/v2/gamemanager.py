@@ -164,9 +164,12 @@ def fieldcallback(field):
             # If this is a WPAWN and squarerow is 7
             # or a BPAWN and squarerow is 0
             pname = str(cboard.piece_at(sourcesq))
+            print(pname)
             pr = ""
             if (field // 8) == 7 and pname == "P":
-                screenback = epaper.epaperbuffer.copy()
+                pr = "q"
+                '''
+				screenback = epaper.epaperbuffer.copy()
                 tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
                 tosend[2] = len(tosend)
                 tosend[len(tosend) - 1] = board.checksum(tosend)
@@ -201,8 +204,11 @@ def fieldcallback(field):
                     time.sleep(0.1)
                 epaper.epaperbuffer = screenback.copy()
                 pausekeys = 2
+                '''
             if (field // 8) == 0 and pname == "p":
-                screenback = epaper.epaperbuffer.copy()
+                pr = "q"
+                '''
+				screenback = epaper.epaperbuffer.copy()
                 tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
                 tosend[2] = len(tosend)
                 tosend[len(tosend) - 1] = board.checksum(tosend)
@@ -238,6 +244,7 @@ def fieldcallback(field):
                         time.sleep(0.1)
                     epaper.epaperbuffer = screenback.copy()
                     pausekeys = 2
+                '''
             if forcemove == 1:
                 mv = computermove
             mv = fromname + toname + pr
@@ -384,6 +391,7 @@ def computerMove(mv):
     # in the format b2b4 , g7g8q , etc
     global computermove
     global forcemove
+    board.beep(board.SOUND_GENERAL)
     if len(mv) < 4:
         return
     # First set the globals so that the thread knows there is a computer move

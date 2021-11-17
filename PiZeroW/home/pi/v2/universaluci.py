@@ -69,6 +69,7 @@ def eventCallback(event):
 		epaper.writeText(0,"New Game")
 		epaper.writeText(1,"               ")
 		epaper.writeText(13,"Play "+ enginename)
+		mw = ""
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
 		print('fertig')
@@ -87,8 +88,8 @@ def eventCallback(event):
 			mv = mv.move
 			epaper.writeText(12, "Engine: " + str(mv))
 			engine.quit()
-			gamemanager.computerMove(str(mv)
-		
+			gamemanager.computerMove(str(mv))
+		#return
 	if event == gamemanager.EVENT_BLACK_TURN:
 		curturn = 0
 		epaper.writeText(0,"Black turn")
@@ -105,9 +106,10 @@ def eventCallback(event):
 			epaper.writeText(12,"Engine: " + str(mv))
 			engine.quit()
 			gamemanager.computerMove(str(mv))
+		#return	
 	if event == gamemanager.EVENT_RESIGN_GAME:
 		gamemanager.resignGame(computeronturn + 1)
-
+		#return
 	if type(event) == str:
 		# Termination.CHECKMATE
 		# Termination.STALEMATE

@@ -11,7 +11,7 @@ import chess.engine
 from random import randint
 
 curturn = 1
-engine = chess.engine.SimpleEngine.popen_uci("/home/pi/centaur/engines/sf_14")
+engine = chess.engine.SimpleEngine.popen_uci("/home/pi/centaur/engines/stockfish_14")
 computeronturn = 0
 kill = 0
 # Pass an ELO between 1350 and 2850
@@ -55,6 +55,7 @@ def eventCallback(event):
 		epaper.writeText(1, "               ")
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
+		return
 		
 	if event == gamemanager.EVENT_WHITE_TURN:
 		curturn = 1
@@ -68,6 +69,7 @@ def eventCallback(event):
 			mv = mv.move
 			epaper.writeText(12, "Engine: " + str(mv))
 			gamemanager.computerMove(str(mv))
+		return	
 	if event == gamemanager.EVENT_BLACK_TURN:
 		curturn = 0
 		epaper.writeText(0,"Black turn")
@@ -80,6 +82,7 @@ def eventCallback(event):
 			mv = mv.move
 			epaper.writeText(12, "Engine: " + str(mv))
 			gamemanager.computerMove(str(mv))
+		return
 
 	if type(event) == str:
 		# Termination.CHECKMATE

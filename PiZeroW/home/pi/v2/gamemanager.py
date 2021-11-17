@@ -78,6 +78,7 @@ def fieldcallback(field):
     print("hallo234")
     lift = 0
     place = 0
+    print(field)
     if field >= 0:
         lift = 1
     else:
@@ -89,6 +90,7 @@ def fieldcallback(field):
     # Check the piece colour against the current turn
     pc = cboard.color_at(field)
     print("123")
+    print(pc)
     vpiece = 0
     if curturn == 0 and pc == False:
         vpiece = 1
@@ -99,10 +101,11 @@ def fieldcallback(field):
     squarecol = (field % 8)
     squarecol = 7 - squarecol
     fieldname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
+    print(computermove)
     print("feldname= "+fieldname)
     legalmoves = cboard.legal_moves
     lmoves = list(legalmoves)
-	print(lmoves)
+    print(legalmoves)
     if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
         # Generate a list of places this piece can move to
         print("legal")
@@ -126,7 +129,10 @@ def fieldcallback(field):
                 pass
             if found == 1:
                 legalsquares.append(x)
+    print("force lift vpiece")
+    print(forcemove , lift , vpiece)
     if forcemove == 1 and lift == 1 and vpiece == 1:
+        print('force')
         # If this is a forced move (computer move) then the piece lifted should equal the start of computermove
         # otherwise set legalsquares so they can just put the piece back down! If it is the correct piece then
         # adjust legalsquares so to only include the target square
@@ -165,6 +171,7 @@ def fieldcallback(field):
             # Promotion
             # If this is a WPAWN and squarerow is 7
             # or a BPAWN and squarerow is 0
+            print(fromname + "    " + toname)
             pname = str(cboard.piece_at(sourcesq))
             print(pname)
             pr = ""
@@ -249,7 +256,8 @@ def fieldcallback(field):
                 '''
             if forcemove == 1:
                 mv = computermove
-            mv = fromname + toname + pr
+            else:
+                mv = fromname + toname + pr
             print(mv)
             # Make the move and update fen.log
             cboard.push(chess.Move.from_uci(mv))
@@ -343,6 +351,7 @@ def gameThread(eventCallback, moveCallback, keycallback):
                     if bytearray(cs) == startstate:
                         print("start")
                         #eventCallback(EVENT_NEW_GAME)
+
                         print("weiter")
                         newgame = 1
                         
@@ -380,10 +389,11 @@ def gameThread(eventCallback, moveCallback, keycallback):
                         session.commit()
                         # print(universaluci.computeronturn)
                         eventCallback(EVENT_NEW_GAME)
-                        #curturn = 1
-                        eventCallback(EVENT_WHITE_TURN)
                         curturn = 1
+                        eventCallback(EVENT_WHITE_TURN)
+                        
                         legalsquares = []
+                        mv=""
                         
                         #print("game")
                     t = 0

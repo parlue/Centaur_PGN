@@ -1,5 +1,6 @@
 # Emulate the Millenium Chesslink protocol
-#
+# modify by dso for playing Bearchess
+# addding missing strings on fen
 import gamemanager
 import sys
 from display import epaper

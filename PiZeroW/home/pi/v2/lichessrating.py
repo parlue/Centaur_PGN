@@ -9,7 +9,7 @@ import time
 #import re
 
 boardfunctions.initScreen()
-time.sleep(3)
+time.sleep(4)
 
 
 range = boardfunctions.getText("Range XXXX-XXXX")

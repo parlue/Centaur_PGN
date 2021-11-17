@@ -8,7 +8,7 @@ import time
 import re
 
 boardfunctions.initScreen()
-time.sleep(2)
+time.sleep(4)
 
 command = """iwlist wlan0 scan | grep -i 'essid:"' | cut -c28-500"""
 result = os.popen(command)

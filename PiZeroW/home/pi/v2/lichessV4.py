@@ -560,8 +560,11 @@ while (status == "started") and ourturn != 0 :
 			print(mv)
 			figure = cboard.piece_at(location)
 			print(figure)
-			if (setrow == 8 and liftrow ==7 and figure == "P") or (setrow == 1 and liftrow ==2 and figure == "P"):
-					mv = mv +"q"
+			if (setrow == 8 and liftrow ==7 and figure == "P") or (setrow == 1 and liftrow ==2 and figure == "p"):
+				mv = mv +"q"
+				prom= "q"
+			else:
+				prom=""
 			print("Checked")
 			if (mv in cboard.legal_moves):
 				
@@ -610,7 +613,7 @@ while (status == "started") and ourturn != 0 :
 				playertime=time.time()
 				
 				#check if lichess accept this move
-				ret = client.board.make_move(gameid, fromln + toln)
+				ret = client.board.make_move(gameid, fromln + toln + prom)
 				if ret :
 					cboard.push(mv)
 					if cboard.is_check():

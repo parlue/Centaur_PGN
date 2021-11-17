@@ -1,4 +1,4 @@
-# This script manages a chess game, passing events and moves back to the calling script with callbacks
+6# This script manages a chess game, passing events and moves back to the calling script with callbacks
 # The calling script is expected to manage the display itself using epaper.py
 # Calling script initialises with subscribeGame(eventCallback, moveCallback, keyCallback)
 # eventCallback feeds back events such as start of game, gameover
@@ -75,7 +75,7 @@ def fieldcallback(field):
     global source
     global gamedbid
     global session
-    #print("hallo234")
+    print("hallo234")
     lift = 0
     place = 0
     if field >= 0:
@@ -85,10 +85,10 @@ def fieldcallback(field):
         field = field * -1
     field = field - 1
     #print("u00ß00")
-    #print(field)
+    print(field)
     # Check the piece colour against the current turn
     pc = cboard.color_at(field)
-    #print("123")
+    print("123")
     vpiece = 0
     if curturn == 0 and pc == False:
         vpiece = 1
@@ -99,11 +99,13 @@ def fieldcallback(field):
     squarecol = (field % 8)
     squarecol = 7 - squarecol
     fieldname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
+    print("feldname= "+fieldname)
     legalmoves = cboard.legal_moves
     lmoves = list(legalmoves)
+	print(lmoves)
     if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
         # Generate a list of places this piece can move to
-        #print("legal")
+        print("legal")
         lifted = 1
         legalsquares = []
         legalsquares.append(field)
@@ -248,7 +250,7 @@ def fieldcallback(field):
             if forcemove == 1:
                 mv = computermove
             mv = fromname + toname + pr
-            #print(mv)
+            print(mv)
             # Make the move and update fen.log
             cboard.push(chess.Move.from_uci(mv))
             fenlog = "/home/pi/centaur/fen.log"
@@ -339,13 +341,14 @@ def gameThread(eventCallback, moveCallback, keycallback):
                     #print(cs)
                     board.unPauseEvents()
                     if bytearray(cs) == startstate:
-                        #print("start")
-                        eventCallback(EVENT_NEW_GAME)
-                        eventCallback(EVENT_WHITE_TURN)
+                        print("start")
+                        #eventCallback(EVENT_NEW_GAME)
+                        print("weiter")
                         newgame = 1
-                        curturn = 1
+                        
                         cboard = chess.Board()
-                        #print("test")
+                        
+                        print("test")
                         fenlog = "/home/pi/centaur/fen.log"
                         f = open(fenlog, "w")
                         f.write(cboard.fen())
@@ -375,6 +378,13 @@ def gameThread(eventCallback, moveCallback, keycallback):
                         )
                         session.add(gamemove)
                         session.commit()
+                        # print(universaluci.computeronturn)
+                        eventCallback(EVENT_NEW_GAME)
+                        #curturn = 1
+                        eventCallback(EVENT_WHITE_TURN)
+                        curturn = 1
+                        legalsquares = []
+                        
                         #print("game")
                     t = 0
                 except:

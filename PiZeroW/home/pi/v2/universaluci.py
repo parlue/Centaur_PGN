@@ -56,7 +56,9 @@ def keyCallback(key):
 	print("Key event received: " + str(key))
 	if key == gamemanager.BTNBACK:
 		kill = 1
-
+	if key == gamemanager.BTNHELP:
+		hallo = 0
+		
 def eventCallback(event):
 	global curturn
 	global engine
@@ -69,7 +71,10 @@ def eventCallback(event):
 		epaper.writeText(13,"Play "+ enginename)
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
+		print('fertig')
+		return
 	if event == gamemanager.EVENT_WHITE_TURN:
+		print("here we are")
 		curturn = 1
 		epaper.writeText(0,"White turn")
 		if curturn == computeronturn:
@@ -82,8 +87,8 @@ def eventCallback(event):
 			mv = mv.move
 			epaper.writeText(12, "Engine: " + str(mv))
 			engine.quit()
-			
-			gamemanager.computerMove(str(mv))
+			gamemanager.computerMove(str(mv)
+		
 	if event == gamemanager.EVENT_BLACK_TURN:
 		curturn = 0
 		epaper.writeText(0,"Black turn")

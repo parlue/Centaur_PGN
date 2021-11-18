@@ -44,9 +44,9 @@ def keyCallback(key):
 		# Send the board state again (for cases where it doesn't seem to have sent)
 		board.beep(board.SOUND_GENERAL)
 		bs = gamemanager.cboard.fen()
-		bsloc = bs.find(" ")
-		brest = bs[bsloc:]
-		bs= bs[:bsloc]
+		#bsloc = bs.find(" ")
+		#brest = bs[bsloc:]
+		#bs= bs[:bsloc]
 		bs = bs.replace("/", "")
 		bs = bs.replace("1", ".")
 		bs = bs.replace("2", "..")
@@ -58,7 +58,7 @@ def keyCallback(key):
 		bs = bs.replace("8", "........")
 		bs = bs + brest
 		resp = 's'
-		for x in range(0, len(bs)):
+		for x in range(0,64):
 			resp = resp + bs[x]
 		print("sending status on change")
 		print(resp)
@@ -81,9 +81,9 @@ def eventCallback(event):
 		epaper.drawFen(gamemanager.cboard.fen())
 		print("sending state")
 		bs = gamemanager.cboard.fen()
-		bsloc = bs.find(" ")
-		brest = bs[bsloc:]
-		bs= bs[:bsloc]
+		#bsloc = bs.find(" ")
+		#brest = bs[bsloc:]
+		#bs= bs[:bsloc]
 		
 		bs = bs.replace("/", "")
 		bs = bs.replace("1", ".")
@@ -96,7 +96,7 @@ def eventCallback(event):
 		bs = bs.replace("8", "........")
 		bs = bs + brest
 		resp = 's'
-		for x in range(0, len(bs)+1):
+		for x in range(0,64):
 			resp = resp + bs[x]
 		print(resp)
 		sendMilleniumCommand(resp)
@@ -137,9 +137,9 @@ def moveCallback(move):
 	epaper.writeText(9, move)
 	# Note at the moment chess for android asks to send status on any change, but there are other options TODO
 	bs = gamemanager.cboard.fen()
-	bsloc = bs.find(" ")
-	brest = bs[bsloc:]
-	bs= bs[:bsloc]
+	#bsloc = bs.find(" ")
+	#brest = bs[bsloc:]
+	#bs= bs[:bsloc]
 	bs = bs.replace("/", "")
 	bs = bs.replace("1", ".")
 	bs = bs.replace("2", "..")
@@ -151,7 +151,7 @@ def moveCallback(move):
 	bs = bs.replace("8", "........")
 	bs = bs + brest
 	resp = 's'
-	for x in range(0, len(bs)):
+	for x in range(0,64):
 		resp = resp + bs[x]
 	print("sending status on change")
 	sendMilleniumCommand(resp)
@@ -345,9 +345,9 @@ while kill == 0:
 				# Status - essentially asks for the board state to be sent
 				client_sock.recv(2)
 				bs = gamemanager.cboard.fen()
-				bsloc = bs.find(" ")
-				brest = bs[bsloc:]
-				bs= bs[:bsloc]
+				#bsloc = bs.find(" ")
+				#brest = bs[bsloc:]
+				#bs= bs[:bsloc]
 				bs = bs.replace("/","")
 				bs = bs.replace("1",".")
 				bs = bs.replace("2", "..")
@@ -359,7 +359,7 @@ while kill == 0:
 				bs = bs.replace("8", "........")
 				bs = bs + brest
 				resp = 's'
-				for x in range(0,len(bs)):
+				for x in range(0,64):
 					resp = resp + bs[x]
 				sendMilleniumCommand(resp)
 				handled = 1

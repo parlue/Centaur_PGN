@@ -354,7 +354,12 @@ def gameThread(eventCallback, moveCallback, keycallback):
 
                         print("weiter")
                         newgame = 1
-                        
+                        squarecol = ""
+                        squarerow = ""
+                        square = ""
+                        feldname = ""
+                        field = 0
+							
                         cboard = chess.Board()
                         
                         print("test")

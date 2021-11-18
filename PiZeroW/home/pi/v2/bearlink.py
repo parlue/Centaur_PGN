@@ -101,6 +101,7 @@ def eventCallback(event):
 		print(resp)
 		sendMilleniumCommand(resp)
 		board.ledsOff()
+		return
 	if event == gamemanager.EVENT_WHITE_TURN:
 		curturn = 1
 		print("white turn event")

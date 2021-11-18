@@ -454,6 +454,8 @@ def subscribeGame(eventCallback, moveCallback, keyCallback):
         source = "DGT-Board"
     if source == "lichessV4.py":
         source = "Lichess"
+	if source == "bearlink.py":
+		source = "Bearlink"
     Session = sessionmaker(bind=models.engine)
     session = Session()
 

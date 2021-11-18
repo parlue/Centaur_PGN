@@ -55,6 +55,7 @@ def keyCallback(key):
 	global kill
 	print("Key event received: " + str(key))
 	if key == gamemanager.BTNBACK:
+		board.ledsOff()
 		kill = 1
 	if key == gamemanager.BTNHELP:
 		hallo = 0
@@ -72,6 +73,7 @@ def eventCallback(event):
 		mw = ""
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
+		board.ledsOff()
 		print('fertig')
 		return
 	if event == gamemanager.EVENT_WHITE_TURN:

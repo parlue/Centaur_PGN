@@ -18,6 +18,7 @@ import time
 import chess
 import inspect
 
+
 # Some useful constants
 BTNBACK = 1
 BTNTICK = 2
@@ -43,8 +44,10 @@ pausekeys = 0
 computermove = ""
 forcemove = 0
 source = ""
+cm = 0
 gamedbid = -1
 session = None
+
 
 gameinfo_event = ""
 gameinfo_site = ""
@@ -52,419 +55,400 @@ gameinfo_round = ""
 gameinfo_white = ""
 gameinfo_black = ""
 
+def engineturn(cmove):
+	global cm 
+	cm = cmove
 def keycallback(keypressed):
-    # Receives the key pressed and passes back to the script calling game manager
-    global keycallbackfunction
-    if keycallbackfunction != None:
-        keycallbackfunction(keypressed)
+	# Receives the key pressed and passes back to the script calling game manager
+	global keycallbackfunction
+	if keycallbackfunction != None:
+		keycallbackfunction(keypressed)
 
 def fieldcallback(field):
-    # Receives field events. Positive is a field lift, negative is a field place. Numbering 0 = a1, 63 = h8
-    # Use this to calculate moves
-    global cboard
-    global curturn
-    global movecallbackfunction
-    global sourcesq
-    global legalsquares
-    global eventcallbackfunction
-    global newgame
-    global keycallback
-    global pausekeys
-    global computermove
-    global forcemove
-    global source
-    global gamedbid
-    global session
-    print("hallo234")
-    lift = 0
-    place = 0
-    print(field)
-    if field >= 0:
-        lift = 1
-    else:
-        place = 1
-        field = field * -1
-    field = field - 1
-    #print("u00ß00")
-    print(field)
-    # Check the piece colour against the current turn
-    pc = cboard.color_at(field)
-    print("123")
-    print(pc)
-    vpiece = 0
-    if curturn == 0 and pc == False:
-        vpiece = 1
-    if curturn == 1 and pc == True:
-        vpiece = 1
-    #print("jjjj")
-    squarerow = (field // 8)
-    squarecol = (field % 8)
-    squarecol = 7 - squarecol
-    fieldname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
-    print(computermove)
-    print("feldname= "+fieldname)
-    legalmoves = cboard.legal_moves
-    lmoves = list(legalmoves)
-    print(legalmoves)
-    if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
-        # Generate a list of places this piece can move to
-        print("legal")
-        lifted = 1
-        legalsquares = []
-        legalsquares.append(field)
-        sourcesq = field
-        for x in range(0, 64):
-            sqxr = (x // 8)
-            sqxc = (x % 8)
-            sqxc = 7 - sqxc
-            fx = chr(ord("a") + (7 - sqxc)) + chr(ord("1") + sqxr)
-            tm = fieldname + fx
-            found = 0
-            try:
-                for q in range(0,len(lmoves)):
-                    if str(tm[0:4]) == str(lmoves[q])[0:4]:
-                        found = 1
-                        break
-            except:
-                pass
-            if found == 1:
-                legalsquares.append(x)
-    print("force lift vpiece")
-    print(forcemove , lift , vpiece)
-    if forcemove == 1 and lift == 1 and vpiece == 1:
-        print('force')
-        # If this is a forced move (computer move) then the piece lifted should equal the start of computermove
-        # otherwise set legalsquares so they can just put the piece back down! If it is the correct piece then
-        # adjust legalsquares so to only include the target square
-        if fieldname != computermove[0:2]:
-            # Forced move but wrong piece lifted
-            legalsquares = []
-            legalsquares.append(field)
-        else:
-            # Forced move, correct piece lifted, limit legal squares
-            target = computermove[2:4]
-            # Convert the text in target to the field number
-            sqcol = ord(target[0:1]) - ord('a')
-            sqrow = ord(target[1:2]) - ord('1')
-            tsq = (sqrow * 8) + (sqcol)
-            legalsquares = []
-            legalsquares.append(tsq)
-    if place == 1 and field not in legalsquares:
-        board.beep(board.SOUND_WRONG_MOVE)
-    if place == 1 and field in legalsquares:
-        newgame = 0
-        #
-        if field == sourcesq:
-            # Piece has simply been placed back
-            sourcesq = -1
-            legalsquares = []
-        else:
-            # Piece has been moved
-            squarerow = (sourcesq // 8)
-            squarecol = (sourcesq % 8)
-            squarecol = 7 - squarecol
-            fromname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
-            squarerow = (field // 8)
-            squarecol = (field % 8)
-            squarecol = 7 - squarecol
-            toname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
-            # Promotion
-            # If this is a WPAWN and squarerow is 7
-            # or a BPAWN and squarerow is 0
-            print(fromname + "    " + toname)
-            pname = str(cboard.piece_at(sourcesq))
-            print(pname)
-            pr = ""
-            if (field // 8) == 7 and pname == "P":
-                pr = "q"
-                '''
+	# Receives field events. Positive is a field lift, negative is a field place. Numbering 0 = a1, 63 = h8
+	# Use this to calculate moves
+	global cboard
+	global curturn
+	global movecallbackfunction
+	global sourcesq
+	global legalsquares
+	global eventcallbackfunction
+	global newgame
+	global keycallback
+	global pausekeys
+	global computermove
+	global forcemove
+	global source
+	global gamedbid
+	global session
+	print("hallo234")
+		
+	lift = 0
+	place = 0
+	if field >= 0:
+		lift = 1
+		if cm == 0:
+			sourcesq = -1
+	else:
+		place = 1
+		field = field * -1
+	field = field - 1
+	# Check the piece colour against the current turn
+	pc = cboard.color_at(field)
+	vpiece = 0
+	if curturn == 0 and pc == False:
+		vpiece = 1
+	if curturn == 1 and pc == True:
+		
+		vpiece = 1
+	squarerow = (field // 8)
+	squarecol = (field % 8)
+	squarecol = 7 - squarecol
+	fieldname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
+	legalmoves = cboard.legal_moves
+	lmoves = list(legalmoves)
+	print(curturn,lift,sourcesq,vpiece)
+	if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
+		# Generate a list of places this piece can move to
+		print("legal")
+		lifted = 1
+		legalsquares = []
+		legalsquares.append(field)
+		sourcesq = field
+		for x in range(0, 64):
+			sqxr = (x // 8)
+			sqxc = (x % 8)
+			sqxc = 7 - sqxc
+			fx = chr(ord("a") + (7 - sqxc)) + chr(ord("1") + sqxr)
+			tm = fieldname + fx
+			found = 0
+			try:
+				for q in range(0,len(lmoves)):
+					if str(tm[0:4]) == str(lmoves[q])[0:4]:
+						found = 1
+						break
+			except:
+				pass
+			if found == 1:
+				legalsquares.append(x)
+	if forcemove == 1 and lift == 1 and vpiece == 1:
+		# If this is a forced move (computer move) then the piece lifted should equal the start of computermove
+		# otherwise set legalsquares so they can just put the piece back down! If it is the correct piece then
+		# adjust legalsquares so to only include the target square
+		if fieldname != computermove[0:2]:
+			# Forced move but wrong piece lifted
+			legalsquares = []
+			legalsquares.append(field)
+		else:
+			# Forced move, correct piece lifted, limit legal squares
+			target = computermove[2:4]
+			# Convert the text in target to the field number
+			sqcol = ord(target[0:1]) - ord('a')
+			sqrow = ord(target[1:2]) - ord('1')
+			tsq = (sqrow * 8) + (sqcol)
+			legalsquares = []
+			legalsquares.append(tsq)
+	if place == 1 and field not in legalsquares:
+		board.beep(board.SOUND_WRONG_MOVE)
+	if place == 1 and field in legalsquares:
+		newgame = 0
+		#
+		if field == sourcesq:
+			# Piece has simply been placed back
+			sourcesq = -1
+			legalsquares = []
+		else:
+			# Piece has been moved
+			squarerow = (sourcesq // 8)
+			squarecol = (sourcesq % 8)
+			squarecol = 7 - squarecol
+			fromname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
+			squarerow = (field // 8)
+			squarecol = (field % 8)
+			squarecol = 7 - squarecol
+			toname = chr(ord("a") + (7 - squarecol)) + chr(ord("1") + squarerow)
+			# Promotion
+			# If this is a WPAWN and squarerow is 7
+			# or a BPAWN and squarerow is 0
+			pname = str(cboard.piece_at(sourcesq))
+			pr = ""
+			if (field // 8) == 7 and pname == "P":
+				pr = "q"
+				'''
 				screenback = epaper.epaperbuffer.copy()
-                tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
-                tosend[2] = len(tosend)
-                tosend[len(tosend) - 1] = board.checksum(tosend)
-                board.ser.write(tosend)
-                epaper.promotionOptions(13)
-                pausekeys = 1
-                time.sleep(1)
-                buttonPress = 0
-                while buttonPress == 0:
-                    board.ser.read(1000000)
-                    tosend = bytearray(b'\x83\x06\x50\x59')
-                    board.ser.write(tosend)
-                    resp = board.ser.read(10000)
-                    resp = bytearray(resp)
-                    tosend = bytearray(b'\x94\x06\x50\x6a')
-                    board.ser.write(tosend)
-                    expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
-                    resp = board.ser.read(10000)
-                    resp = bytearray(resp)
-                    if (resp.hex() == "b10011065000140a0501000000007d4700"):
-                        buttonPress = 1  # BACK
-                        pr = "n"
-                    if (resp.hex() == "b10011065000140a0510000000007d175f"):
-                        buttonPress = 2  # TICK
-                        pr = "b"
-                    if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
-                        buttonPress = 3  # UP
-                        pr = "q"
-                    if (resp.hex() == "b10010065000140a050200000000611d"):
-                        buttonPress = 4  # DOWN
-                        pr = "r"
-                    time.sleep(0.1)
-                epaper.epaperbuffer = screenback.copy()
-                pausekeys = 2
-                '''
-            if (field // 8) == 0 and pname == "p":
-                pr = "q"
-                '''
+				tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
+				tosend[2] = len(tosend)
+				tosend[len(tosend) - 1] = board.checksum(tosend)
+				board.ser.write(tosend)
+				epaper.promotionOptions(13)
+				pausekeys = 1
+				time.sleep(1)
+				buttonPress = 0
+				while buttonPress == 0:
+					board.ser.read(1000000)
+					tosend = bytearray(b'\x83\x06\x50\x59')
+					board.ser.write(tosend)
+					resp = board.ser.read(10000)
+					resp = bytearray(resp)
+					tosend = bytearray(b'\x94\x06\x50\x6a')
+					board.ser.write(tosend)
+					expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+					resp = board.ser.read(10000)
+					resp = bytearray(resp)
+					if (resp.hex() == "b10011065000140a0501000000007d4700"):
+						buttonPress = 1  # BACK
+						pr = "n"
+					if (resp.hex() == "b10011065000140a0510000000007d175f"):
+						buttonPress = 2  # TICK
+						pr = "b"
+					if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
+						buttonPress = 3  # UP
+						pr = "q"
+					if (resp.hex() == "b10010065000140a050200000000611d"):
+						buttonPress = 4  # DOWN
+						pr = "r"
+					time.sleep(0.1)
+				epaper.epaperbuffer = screenback.copy()
+				pausekeys = 2
+				'''
+			if (field // 8) == 0 and pname == "p":
+				pr = "q"
+				'''
 				screenback = epaper.epaperbuffer.copy()
-                tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
-                tosend[2] = len(tosend)
-                tosend[len(tosend) - 1] = board.checksum(tosend)
-                board.ser.write(tosend)
-                if forcemove == 0:
-                    epaper.promotionOptions(13)
-                    pausekeys = 1
-                    time.sleep(1)
-                    buttonPress = 0
-                    while buttonPress == 0:
-                        board.ser.read(1000000)
-                        tosend = bytearray(b'\x83\x06\x50\x59')
-                        board.ser.write(tosend)
-                        resp = board.ser.read(10000)
-                        resp = bytearray(resp)
-                        tosend = bytearray(b'\x94\x06\x50\x6a')
-                        board.ser.write(tosend)
-                        expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
-                        resp = board.ser.read(10000)
-                        resp = bytearray(resp)
-                        if (resp.hex() == "b10011065000140a0501000000007d4700"):
-                            buttonPress = 1  # BACK
-                            pr = "n"
-                        if (resp.hex() == "b10011065000140a0510000000007d175f"):
-                            buttonPress = 2  # TICK
-                            pr = "b"
-                        if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
-                            buttonPress = 3  # UP
-                            pr = "q"
-                        if (resp.hex() == "b10010065000140a050200000000611d"):
-                            buttonPress = 4  # DOWN
-                            pr = "r"
-                        time.sleep(0.1)
-                    epaper.epaperbuffer = screenback.copy()
-                    pausekeys = 2
-                '''
-            if forcemove == 1:
-                mv = computermove
-            else:
-                mv = fromname + toname + pr
-            print(mv)
-            # Make the move and update fen.log
-            cboard.push(chess.Move.from_uci(mv))
-            fenlog = "/home/pi/centaur/fen.log"
-            f = open(fenlog, "w")
-            f.write(cboard.fen())
-            f.close()
-            gamemove = models.GameMove(
-                gameid=gamedbid,
-                move=mv,
-                fen=str(cboard.fen())
-            )
-            session.add(gamemove)
-            session.commit()
-            legalsquares = []
-            sourcesq = -1
-            board.ledsOff()
-            forcemove = 0
-            if movecallbackfunction != None:
-                movecallbackfunction(mv)
-            board.beep(board.SOUND_GENERAL)
-            # Check the outcome
-            outc = cboard.outcome(claim_draw=True)
-            if outc == None or outc == "None" or outc == 0:
-                # Switch the turn
-                if curturn == 0:
-                    curturn = 1
-                    if eventcallbackfunction != None:
-                        eventcallbackfunction(EVENT_WHITE_TURN)
-                else:
-                    curturn = 0
-                    if eventcallbackfunction != None:
-                        eventcallbackfunction(EVENT_BLACK_TURN)
-            else:
-                tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
-                tosend[2] = len(tosend)
-                tosend[len(tosend) - 1] = board.checksum(tosend)
-                board.ser.write(tosend)
-                # Depending on the outcome we can update the game information for the result
-                resultstr = str(cboard.result())
-                tg = session.query(models.Game).filter(models.Game.id == gamedbid).first()
-                tg.result = resultstr
-                session.flush()
-                session.commit()
-                eventcallbackfunction(str(outc.termination))
+				tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
+				tosend[2] = len(tosend)
+				tosend[len(tosend) - 1] = board.checksum(tosend)
+				board.ser.write(tosend)
+				if forcemove == 0:
+					epaper.promotionOptions(13)
+					pausekeys = 1
+					time.sleep(1)
+					buttonPress = 0
+					while buttonPress == 0:
+						board.ser.read(1000000)
+						tosend = bytearray(b'\x83\x06\x50\x59')
+						board.ser.write(tosend)
+						resp = board.ser.read(10000)
+						resp = bytearray(resp)
+						tosend = bytearray(b'\x94\x06\x50\x6a')
+						board.ser.write(tosend)
+						expect = bytearray(b'\xb1\x00\x06\x06\x50\x0d')
+						resp = board.ser.read(10000)
+						resp = bytearray(resp)
+						if (resp.hex() == "b10011065000140a0501000000007d4700"):
+							buttonPress = 1  # BACK
+							pr = "n"
+						if (resp.hex() == "b10011065000140a0510000000007d175f"):
+							buttonPress = 2  # TICK
+							pr = "b"
+						if (resp.hex() == "b10011065000140a0508000000007d3c7c"):
+							buttonPress = 3  # UP
+							pr = "q"
+						if (resp.hex() == "b10010065000140a050200000000611d"):
+							buttonPress = 4  # DOWN
+							pr = "r"
+						time.sleep(0.1)
+					epaper.epaperbuffer = screenback.copy()
+					pausekeys = 2
+				'''
+			if forcemove == 1:
+				mv = computermove
+				forcemove = 0
+			else:
+				mv = fromname + toname + pr
+			# Make the move and update fen.log
+			cboard.push(chess.Move.from_uci(mv))
+			engineturn(0)
+			fenlog = "/home/pi/centaur/fen.log"
+			f = open(fenlog, "w")
+			f.write(cboard.fen())
+			f.close()
+			gamemove = models.GameMove(
+				gameid=gamedbid,
+				move=mv,
+				fen=str(cboard.fen())
+			)
+			session.add(gamemove)
+			session.commit()
+			legalsquares = []
+			sourcesq = -1
+			board.ledsOff()
+			forcemove = 0
+			if movecallbackfunction != None:
+				movecallbackfunction(mv)
+			board.beep(board.SOUND_GENERAL)
+			# Check the outcome
+			outc = cboard.outcome(claim_draw=True)
+			if outc == None or outc == "None" or outc == 0:
+				# Switch the turn
+				if curturn == 0:
+					curturn = 1
+					if eventcallbackfunction != None:
+						eventcallbackfunction(EVENT_WHITE_TURN)
+				else:
+					curturn = 0
+					if eventcallbackfunction != None:
+						eventcallbackfunction(EVENT_BLACK_TURN)
+			else:
+				tosend = bytearray(b'\xb1\x00\x08\x06\x50\x50\x08\x00\x08\x59\x08\x00');
+				tosend[2] = len(tosend)
+				tosend[len(tosend) - 1] = board.checksum(tosend)
+				board.ser.write(tosend)
+				# Depending on the outcome we can update the game information for the result
+				resultstr = str(cboard.result())
+				tg = session.query(models.Game).filter(models.Game.id == gamedbid).first()
+				tg.result = resultstr
+				session.flush()
+				session.commit()
+				eventcallbackfunction(str(outc.termination))
 
 
 def gameThread(eventCallback, moveCallback, keycallback):
-    # The main thread handles the actual chess game functionality and calls back to
-    # eventCallback with game events and
-    # moveCallback with the actual moves made
-    global kill
-    global startstate
-    global newgame
-    global cboard
-    global curturn
-    global keycallbackfunction
-    global movecallbackfunction
-    global eventcallbackfunction
-    global pausekeys
-    global source
-    global gamedbid
-    global session
-    global gameinfo_event
-    global gameinfo_site
-    global gameinfo_round
-    global gameinfo_white
-    global gameinfo_black
-    #print("hier")
-    keycallbackfunction = keycallback
-    movecallbackfunction = moveCallback
-    eventcallbackfunction = eventCallback
-    board.ledsOff()
-    board.subscribeEvents(keycallback, fieldcallback)
-    t = 0
-    pausekeys = 0
-    while kill == 0:
-        # Detect if a new game has begun
-        #print("hauch")
-        if newgame == 0:
-            if t < 5:
-                t = t + 1
-            else:
-                try:
-                    
-                    #board.beep(board.SOUND_GENERAL)
-                    board.pauseEvents()
-                    cs = board.getBoardState()
-                    #print(cs)
-                    board.unPauseEvents()
-                    if bytearray(cs) == startstate:
-                        print("start")
-                        #eventCallback(EVENT_NEW_GAME)
-
-                        print("weiter")
-                        newgame = 1
-                        squarecol = ""
-                        squarerow = ""
-                        square = ""
-                        feldname = ""
-                        field = 0
-							
-                        cboard = chess.Board()
-                        
-                        print("test")
-                        fenlog = "/home/pi/centaur/fen.log"
-                        f = open(fenlog, "w")
-                        f.write(cboard.fen())
-                        f.close()
-                        board.beep(board.SOUND_GENERAL)
-                        time.sleep(0.3)
-                        board.beep(board.SOUND_GENERAL)
-                        # Log a new game in the db
-                        game = models.Game(
-                            source=source,
-                            event=gameinfo_event,
-                            site=gameinfo_site,
-                            round=gameinfo_round,
-                            white=gameinfo_white,
-                            black=gameinfo_black
-                        )
-                        
-                        session.add(game)
-                        session.commit()
-                        # Get the max game id as that is this game id and fill it into gamedbid
-                        gamedbid = session.query(func.max(models.Game.id)).scalar()
-                        # Now make an entry in GameMove for this start state
-                        gamemove = models.GameMove(
-                            gameid = gamedbid,
-                            move = '',
-                            fen = str(cboard.fen())
-                        )
-                        session.add(gamemove)
-                        session.commit()
-                        # print(universaluci.computeronturn)
-                        eventCallback(EVENT_NEW_GAME)
-                        curturn = 1
-                        eventCallback(EVENT_WHITE_TURN)
-                        
-                        legalsquares = []
-                        mv=""
-                        
-                        #print("game")
-                    t = 0
-                except:
-                    pass
-        if pausekeys == 1:
-            board.pauseEvents()
-        if pausekeys == 2:
-            board.unPauseEvents()
-            pausekeys = 0
-        time.sleep(0.1)
+	# The main thread handles the actual chess game functionality and calls back to
+	# eventCallback with game events and
+	# moveCallback with the actual moves made
+	global kill
+	global startstate
+	global newgame
+	global cboard
+	global curturn
+	global keycallbackfunction
+	global movecallbackfunction
+	global eventcallbackfunction
+	global pausekeys
+	global source
+	global gamedbid
+	global session
+	global gameinfo_event
+	global gameinfo_site
+	global gameinfo_round
+	global gameinfo_white
+	global gameinfo_black
+	#print("hier")
+	keycallbackfunction = keycallback
+	movecallbackfunction = moveCallback
+	eventcallbackfunction = eventCallback
+	board.ledsOff()
+	board.subscribeEvents(keycallback, fieldcallback)
+	t = 0
+	pausekeys = 0
+	while kill == 0:
+		# Detect if a new game has begun
+		#print("hauch")
+		if newgame == 0:
+			if t < 5:
+				t = t + 1
+			else:
+				try:
+					
+					#board.beep(board.SOUND_GENERAL)
+					board.pauseEvents()
+					cs = board.getBoardState()
+					#print(cs)
+					board.unPauseEvents()
+					if bytearray(cs) == startstate:
+						engineturn(0)
+						cboard = chess.Board()
+						fenlog = "/home/pi/centaur/fen.log"
+						f = open(fenlog, "w")
+						f.write(cboard.fen())
+						f.close()
+						board.beep(board.SOUND_GENERAL)
+						time.sleep(0.3)
+						board.beep(board.SOUND_GENERAL)
+						# Log a new game in the db
+						game = models.Game(
+							source=source,
+							event=gameinfo_event,
+							site=gameinfo_site,
+							round=gameinfo_round,
+							white=gameinfo_white,
+							black=gameinfo_black
+						)
+						
+						session.add(game)
+						session.commit()
+						# Get the max game id as that is this game id and fill it into gamedbid
+						gamedbid = session.query(func.max(models.Game.id)).scalar()
+						# Now make an entry in GameMove for this start state
+						gamemove = models.GameMove(
+							gameid = gamedbid,
+							move = '',
+							fen = str(cboard.fen())
+						)
+						session.add(gamemove)
+						session.commit()
+						eventCallback(EVENT_NEW_GAME)
+						curturn = 1
+						board.ledsOff()
+						eventCallback(EVENT_WHITE_TURN)
+						legalsquares = []
+						newgame = 1
+					t = 0
+				except:
+					pass
+		if pausekeys == 1:
+			board.pauseEvents()
+		if pausekeys == 2:
+			board.unPauseEvents()
+			pausekeys = 0
+		time.sleep(0.1)
 
 def computerMove(mv):
-    # Set the computer move that the player is expected to make
-    # in the format b2b4 , g7g8q , etc
-    global computermove
-    global forcemove
-    board.beep(board.SOUND_GENERAL)
-    if len(mv) < 4:
-        return
-    # First set the globals so that the thread knows there is a computer move
-    computermove = mv
-    forcemove = 1
-    # Next indicate this on the board. First convert the text representation to the field number
-    fromnum = ((ord(mv[1:2]) - ord("1")) * 8) + (ord(mv[0:1]) - ord("a"))
-    tonum = ((ord(mv[3:4]) - ord("1")) * 8) + (ord(mv[2:3]) - ord("a"))
-    # Then light it up!
-    board.ledFromTo(fromnum,tonum)
+	# Set the computer move that the player is expected to make
+	# in the format b2b4 , g7g8q , etc
+	global computermove
+	global forcemove
+	global cmove
+	board.beep(board.SOUND_GENERAL)
+	if len(mv) < 4:
+		return
+	# First set the globals so that the thread knows there is a computer move
+	computermove = mv
+	forcemove = 1
+	engineturn(1)
+	# Next indicate this on the board. First convert the text representation to the field number
+	fromnum = ((ord(mv[1:2]) - ord("1")) * 8) + (ord(mv[0:1]) - ord("a"))
+	tonum = ((ord(mv[3:4]) - ord("1")) * 8) + (ord(mv[2:3]) - ord("a"))
+	# Then light it up!
+	board.ledFromTo(fromnum,tonum)
+	
 
 def setGameInfo(gi_event,gi_site,gi_round,gi_white,gi_black):
-    # Call before subscribing if you want to set further information about the game for the PGN files
-    global gameinfo_event
-    global gameinfo_site
-    global gameinfo_round
-    global gameinfo_white
-    global gameinfo_black
-    gameinfo_event = gi_event
-    gameinfo_site = gi_site
-    gameinfo_round = gi_round
-    gameinfo_white = gi_white
-    gameinfo_black = gi_black
+	# Call before subscribing if you want to set further information about the game for the PGN files
+	global gameinfo_event
+	global gameinfo_site
+	global gameinfo_round
+	global gameinfo_white
+	global gameinfo_black
+	gameinfo_event = gi_event
+	gameinfo_site = gi_site
+	gameinfo_round = gi_round
+	gameinfo_white = gi_white
+	gameinfo_black = gi_black
 
 def subscribeGame(eventCallback, moveCallback, keyCallback):
-    # Subscribe to the game manager
-    global source
-    global gamedbid
-    global session
-    
-    source = inspect.getsourcefile(sys._getframe(1))
-    if source == "universaluci.py":
-        source = "Engineplay"
-    if source == "dgte.py":
-        source = "DGT-Board"
-    if source == "lichessV4.py":
-        source = "Lichess"
-	if source == "bearlink.py":
-		source = "Bearlink"
-    Session = sessionmaker(bind=models.engine)
-    session = Session()
+	# Subscribe to the game manager
+	global source
+	global gamedbid
+	global session
 
-    board.clearSerial()
-    gamethread = threading.Thread(target=gameThread, args=([eventCallback, moveCallback, keyCallback]))
-    gamethread.daemon = True
-    gamethread.start()
+	source = inspect.getsourcefile(sys._getframe(1))
+	if source == "universaluci.py":
+		source = "Engineplay"
+	if source == "dgte.py":
+		source = "DGT-Board"
+	if source == "lichessV4.py":
+		source = "Lichess"
+	Session = sessionmaker(bind=models.engine)
+	session = Session()
+
+	board.clearSerial()
+	gamethread = threading.Thread(target=gameThread, args=([eventCallback, moveCallback, keyCallback]))
+	gamethread.daemon = True
+	gamethread.start()
 
 def unsubscribeGame():
-    # Stops the game manager
-    global kill
-    kill = 1
+	# Stops the game manager
+	global kill
+	kill = 1

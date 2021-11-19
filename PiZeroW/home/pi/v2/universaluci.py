@@ -55,7 +55,6 @@ def keyCallback(key):
 	global kill
 	print("Key event received: " + str(key))
 	if key == gamemanager.BTNBACK:
-		board.ledsOff()
 		kill = 1
 	if key == gamemanager.BTNHELP:
 		hallo = 0
@@ -65,15 +64,16 @@ def eventCallback(event):
 	global engine
 	global eloarg
 	global kill
+	global mv
+	
+	#cmove = 0
 	# This function receives event callbacks about the game in play
 	if event == gamemanager.EVENT_NEW_GAME:
 		epaper.writeText(0,"New Game")
 		epaper.writeText(1,"               ")
 		epaper.writeText(13,"Play "+ enginename)
-		mw = ""
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
-		board.ledsOff()
 		print('fertig')
 		return
 	if event == gamemanager.EVENT_WHITE_TURN:
@@ -91,7 +91,7 @@ def eventCallback(event):
 			epaper.writeText(12, "Engine: " + str(mv))
 			engine.quit()
 			gamemanager.computerMove(str(mv))
-		#return
+		return
 	if event == gamemanager.EVENT_BLACK_TURN:
 		curturn = 0
 		epaper.writeText(0,"Black turn")
@@ -108,10 +108,10 @@ def eventCallback(event):
 			epaper.writeText(12,"Engine: " + str(mv))
 			engine.quit()
 			gamemanager.computerMove(str(mv))
-		#return	
+		return	
 	if event == gamemanager.EVENT_RESIGN_GAME:
 		gamemanager.resignGame(computeronturn + 1)
-		#return
+		return
 	if type(event) == str:
 		# Termination.CHECKMATE
 		# Termination.STALEMATE

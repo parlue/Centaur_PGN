@@ -249,27 +249,65 @@ while True:
 		sys.exit()
 	
 	if result == "MESS":
-		enginemenu = {'KING': ' The King'}
+		enginemenu = {'stockfish': 'Stockfish'}
+		# Pick up the engines from the engines folder and build the menu
+		enginepath = str("/home/pi/v2/engines/")
+		enginefiles = os.listdir(enginepath)
+		for f in enginefiles:
+			fn = str(f)
+			if '.uci' not in fn:
+				if '.bin' not in fn:
+				# If this file is not .uci then assume it is an engine
+					enginemenu[fn] = fn
 		result = doMenu(enginemenu)
 		print(result)
-		cEngine = "The_King"
-		
-		#PathEngine = "hallo"
-		#'/home/pi/v2/engines/ct800'
-		ctmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
-		color = doMenu(cmenu)
-		print(color)
-		# Current game will launch the screen for the current
-		if (color != "BACK"):
-			ratingmenu = {'1000': ' 1000 ELO', '1100': ' 1100 ELO', '1200': ' 1200 ELO', ' 1400': ' 1400 ELO', '1500': ' 1500 ELO', '1600': ' 1600 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO'}
-			elo = doMenu(ratingmenu)
-			if elo != "BACK":
-				epaper.clearScreen()
-				epaper.writeText(0, "Loading...")
-				boardfunctions.pauseEvents()
-				os.system("/usr/bin/python3.6 universalmessuci.py " + cEngine + " " + PathEngine + " " + color + " " + elo)
-				epaper.epd.init()
-				boardfunctions.unPauseEvents()
+		if result == "stockfish":
+			sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
+			color = doMenu(sfmenu)
+			print(color)
+			# Current game will launch the screen for the current
+			if (color != "BACK"):
+				ratingmenu = {'2850': ' Pure', '1350': '  1350 ELO', '1500': ' 1500 ELO', '1700': ' 1700 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO', '2600': ' 2600 ELO'}
+				elo = doMenu(ratingmenu)
+				if elo != "BACK":
+					epaper.clearScreen()
+					epaper.writeText(0, "Loading...")
+					boardfunctions.pauseEvents()
+					os.system("/usr/bin/python3.6 /home/pi/v2/stockfish.py " + color + " " + elo)
+					boardfunctions.unPauseEvents()
+		else:
+			if result != "BACK":
+				# There are two options here. Either a file exists in the engines folder as enginename.uci which will give us menu options, or one doesn't and we run it as default
+				enginefile = enginepath + result
+				ucifile = enginepath + result + ".uci"
+				cmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
+				color = doMenu(cmenu)
+				# Current game will launch the screen for the current
+				if (color != "BACK"):
+					if os.path.exists(ucifile):
+						# Read the uci file and build a menu
+						config = configparser.ConfigParser()
+						config.read(ucifile)
+						print(config.sections())
+						smenu = {}
+						for sect in config.sections():
+							smenu[sect] = sect
+						sec = doMenu(smenu)
+						if sec != "BACK":
+							epaper.clearScreen()
+							epaper.writeText(0, "Loading...")
+							boardfunctions.pauseEvents()
+							print("/home/pi/v2/universaluci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
+							os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
+							boardfunctions.unPauseEvents()
+					else:
+						# With no uci file we just call the engine
+						epaper.clearScreen()
+						epaper.writeText(0, "Loading...")
+						boardfunctions.pauseEvents()
+						print("/home/pi/v2/universaluci.py " + color + " \"" + result + "\"")
+						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
+						boardfunctions.unPauseEvents()
 
 	
 # // here check	

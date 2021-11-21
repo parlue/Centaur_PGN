@@ -74,6 +74,8 @@ def eventCallback(event):
 		epaper.writeText(1,"               ")
 		epaper.writeText(13,"Play "+ enginename)
 		curturn = 1
+		os.chdir("/home/pi/v2/engines/")
+		engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
 		epaper.drawFen(gamemanager.cboard.fen())
 		print('fertig')
 		return
@@ -82,34 +84,34 @@ def eventCallback(event):
 		curturn = 1
 		epaper.writeText(0,"White turn")
 		if curturn == computeronturn:
-			os.chdir("/home/pi/v2/engines/")
-			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
+			#os.chdir("/home/pi/v2/engines/")
+			#engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
 			if ucioptions != {}:
 				options = (ucioptions)
 				engine.configure(options)
-			limit = chess.engine.Limit(time=5)
+			limit = chess.engine.Limit(time=30)
 			mv = engine.play(gamemanager.cboard, limit, info=chess.engine.INFO_ALL)
 			mv = mv.move
 			epaper.writeText(12, "Engine: " + str(mv))
-			engine.quit()
+			#engine.quit()
 			gamemanager.computerMove(str(mv))
 		return
 	if event == gamemanager.EVENT_BLACK_TURN:
 		curturn = 0
 		epaper.writeText(0,"Black turn")
 		if curturn == computeronturn:
-			os.chdir("/home/pi/v2/engines/")
-			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
+			#os.chdir("/home/pi/v2/engines/")
+			#engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
 			if ucioptions != {}:
 				options = (ucioptions)
 				print("preload")
 				engine.configure(options)
 				print("options load")
-			limit = chess.engine.Limit(time=5)
+			limit = chess.engine.Limit(time=30)
 			mv = engine.play(gamemanager.cboard, limit, info=chess.engine.INFO_ALL)
 			mv = mv.move
 			epaper.writeText(12,"Engine: " + str(mv))
-			engine.quit()
+			#engine.quit()
 			gamemanager.computerMove(str(mv))
 		return	
 	if event == gamemanager.EVENT_RESIGN_GAME:

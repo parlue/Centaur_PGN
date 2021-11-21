@@ -2,6 +2,7 @@
 #
 import gamemanager
 import sys
+import os
 # sys.path.append('/home/pi/v2/board')
 from display import epaper
 import time
@@ -81,6 +82,7 @@ def eventCallback(event):
 		curturn = 1
 		epaper.writeText(0,"White turn")
 		if curturn == computeronturn:
+			os.chdir("/home/pi/v2/engines/")
 			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
 			if ucioptions != {}:
 				options = (ucioptions)
@@ -96,6 +98,7 @@ def eventCallback(event):
 		curturn = 0
 		epaper.writeText(0,"Black turn")
 		if curturn == computeronturn:
+			os.chdir("/home/pi/v2/engines/")
 			engine = chess.engine.SimpleEngine.popen_uci("/home/pi/v2/engines/" + enginename)
 			if ucioptions != {}:
 				options = (ucioptions)

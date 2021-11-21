@@ -1,6 +1,7 @@
 [DEFAULT]
 Hash = 64 
 Threads = 1
+NN_file = /home/pi/v2/engines/nn.bin
 UCI_LimitStrength = true
 
 [Elo@1500]

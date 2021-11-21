@@ -29,6 +29,7 @@ BTNPLAY = 6
 EVENT_NEW_GAME = 1
 EVENT_BLACK_TURN = 2
 EVENT_WHITE_TURN = 3
+lifted = 0
 
 kill = 0
 startstate = bytearray(b'\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01')
@@ -58,6 +59,10 @@ gameinfo_black = ""
 def engineturn(cmove):
 	global cm 
 	cm = cmove
+def lifton(liftop):
+	global lifted
+	
+	lifted = liftop
 def keycallback(keypressed):
 	# Receives the key pressed and passes back to the script calling game manager
 	global keycallbackfunction
@@ -87,12 +92,14 @@ def fieldcallback(field):
 	place = 0
 	if field >= 0:
 		lift = 1
-		if cm == 0:
+		if cm == 0 and lifted != 1:
 			sourcesq = -1
 	else:
 		place = 1
 		field = field * -1
 	field = field - 1
+	print("lifted")
+	print(lifted)
 	# Check the piece colour against the current turn
 	pc = cboard.color_at(field)
 	vpiece = 0
@@ -111,7 +118,7 @@ def fieldcallback(field):
 	if lift == 1 and field not in legalsquares and sourcesq < 0 and vpiece == 1:
 		# Generate a list of places this piece can move to
 		print("legal")
-		lifted = 1
+		lifton(1)
 		legalsquares = []
 		legalsquares.append(field)
 		sourcesq = field
@@ -258,6 +265,7 @@ def fieldcallback(field):
 				mv = fromname + toname + pr
 			# Make the move and update fen.log
 			cboard.push(chess.Move.from_uci(mv))
+			lifton(0)
 			engineturn(0)
 			fenlog = "/home/pi/centaur/fen.log"
 			f = open(fenlog, "w")
@@ -348,6 +356,7 @@ def gameThread(eventCallback, moveCallback, keycallback):
 					board.unPauseEvents()
 					if bytearray(cs) == startstate:
 						engineturn(0)
+						lifton(0)
 						cboard = chess.Board()
 						fenlog = "/home/pi/centaur/fen.log"
 						f = open(fenlog, "w")

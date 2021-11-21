@@ -132,6 +132,7 @@ while True:
 		'Centaur': ' DGT Centaur',
 		'Lichess': ' Lichess',
 		'DGT': ' DGT Board',
+		'BEAR': ' Bearlink',
 		'ENGINE': ' Play Engine',
 #		'MESS': ' Mess Emu',
 		'SETUP': ' Setup',
@@ -216,6 +217,12 @@ while True:
 		os.chdir("/home/pi/v2/")
 		os.system("/usr/bin/python3.6 dgte.py")
 		boardfunctions.unPauseEvents()
+	if result == "BEAR":
+		epaper.clearScreen()
+		boardfunctions.pauseEvents()
+		os.chdir("/home/pi/v2/")
+		os.system("/usr/bin/python3.6 bearlink.py")
+		boardfunctions.unPauseEvents()
 
 	if result == "Shutdown":
 		boardfunctions.clearScreen()
@@ -274,8 +281,9 @@ while True:
 		for f in enginefiles:
 			fn = str(f)
 			if '.uci' not in fn:
+				if '.bin' not in fn:
 				# If this file is not .uci then assume it is an engine
-				enginemenu[fn] = fn
+					enginemenu[fn] = fn
 		result = doMenu(enginemenu)
 		print(result)
 		if result == "stockfish":

@@ -1,5 +1,5 @@
 # Emulate the Millenium Chesslink protocol
-# modify by dso for playing Bearchess
+# modify by dso for playing Bearchess and use a other bluettoth connection 
 # addding missing strings on fen
 import gamemanager
 import sys
@@ -56,9 +56,9 @@ def keyCallback(key):
 		bs = bs.replace("6", "......")
 		bs = bs.replace("7", ".......")
 		bs = bs.replace("8", "........")
-		bs = bs + brest
+		#bs = bs + brest
 		resp = 's'
-		for x in range(0,64):
+		for x in reversed (range(64)):
 			resp = resp + bs[x]
 		print("sending status on change")
 		print(resp)
@@ -94,9 +94,9 @@ def eventCallback(event):
 		bs = bs.replace("6", "......")
 		bs = bs.replace("7", ".......")
 		bs = bs.replace("8", "........")
-		bs = bs + brest
+		#bs = bs + brest
 		resp = 's'
-		for x in range(0,64):
+		for x in reversed(range(64)):
 			resp = resp + bs[x]
 		print(resp)
 		sendMilleniumCommand(resp)
@@ -149,9 +149,9 @@ def moveCallback(move):
 	bs = bs.replace("6", "......")
 	bs = bs.replace("7", ".......")
 	bs = bs.replace("8", "........")
-	bs = bs + brest
+	#bs = bs + brest
 	resp = 's'
-	for x in range(0,64):
+	for x in reversed(range(64)):
 		resp = resp + bs[x]
 	print("sending status on change")
 	sendMilleniumCommand(resp)
@@ -318,13 +318,16 @@ while kill == 0:
 		handled = 1
 		while kill == 0:
 			data = client_sock.recv(1)
+			print("get dataall")
 			print(data)
 			if not data:
 				print("read failed")
 				break
 			cmd = data[0] & 127
 			handled = 0
+			print("get fulldata")
 			print(cmd)
+			
 			print(chr(cmd))
 			if chr(cmd) == 'V':
 				# Remote is asking for the version
@@ -357,9 +360,9 @@ while kill == 0:
 				bs = bs.replace("6", "......")
 				bs = bs.replace("7", ".......")
 				bs = bs.replace("8", "........")
-				bs = bs + brest
+				#bs = bs
 				resp = 's'
-				for x in range(0,64):
+				for x in reversed(range(64)):
 					resp = resp + bs[x]
 				sendMilleniumCommand(resp)
 				handled = 1
@@ -406,6 +409,8 @@ while kill == 0:
 				# with it's regular flashing pattern.
 				client_sock.recv(2) # Slot time
 				mpattern = bytearray([0] * 81)
+				print("cpattern")
+				#print(mpattern)
 				moff = 0
 				for x in range(0,81):
 					h1 = client_sock.recv(1)[0] & 127
@@ -416,10 +421,16 @@ while kill == 0:
 					moff = moff + 1
 				client_sock.recv(2) # Checksum
 				centaurpattern = bytearray([0] * 64)
+				print(v)
+				print(mpattern)
+				
+
+
+					
 				ledmap = [
-					[7, 8, 16, 17], [16, 17, 25, 26], [26, 27, 34, 35], [34, 35, 43, 44], [43, 44, 52, 53], [52, 53, 61, 62],
+					[7, 8, 16, 17], [16, 17, 25, 26], [25, 26, 34, 35], [34, 35, 43, 44], [43, 44, 52, 53], [52, 53, 61, 62],
 					[61, 62, 70, 71], [70, 71, 79, 80],
-					[6, 7, 15, 16], [15, 16, 24, 25], [24, 25, 33, 34], [34, 35, 42, 43], [42, 43, 51, 52], [51, 52, 60, 61],
+					[6, 7, 15, 16], [15, 16, 24, 25], [24, 25, 33, 34], [33, 34, 42, 43], [42, 43, 51, 52], [51, 52, 60, 61],
 					[60, 61, 69, 70], [69, 70, 78, 79],
 					[5, 6, 14, 15], [14, 15, 23, 24], [23, 24, 32, 33], [32, 33, 41, 42], [41, 42, 50, 51], [50, 51, 59, 60],
 					[59, 60, 68, 69], [68, 69, 77, 78],
@@ -434,7 +445,7 @@ while kill == 0:
 					[0, 1, 9, 10], [9, 10, 18, 19], [18, 19, 27, 28], [27, 28, 36, 37], [36, 37, 45, 46], [45, 46, 54, 55],
 					[54, 55, 63, 64], [63, 64, 72, 73]
 				]
-				for x in range(0, 64):
+				for x in range(0,64):
 					lmap = ledmap[x];
 					if mpattern[lmap[0]] > 0:
 						centaurpattern[x] = centaurpattern[x] + 1
@@ -444,10 +455,14 @@ while kill == 0:
 						centaurpattern[x] = centaurpattern[x] + 1
 					if mpattern[lmap[3]] > 0:
 						centaurpattern[x] = centaurpattern[x] + 1
+				print ("mpattern nach ersten")
+				print (centaurpattern)
 				# Now take only the squares where all lights are light
 				for x in range(0, 64):
 					if centaurpattern[x] != 4:
 						centaurpattern[x] = 0
+				print("pattern gefiltert")
+				print(centaurpattern)
 				# If a piece has moved 2 squares then we need to elimate the middle LED
 				for r in range(0, 8):
 					for t in range(0, 6):
@@ -461,17 +476,24 @@ while kill == 0:
 							centaurpattern[((r + 1) * 8) + t] = 0
 				board.ledsOff()
 				trigger = 0
+				ledmatrix=[7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8,23,22,21,20,19,18,17,16,31,30,29,28,27,26,25,24,39,38,37,36,35,34,33,32,47,46,45,44,43,42,41,40,55,54,53,52,51,50,49,48,63,62,61,60,59,58,57,56]
 				tosend = bytearray(b'\xb0\x00\x0c\x06\x50\x05\x05\x00\x05')
-				for x in range(0, 64):
+				for x in range(0,64):
 					if centaurpattern[x] > 0:
+						
 						trigger = 1
-						tosend.append(board.rotateField(x))
+						#if x >=0:
+						print ("xhier")
+						print(x)
+						x =ledmatrix[x]
+						
+						tosend.append(x)
 				if trigger == 1:
 					tosend[2] = len(tosend) + 1
 					tosend.append(board.checksum(tosend))
 					board.ser.write(tosend)
 				sendMilleniumCommand("l")
-				handled = 1
+				handled = 1	
 			if chr(cmd) == 'T':
 				# Reset. Just sleep for a bit :)
 				client_sock.recv(2)

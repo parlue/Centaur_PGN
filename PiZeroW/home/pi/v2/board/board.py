@@ -30,7 +30,7 @@ BTNUP = 3
 BTNDOWN = 4
 BTNHELP = 5
 BTNPLAY = 6
-
+sound = 1	
 
 # Various setup
 ser = serial.Serial("/dev/ttyS0", baudrate=1000000, timeout=0.2)
@@ -341,6 +341,8 @@ def beep(beeptype):
     # Ask the centaur to make a beep sound
  #   if centaur.get_sound() == "off":
  #       return
+    if sound == 0:
+        return
     if (beeptype == SOUND_GENERAL):
         ser.write(bytearray(b'\xb1\x00\x08\x06\x50\x4c\x08\x63'))
     if (beeptype == SOUND_FACTORY):

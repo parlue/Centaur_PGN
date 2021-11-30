@@ -242,7 +242,9 @@ class EPD:
                     if pixels[x, y] == 0:
                         buf[int((newx + newy * self.width) / 8)
                             ] &= ~(0x80 >> (y % 8))
-        else:
+ 
+ #dso mod change
+       else:
             # A different sized image
             logging.debug("Other")
             for y in range(imheight):
@@ -266,7 +268,7 @@ class EPD:
         epdconfig.delay_ms(10)
 
         self.TurnOnDisplay()
-
+# dso changed by mod
     def unsetRegion(self):
         self.SetPartReg()
         self.send_command(0x91)
@@ -280,7 +282,7 @@ class EPD:
         self.send_data(0x28)
         epdconfig.delay_ms(20)
         self.TurnOnDisplay()
-
+# dso changed by mod
     def unsetRegionP(self):
         self.SetPartReg()
         self.send_command(0x91)
@@ -306,7 +308,7 @@ class EPD:
         self.send_data(int(self.height / 256))
         self.send_data(self.height % 256 - 1)
         self.send_data(0x28)
-
+# dso changed mod
         # self.send_command(0x10)
         # for i in range(0, int(self.width * self.height / 8)):
         # self.send_data(image[i])
@@ -318,7 +320,7 @@ class EPD:
         epdconfig.delay_ms(10)
 
         self.TurnOnDisplay()
-
+# dso chenged by mod
     def DisplayRegion(self, y0, y1, image):
         self.SetPartReg()
         self.send_command(0x91)

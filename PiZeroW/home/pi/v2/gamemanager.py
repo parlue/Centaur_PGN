@@ -1,4 +1,4 @@
-6# This script manages a chess game, passing events and moves back to the calling script with callbacks
+# This script manages a chess game, passing events and moves back to the calling script with callbacks
 # The calling script is expected to manage the display itself using epaper.py
 # Calling script initialises with subscribeGame(eventCallback, moveCallback, keyCallback)
 # eventCallback feeds back events such as start of game, gameover
@@ -13,6 +13,8 @@ from display import epaper
 from db import models
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, func
+import v2conf
+import chessclock
 import threading
 import time
 import chess
@@ -48,8 +50,7 @@ source = ""
 cm = 0
 gamedbid = -1
 session = None
-
-
+firstmove = 1
 gameinfo_event = ""
 gameinfo_site = ""
 gameinfo_round = ""
@@ -61,8 +62,87 @@ def engineturn(cmove):
 	cm = cmove
 def lifton(liftop):
 	global lifted
-	
 	lifted = liftop
+def gameon(smove):
+	global firstmove
+	firstmove = smove
+
+	
+def chessclockthreat():
+	# This thread just decrements the clock and updates the epaper
+	global rwhite
+	global rblack
+	global curturn
+	global kill
+	global cboard
+	rwhite = cwhite
+	rblack = cblack
+	incr = cincr
+	bhelp = 0
+	whelp = 0
+	while kill == 0:
+
+		if rwhite > 0  and curturn == 1 and cboard.fen() != "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1":
+			if bhelp == 1:
+				rblack = rblack + cincr
+				bhelp = 0
+			rwhite = rwhite -1
+			whelp = 1
+			if rwhite == 0:
+				wins = "black"
+		if rblack > 0 and curturn == 0:
+			if whelp == 1:
+				rwhite = rwhite + cincr
+				whelp = 0
+			rblack = rblack - 1
+			bhelp = 1
+			if rblack == 0:
+				wins = "white"
+		
+# umrechnungen 		
+		rwhitemin = str(rwhite//60)
+		if int(rwhitemin)<10:
+			rwhitemin = "0"+rwhitemin
+		rwhitesec = str(rwhite%60)
+		if int(rwhitesec)<10:
+			rwhitesec = "0"+rwhitesec
+		rblackmin = str(rblack//60)
+		if int(rblackmin)<10:
+			rblackmin = "0"+rblackmin
+		rblacksec = str(rblack%60)
+		if int(rblacksec)<10:
+			rblacksec = "0"+rblacksec
+			
+		
+		chesstime= " "+ rwhitemin +":"+rwhitesec+"         "+rblackmin+":"+rblacksec
+		epaper.writeText(12, chesstime)
+		if rwhite == 0 or rblack == 0:
+			rwhite = 0
+			rblack = 0
+			epaper.writeText(12, "TIMEOUT    ")
+			epaper.writeText(13, wins +" wins")
+			
+		time.sleep(1)
+			
+
+def setchessclock(white,black,incr):
+#whine and black in min, inc in sec
+	global cwhite
+	global cblack
+	global cincr
+	cwhite = white * 60
+	cblack = black * 60
+	cincr = incr
+
+def startchessclock():
+    
+	chesstime= str(cwhite//60) +":"+str(cwhite%60)+"        "+str(cblack//60)+":"+str(cblack%60)
+	epaper.writeText(12,chesstime)
+	clockthread = threading.Thread(target=chessclockthreat, args=())
+	clockthread.daemon = True
+	clockthread.start()
+	
+#	lifted = liftop
 def keycallback(keypressed):
 	# Receives the key pressed and passes back to the script calling game manager
 	global keycallbackfunction
@@ -92,6 +172,7 @@ def fieldcallback(field):
 	place = 0
 	if field >= 0:
 		lift = 1
+		gameon(1)
 		if cm == 0 and lifted != 1:
 			sourcesq = -1
 	else:
@@ -354,9 +435,10 @@ def gameThread(eventCallback, moveCallback, keycallback):
 					cs = board.getBoardState()
 					#print(cs)
 					board.unPauseEvents()
-					if bytearray(cs) == startstate:
+					if bytearray(cs) == startstate and firstmove == 1:
 						engineturn(0)
 						lifton(0)
+						gameon(0)	
 						cboard = chess.Board()
 						fenlog = "/home/pi/centaur/fen.log"
 						f = open(fenlog, "w")
@@ -387,10 +469,21 @@ def gameThread(eventCallback, moveCallback, keycallback):
 						)
 						session.add(gamemove)
 						session.commit()
+						#for i in range(1,6):
+						#	epaper.writeText(0,"Load engine")
+						#	epaper.writeText(1,"please wait /")
+						#	time.sleep(1)
+						#	epaper.writeText(1,"please wait \\")
+						#	time.sleep(1)
+						#epaper.writeText(0,"           ")
+						#epaper.writeText(1,"             ")
+						#time.spleep(1)
 						eventCallback(EVENT_NEW_GAME)
 						curturn = 1
 						board.ledsOff()
+						print(678)
 						eventCallback(EVENT_WHITE_TURN)
+						#rungame(1)
 						legalsquares = []
 						newgame = 1
 					t = 0

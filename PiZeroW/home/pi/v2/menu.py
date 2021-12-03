@@ -153,6 +153,7 @@ while True:
 		
 		#sys.exit()
 	if result == "SETUP":
+		time.sleep(1)
 		setupmenu = {'CHESSCLOCK': ' Chessclock' , 'wifi': ' Wifi setup' , 'Connection': ' Wifi check' , 'lichessapi': ' Lichesskey', 'lichessrating': 'Lichessrating'}
 		result = doMenu(setupmenu)
 		if result == "lichessapi":
@@ -162,8 +163,13 @@ while True:
 			os.system("/usr/bin/python3.6 lichessapi.py")
 			boardfunctions.unPauseEvents()
 		if result == "CHESSCLOCK":
-			timemenu ={'5 , 3': ' 5+3 minutes' , '10 , 5': ' 10+5 minutes' , '15 , 10': ' 15+10 minutes', '30': ' 30 minutes', '30 , 20': ' 30+20 minutes', '60': ' 60 minutes', '90': ' 90 minutes'}
+			time.sleep(1)
+			timemenu ={'none': ' No clock', '5 , 3': ' 5+3 minutes' , '10 , 5': ' 10+5 minutes' , '15 , 10': ' 15+10 minutes', '30': ' 30 minutes', '30 , 20': ' 30+20 minutes', '60': ' 60 minutes', '90': ' 90 minutes'}
 			result = doMenu(timemenu)
+			if result == 'none':
+				w = "0"
+				b = "0"
+				i = "0"
 			if result =='5 , 3':
 				w = "5"
 				b = "5"
@@ -207,6 +213,7 @@ while True:
 			os.system("/usr/bin/python3.6 lichessrating.py")
 			boardfunctions.unPauseEvents()
 		if result == "wifi":
+			time.sleep(1)
 			wifimenu = {'wpa2': ' WPA2-PSK', 'wps': ' WPS Setup' }
 			#' Recover wifi'}
 			result = doMenu(wifimenu)
@@ -288,18 +295,18 @@ while True:
 		sys.exit()
 	
 	if result == "MESS":
-		time.sleep(0.8)
+		time.sleep(1)
 		enginepath = str("/home/pi/v2/messengine/")
-		enginemenu = {'Lang': ' Lang', 'Konig': ' J. Konig', 'Schroder': ' E. Schroeder', 'other': ' Ohter'}
+		enginemenu = {'Lang': ' R. Lang', 'Konig': ' J. Konig', 'Schroder': ' E. Schroeder', 'other': ' Ohter'}
 		result = doMenu(enginemenu)
-		time.sleep(0.8)
+		time.sleep(1)
 		if result == "Lang":
 			engmenu ={'Amsterdam': ' Amsterdam', 'Dallas': ' Dallas', 'London': ' London', 'Roma': ' Roma'}
 			result = doMenu(engmenu)
-			time.sleep(0.8)
+			time.sleep(1)
 			if result == "Amsterdam":
 				result="amsterd"
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "amsterd"
 				ucifile = enginepath + "amsterd" + ".uci"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
@@ -320,6 +327,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + "amsterd" + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -328,14 +336,15 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			#
 				
 			if result == 'Dallas':
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "dallas16"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "dallas16"
 				ucifile = enginepath + "dallas16" + ".uci"
 				if os.path.exists(ucifile):
@@ -354,6 +363,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -362,12 +372,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == 'London':
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "lond32"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "lond32"
 				ucifile = enginepath + "lond32" + ".uci"
 				if os.path.exists(ucifile):
@@ -386,6 +397,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -394,12 +406,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == 'Roma':
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "roma32"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "roma32"
 				ucifile = enginepath + "roma32" + ".uci"
 				if os.path.exists(ucifile):
@@ -418,6 +431,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -426,17 +440,18 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 		
 		if result == "Konig":
-			time.sleep(0.8)
+			time.sleep(1)
 			engmenu={'Risc2500': ' Risc2500', 'Montreux': ' Montreux', 'Tascr30': ' Tascr30'}
 			result = doMenu(engmenu)
 			if result == 'Risc2500':
-				time.sleep(0.8)
+				time.sleep(1)
 				result = 'risc2500'
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "risc2500"
 				ucifile = enginepath + "risc2500" + ".uci"
 				if os.path.exists(ucifile):
@@ -455,6 +470,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -463,12 +479,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == 'Montreux':
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "montreux"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "montreux"
 				ucifile = enginepath + "montreux" + ".uci"
 				if os.path.exists(ucifile):
@@ -487,6 +504,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -495,12 +513,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == 'Tascr30':
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "tascr30_king"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "tascr30_king"
 				ucifile = enginepath + "tascr30_king" + ".uci"
 				if os.path.exists(ucifile):
@@ -519,6 +538,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -527,17 +547,18 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 				
 		if result == "Schroder":
-			time.sleep(0.8)
+			time.sleep(1)
 			engmenu = {'MMIV': ' MMIV', 'MMV': ' MMV', 'Rebel': ' Rebel', 'Nshort': ' Nshort', 'Polgar': ' Polgar'}
 			result = doMenu(engmenu)
 			if result == "MMIV":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "mm4"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "mm4"
 				ucifile = enginepath + "mm4" + ".uci"
 				if os.path.exists(ucifile):
@@ -556,6 +577,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -564,12 +586,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == "MMV":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "mm5"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "mm5"
 				ucifile = enginepath + "mm5" + ".uci"
 				if os.path.exists(ucifile):
@@ -588,6 +611,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -596,12 +620,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == "Rebel":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "rebel5"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "rebel5"
 				ucifile = enginepath + "rebel5" + ".uci"
 				if os.path.exists(ucifile):
@@ -620,6 +645,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -628,12 +654,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == "Nshort":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "nshort"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "nshort"
 				ucifile = enginepath + "nshort" + ".uci"
 				if os.path.exists(ucifile):
@@ -652,6 +679,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -660,12 +688,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 			if result == "Polgar":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "polgar"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "polgar"
 				ucifile = enginepath + "polgar" + ".uci"
 				if os.path.exists(ucifile):
@@ -684,6 +713,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -692,16 +722,17 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()
+					time.sleep(2)
 		if result == "other":
-			time.sleep(0.8)
+			time.sleep(1)
 			engmenu = {'sensory': ' Sensory 9', 'prodigy': ' Prodigy', 'chess2001': ' CXG Chess','Supercon': ' Supercon'}
 			result = doMenu(engmenu)
 			if result == "Supercon":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "supercon"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "supercon"
 				ucifile = enginepath + "supercon" + ".uci"
 				if os.path.exists(ucifile):
@@ -720,6 +751,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -728,12 +760,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()	
+					time.sleep(2)
 			if result == "sensory":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "super9ccg"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "super9ccg"
 				ucifile = enginepath + "super9ccg" + ".uci"
 				if os.path.exists(ucifile):
@@ -752,6 +785,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -760,12 +794,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()	
+					time.sleep(2)
 			if result == "prodigy":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "prodigy"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "prodigy"
 				ucifile = enginepath + "prodigy" + ".uci"
 				if os.path.exists(ucifile):
@@ -784,6 +819,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -792,12 +828,13 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()	
+					time.sleep(2)
 			if result == "chess2001":
-				time.sleep(0.8)
+				time.sleep(1)
 				result = "ch2001"
 				sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 				color = doMenu(sfmenu)
-				time.sleep(0.8)
+				time.sleep(1)
 				enginefile = enginepath + "ch2001"
 				ucifile = enginepath + "ch2001" + ".uci"
 				if os.path.exists(ucifile):
@@ -816,6 +853,7 @@ while True:
 						print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"" + " \"" + sec+ "\"")
 						boardfunctions.unPauseEvents()
+						time.sleep(2)
 				else:
 					# With no uci file we just call the engine
 					epaper.clearScreen()
@@ -824,8 +862,10 @@ while True:
 					print("/home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					os.system("/usr/bin/python3.6 /home/pi/v2/universalmessuci.py " + color + " \"" + result + "\"")
 					boardfunctions.unPauseEvents()	
+					time.sleep(2)
 # // here check	
 	if result == "ENGINE":
+		time.sleep(1)
 		enginemenu = {'stockfish': 'Stockfish'}
 		# Pick up the engines from the engines folder and build the menu
 		enginepath = str("/home/pi/v2/engines/")
@@ -839,11 +879,13 @@ while True:
 		result = doMenu(enginemenu)
 		print(result)
 		if result == "stockfish":
+			time.sleep(1)
 			sfmenu = {'white': ' White', 'black': ' Black', 'random': ' Random'}
 			color = doMenu(sfmenu)
 			print(color)
 			# Current game will launch the screen for the current
 			if (color != "BACK"):
+				time.sleep(1)
 				ratingmenu = {'2850': ' Pure', '1350': '  1350 ELO', '1500': ' 1500 ELO', '1700': ' 1700 ELO', '1800': ' 1800 ELO', '2000': ' 2000 ELO', '2200': ' 2200 ELO', '2400': ' 2400 ELO', '2600': ' 2600 ELO'}
 				elo = doMenu(ratingmenu)
 				if elo != "BACK":
@@ -914,6 +956,7 @@ while True:
 			color = result
 			timemenu = {'10 , 5': ' 10+5 minutes' , '15 , 10': ' 15+10 minutes', '30': ' 30 minutes', '30 , 20': ' 30+20 minutes', '60 , 20': ' 60+20 minutes'}
 			result = doMenu(timemenu)
+							
 			if result =='10 , 5':
 				gtime = '10'
 				gincrement = '5'

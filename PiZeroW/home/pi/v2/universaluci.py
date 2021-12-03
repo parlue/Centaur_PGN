@@ -23,9 +23,11 @@ whiteclock = chessoclock[0]
 blackclock = chessoclock[1]
 incr = chessoclock[2]
 curturn = 1
+
 computeronturn = 0
 kill = 0
 engineload=0
+sound = 1
 # Expect the first argument to be 'white' 'black' or 'random' for what the player is playing
 computerarg = sys.argv[1]
 if computerarg == "white":
@@ -99,18 +101,18 @@ def keyCallback(key):
 	if key == gamemanager.BTNBACK:
 		kill = 1
 # open submenu - todo
-	if key == gamemanager.BTNHELP:
-		if sound == 0:
-			sound == 1
-		if sound == 1:
-			sound = 0
+#	if key == gamemanager.BTNHELP:
+#		if sound == 0:
+#			sound == 1
+#		if sound == 1:
+#			sound = 0
 		
 #start the clock
-	if key == gamemanager.BTNPLAY:
-		if gamemanager.cboard.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1":
-			gamemanager.setchessclock(whiteclock,blackclock,incr)
-			gamemanager.startchessclock()
-		Hallo = 1
+#	if key == gamemanager.BTNPLAY:
+#		if gamemanager.cboard.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1":
+#			gamemanager.setchessclock(whiteclock,blackclock,incr)
+#			gamemanager.startchessclock()
+#		Hallo = 1
 		
 		
 def eventCallback(event):
@@ -130,6 +132,9 @@ def eventCallback(event):
 		epaper.writeText(14,"Play "+ enginename)
 		epaper.writeText(13, "              ")
 		curturn = 1
+		if whiteclock !=0 and blackclock != 0:
+			gamemanager.setchessclock(whiteclock,blackclock,incr)
+			gamemanager.startchessclock()
 		epaper.drawFen(gamemanager.cboard.fen())
 		print('fertig')
 		return
@@ -219,7 +224,6 @@ else:
 gamemanager.subscribeGame(eventCallback, moveCallback, keyCallback)
 epaper.writeText(0,"Place pieces in")
 epaper.writeText(1,"Starting Pos")
-
 
 while kill == 0:
 	time.sleep(0.1)

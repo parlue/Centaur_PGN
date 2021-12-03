@@ -128,18 +128,18 @@ def keyCallback(key):
 		os.system("/usr/bin/killall -9 {enginename}")
 		kill = 1
 # open submenu - todo
-	if key == gamemanager.BTNHELP:
-		if sound == 0:
-			sound == 1
-		if sound == 1:
-			sound = 0
-		hallo = 0
+#	if key == gamemanager.BTNHELP:
+#		if sound == 0:
+#			sound == 1
+#		if sound == 1:
+#			sound = 0
+#		hallo = 0
 #start the clock
-	if key == gamemanager.BTNPLAY:
-		if gamemanager.cboard.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1":
-			gamemanager.setchessclock(whiteclock,blackclock,incr)
-			gamemanager.startchessclock()
-		Hallo = 1
+#	if key == gamemanager.BTNPLAY:
+#		if gamemanager.cboard.fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1":
+#			gamemanager.setchessclock(whiteclock,blackclock,incr)
+#			gamemanager.startchessclock()
+#			Hallo = 1
 		
 		
 def eventCallback(event):
@@ -159,6 +159,9 @@ def eventCallback(event):
 		epaper.writeText(1,"               ")
 		epaper.writeText(13, "              ")
 		epaper.writeText(14,"Play "+ enginename)
+		if whiteclock !=0 and blackclock != 0:
+			gamemanager.setchessclock(whiteclock,blackclock,incr)
+			gamemanager.startchessclock()
 		curturn = 1
 		epaper.drawFen(gamemanager.cboard.fen())
 		if sgame == 1:

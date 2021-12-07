@@ -1,15 +1,28 @@
 #!/usr/bin/python3.6 
 
-# DGT Centaur game exporter version 0.99
-# Dirk Sommerfeld dso@vpilots.de
-# May, 19th 2021
-# Please play your game and if you want to get a PGN file of the actual board, please swicth off the centaur.
-# Insert a USB stick and switch on the centaur, after the game is restarted
-# you can remove the USB stick. The PGN file was stored on it.
-# You will found a (No)_mygame.pgn on it. That's all
-# Please use unly USB-Sticks with a Windows fat partition
 
+# This file is part of the Centaur V2 Mod open source software
+# ( https://github.com/dsommerfeld/DGTCentaur-2.0-by-dso )
+#
+# DGTCentaur Mods is free software: you can redistribute
+# it and/or modify it under the terms of the GNU General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# DGTCentaur Mods is distributed in the hope that it will
+# be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this file.  If not, see
+#
+# https://github.com/dsommerfeld/DGTCentaur-2.0-by-dso/blob/master/LICENSE.md
+#
+# This and any other notices must remain intact and unaltered in any
+# distribution, modification, variant, or derivative of this software.
 
+# PGN Game exporter
 import pickle
 import sys
 import chess

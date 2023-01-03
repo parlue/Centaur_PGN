@@ -1,5 +1,0 @@
-config.py
-*.pyc
-.*
-!/.gitignore
-push.sh

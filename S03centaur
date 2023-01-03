@@ -1,0 +1,14 @@
+echo "start menu V2"
+INPUT_STRING= run
+while [ "$INPUT_STRING" != "bye" ]
+do
+cd /home/pi/v2
+/usr/bin/python3.6 /home/pi/v2/menu.py
+done
+
+
+#echo "write pgn"
+#/usr/bin/python3.6 /mnt/chessgame.py
+#echo "ready pgn please remove USB-stick"
+#cd /home/pi/centaur
+#./centaur &
